@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'JCES-PTA') }}</title>
+    <title>Principal Dashboard - {{ config('app.name', 'JCES-PTA') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-50">
@@ -26,8 +26,8 @@
 
             <!-- Navigation Menu -->
             <nav class="flex-1 px-3 py-6 space-y-2">
-                <a href="{{ route('dashboard') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                <a href="{{ route('principal.dashboard') }}" 
+                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                     </svg>
@@ -39,7 +39,7 @@
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
                     </svg>
-                    <span>Announcements</span>
+                    <span>Announcement</span>
                 </a>
 
                 <a href="#" 
@@ -59,6 +59,14 @@
                     </svg>
                     <span>Payments</span>
                 </a>
+
+                <a href="#" 
+                   class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                    </svg>
+                    <span>Parents</span>
+                </a>
             </nav>
 
             <!-- User Profile and Sign Out -->
@@ -75,13 +83,11 @@
 
                 <div class="flex items-center gap-3 px-4">
                     <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                        <span class="text-green-600 font-semibold text-sm">
-                            {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
-                        </span>
+                        <span class="text-green-600 font-semibold text-sm">JD</span>
                     </div>
                     <div class="text-white">
-                        <div class="text-sm font-semibold">{{ Auth::user()->name ?? 'User' }}</div>
-                        <div class="text-xs opacity-90">Parent</div>
+                        <div class="text-sm font-semibold">Juan Dela Cruz</div>
+                        <div class="text-xs opacity-90">Principal</div>
                     </div>
                 </div>
             </div>
@@ -90,51 +96,34 @@
         <!-- Main Content Area -->
         <div class="flex-1 overflow-y-auto">
             <!-- Top Header -->
-            @if (isset($header))
             <header class="bg-gradient-to-r from-green-50 to-green-100 border-b border-gray-200 px-8 py-4">
                 <div class="flex items-center justify-between">
-                    {{ $header }}
-                    
-                    <!-- User Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 focus:outline-none">
-                            <span>{{ Auth::user()->name ?? 'User' }}</span>
-                            <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    <div class="flex items-center gap-3">
+                        <button class="text-gray-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
                         </button>
-
-                        <!-- Dropdown Menu -->
-                        <div x-show="open" 
-                             @click.away="open = false"
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-95"
-                             x-transition:enter-end="opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-150"
-                             x-transition:leave-start="opacity-100 scale-100"
-                             x-transition:leave-end="opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
-                             style="display: none;">
-                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                <span>Profile</span>
-                            </a>
-                        </div>
+                        <h1 class="text-2xl font-bold text-gray-900">@yield('title', 'Home')</h1>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Principal dashboard
                     </div>
                 </div>
             </header>
-            @endif
 
             <!-- Page Content -->
             <main class="p-8">
-                {{ $slot }}
+                @yield('content')
             </main>
         </div>
     </div>
 
-    <!-- Alpine.js for dropdown functionality -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Floating Action Button -->
+    <button class="fixed bottom-6 right-6 w-14 h-14 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"/>
+        </svg>
+    </button>
 </body>
 </html>

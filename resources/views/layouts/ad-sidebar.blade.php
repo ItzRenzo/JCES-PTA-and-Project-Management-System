@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'JCES-PTA') }}</title>
+    <title>Admin Dashboard - {{ config('app.name', 'JCES-PTA') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-gray-50">
@@ -26,8 +26,8 @@
 
             <!-- Navigation Menu -->
             <nav class="flex-1 px-3 py-6 space-y-2">
-                <a href="{{ route('dashboard') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                <a href="#" 
+                   class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                     </svg>
@@ -59,6 +59,30 @@
                     </svg>
                     <span>Payments</span>
                 </a>
+
+                <a href="#" 
+                   class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                    </svg>
+                    <span>Parents</span>
+                </a>
+
+                <a href="{{ route('admin.create') }}" 
+                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('admin.create') ? 'bg-lime-400 text-gray-900' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
+                    </svg>
+                    <span>Create Account</span>
+                </a>
+
+                <a href="#" 
+                   class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                    </svg>
+                    <span>Reports</span>
+                </a>
             </nav>
 
             <!-- User Profile and Sign Out -->
@@ -75,13 +99,11 @@
 
                 <div class="flex items-center gap-3 px-4">
                     <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                        <span class="text-green-600 font-semibold text-sm">
-                            {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
-                        </span>
+                        <span class="text-green-600 font-semibold text-sm">JD</span>
                     </div>
                     <div class="text-white">
-                        <div class="text-sm font-semibold">{{ Auth::user()->name ?? 'User' }}</div>
-                        <div class="text-xs opacity-90">Parent</div>
+                        <div class="text-sm font-semibold">Juan Dela Cruz</div>
+                        <div class="text-xs opacity-90">Principal</div>
                     </div>
                 </div>
             </div>
@@ -91,7 +113,7 @@
         <div class="flex-1 overflow-y-auto">
             <!-- Top Header -->
             @if (isset($header))
-            <header class="bg-gradient-to-r from-green-50 to-green-100 border-b border-gray-200 px-8 py-4">
+            <header class="bg-white border-b border-gray-200 px-8 py-4">
                 <div class="flex items-center justify-between">
                     {{ $header }}
                     
@@ -129,12 +151,16 @@
 
             <!-- Page Content -->
             <main class="p-8">
-                {{ $slot }}
+                @yield('content')
             </main>
         </div>
     </div>
 
-    <!-- Alpine.js for dropdown functionality -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Floating Action Button -->
+    <button class="fixed bottom-6 right-6 w-14 h-14 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"/>
+        </svg>
+    </button>
 </body>
 </html>
