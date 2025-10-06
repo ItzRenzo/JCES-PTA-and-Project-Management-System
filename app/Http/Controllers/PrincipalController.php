@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class PrincipalController extends Controller
 {
@@ -12,5 +15,52 @@ class PrincipalController extends Controller
     public function index()
     {
         return view('principal.dashboard');
+    }
+
+    /**
+     * Show the create account form.
+     */
+    public function createAccount()
+    {
+        return view('principal.create-account');
+    }
+
+    /**
+     * Store a newly created account.
+     */
+    public function storeAccount(Request $request)
+    {
+        $request->validate([
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
+            'role' => ['required', 'in:parent,teacher,administrator,principal'],
+            'phone' => ['required', 'string', 'max:20'],
+            'email' => ['required', 'string', 'email', 'max:150', 'unique:users'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        // Generate username from first name + last name + random number
+        $baseUsername = strtolower($request->first_name . $request->last_name);
+        $username = $baseUsername;
+        $counter = 1;
+        
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
+        User::create([
+            'username' => $username,
+            'password_hash' => Hash::make($request->password),
+            'user_type' => $request->role,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'is_active' => true,
+        ]);
+
+        return redirect()->route('principal.create-account')
+            ->with('success', 'Account created successfully! Username: ' . $username);
     }
 }

@@ -67,19 +67,33 @@
                     </svg>
                     <span>Parents</span>
                 </a>
+
+                <a href="{{ route('principal.create-account') }}" 
+                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.create-account') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
+                    </svg>
+                    <span>Create Account</span>
+                </a>
+
+                <a href="#" 
+                   class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                        <path d="M16.707 3.293a1 1 0 010 1.414L15.414 6l1.293 1.293a1 1 0 01-1.414 1.414L14 7.414l-1.293 1.293a1 1 0 01-1.414-1.414L12.586 6l-1.293-1.293a1 1 0 011.414-1.414L14 4.586l1.293-1.293a1 1 0 011.414 0z"/>
+                    </svg>
+                    <span>Reports</span>
+                </a>
             </nav>
 
             <!-- User Profile and Sign Out -->
             <div class="p-4 border-t border-green-700">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors w-full mb-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                        </svg>
-                        <span>Sign Out</span>
-                    </button>
-                </form>
+                <a href="{{ route('sign-out') }}" class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors w-full mb-3 block">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Sign Out</span>
+                </a>
 
                 <div class="flex items-center gap-3 px-4">
                     <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
@@ -105,9 +119,6 @@
                             </svg>
                         </button>
                         <h1 class="text-2xl font-bold text-gray-900">@yield('title', 'Home')</h1>
-                    </div>
-                    <div class="text-sm text-gray-600">
-                        Principal dashboard
                     </div>
                 </div>
             </header>
