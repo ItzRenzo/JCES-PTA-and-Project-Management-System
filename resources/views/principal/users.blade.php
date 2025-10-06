@@ -590,9 +590,6 @@ document.getElementById('editUserForm').addEventListener('submit', function(e) {
     // Here you would typically send the data to your backend
     console.log('Form data for user ID', currentEditingUserId, ':', formDataObj);
     
-    // For now, just show an alert
-    alert('User update functionality will be implemented here');
-    
     // Example of how you would implement the actual update:
     // fetch(`/principal/users/${currentEditingUserId}`, {
     //     method: 'PUT',
