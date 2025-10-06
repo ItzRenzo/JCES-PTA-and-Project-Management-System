@@ -2,15 +2,36 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PrincipalController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
+    // If user is authenticated, redirect to their appropriate dashboard
+    if (Auth::check()) {
+        $user = Auth::user();
+        return match($user->user_type) {
+            'administrator' => redirect()->route('administrator.dashboard'),
+            'principal' => redirect()->route('principal.dashboard'),
+            'teacher' => redirect()->route('teacher.dashboard'),
+            'parent' => redirect()->route('dashboard'),
+            default => redirect()->route('dashboard'),
+        };
+    }
     return view('welcome');
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = Auth::user();
+    
+    // Redirect to appropriate dashboard based on user type
+    return match($user->user_type) {
+        'administrator' => redirect()->route('administrator.dashboard'),
+        'principal' => redirect()->route('principal.dashboard'),
+        'teacher' => redirect()->route('teacher.dashboard'),
+        'parent' => view('dashboard'), // Keep parents on the generic dashboard
+        default => view('dashboard'),
+    };
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Principal routes
@@ -54,6 +75,27 @@ Route::get('/administrator/users', [PrincipalController::class, 'adminUsers'])
 Route::put('/administrator/users/{id}', [PrincipalController::class, 'adminUpdateUser'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.users.update');
+
+// Teacher routes
+Route::get('/teacher', [TeacherController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.dashboard');
+
+Route::get('/teacher/create-account', [TeacherController::class, 'createAccount'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.create-account');
+
+Route::post('/teacher/create-account', [TeacherController::class, 'storeAccount'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.store-account');
+
+Route::get('/teacher/users', [TeacherController::class, 'users'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.users');
+
+Route::put('/teacher/users/{id}', [TeacherController::class, 'updateUser'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.users.update');
 
 // Logout route that redirects to login
 Route::get('/sign-out', function () {
