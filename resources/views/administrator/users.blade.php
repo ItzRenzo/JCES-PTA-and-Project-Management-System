@@ -1,4 +1,4 @@
-﻿@extends('layouts.pr-sidebar')
+@extends('layouts.ad-sidebar')
 
 @section('title', 'Users')
 
@@ -7,7 +7,7 @@
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route('principal.users') }}" class="flex flex-col md:flex-row gap-4">
+        <form method="GET" action="{{ route('administrator.users') }}" class="flex flex-col md:flex-row gap-4">
             <div class="flex-1">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search users..." 
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
@@ -52,65 +52,66 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($users as $user)
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-4 whitespace-nowrap">
+                        <td class="px-4 py-4">
                             <input type="checkbox" class="rounded border-gray-300">
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span class="text-green-600 font-semibold text-sm">
-                                        {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}{{ strtoupper(substr(explode(' ', $user->name ?? 'User')[1] ?? explode(' ', $user->name ?? 'User')[0], 0, 1)) }}
-                                    </span>
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                        <span class="text-sm font-medium text-green-800">
+                                            {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="ml-3 min-w-0">
-                                    <div class="text-sm font-medium text-gray-900 truncate">{{ $user->name ?? 'N/A' }}</div>
-                                    <div class="text-sm text-gray-500 truncate">{{ $user->email }}</div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
+                                    <div class="text-sm text-gray-500">{{ $user->email }}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                @if($user->user_type == 'parent') bg-blue-100 text-blue-800
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                @if($user->user_type == 'principal') bg-purple-100 text-purple-800
+                                @elseif($user->user_type == 'administrator') bg-blue-100 text-blue-800
                                 @elseif($user->user_type == 'teacher') bg-green-100 text-green-800
-                                @elseif($user->user_type == 'administrator') bg-purple-100 text-purple-800
-                                @elseif($user->user_type == 'principal') bg-yellow-100 text-yellow-800
-                                @else bg-gray-100 text-gray-800 @endif">
-                                {{ ucfirst($user->user_type ?? 'Unknown') }}
+                                @else bg-gray-100 text-gray-800
+                                @endif">
+                                {{ ucfirst($user->user_type) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                 {{ $user->is_active ? 'Active' : 'Inactive' }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $user->created_date ? $user->created_date->format('M d, Y') : 'N/A' }}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ $user->created_date ? \Carbon\Carbon::parse($user->created_date)->format('M d, Y') : 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center gap-1">
+                            <div class="flex items-center gap-2">
                                 <button onclick="openEditModal({{ json_encode($user) }})" 
-                                        class="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition-colors duration-200" title="Edit">
+                                        class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-200" 
+                                        title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
+
                                 <button onclick="openViewModal({{ json_encode($user) }})" 
-                                        class="p-1 text-green-600 hover:text-green-900 hover:bg-green-50 rounded transition-colors duration-200" title="View">
+                                        class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-200" 
+                                        title="View">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </button>
+
                                 <button onclick="deleteUser({{ $user->userID }})" 
-                                        class="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-200" title="Delete">
+                                        class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-200" 
+                                        title="Delete">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                                <button class="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded transition-colors duration-200" title="More options">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                     </svg>
                                 </button>
                             </div>
@@ -118,14 +119,8 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                            <div class="flex flex-col items-center">
-                                <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                                <p class="text-lg font-medium">No users found</p>
-                                <p class="text-sm text-gray-400 mt-1">Try adjusting your search filters</p>
-                            </div>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                            No users found.
                         </td>
                     </tr>
                     @endforelse
@@ -238,18 +233,6 @@
                         </div>
                     </div>
 
-                    <div id="adminFields" class="hidden">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Admin Level</label>
-                            <select id="editAdminLevel" name="admin_level" 
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                <option value="junior">Junior Admin</option>
-                                <option value="senior">Senior Admin</option>
-                                <option value="super">Super Admin</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">New Password (optional)</label>
                         <input type="password" id="editPassword" name="password" 
@@ -273,8 +256,6 @@
         </div>
     </div>
 </div>
-
-
 
 <!-- View User Details Modal -->
 <div id="viewUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
@@ -336,11 +317,6 @@
             <div id="viewDepartment" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
           </div>
         </div>
-
-        <div id="viewAdminInfo" class="hidden md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Admin Level</label>
-          <div id="viewAdminLevel" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-        </div>
       </div>
 
       <div class="flex items-center justify-center pt-6 border-t mt-6">
@@ -360,7 +336,7 @@ function openAddUserModal() {
     // For now, this is a placeholder function
     // You can implement a modal or redirect to a create user page
     alert('Add User functionality will be implemented here');
-    // Example: window.location.href = '/principal/users/create';
+    // Example: window.location.href = '/administrator/users/create';
     // Or open a modal dialog
 }
 
@@ -430,7 +406,7 @@ function submitEditForm(event) {
     submitBtn.disabled = true;
     
     // Submit the form
-    fetch(`/principal/users/${userId}`, {
+    fetch(`/administrator/users/${userId}`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -503,134 +479,41 @@ function showRoleSpecificFields(role, mode) {
     const prefix = mode === 'edit' ? 'edit' : 'view';
     
     // Hide all role-specific sections
-    const roleFields = ['parentFields', 'teacherFields', 'adminFields'];
-    const viewRoleFields = ['viewParentInfo', 'viewTeacherInfo', 'viewAdminInfo'];
+    const roleFields = ['parentFields', 'teacherFields'];
+    const viewRoleFields = ['viewParentInfo', 'viewTeacherInfo'];
     
     if (mode === 'edit') {
         roleFields.forEach(field => {
             document.getElementById(field).classList.add('hidden');
         });
+        
+        // Show relevant fields based on role
+        if (role === 'parent') {
+            document.getElementById('parentFields').classList.remove('hidden');
+        } else if (role === 'teacher') {
+            document.getElementById('teacherFields').classList.remove('hidden');
+        }
+        // No special fields for administrator or principal roles
     } else {
         viewRoleFields.forEach(field => {
             document.getElementById(field).classList.add('hidden');
         });
-    }
-    
-    // Show relevant fields based on role
-    switch(role) {
-        case 'parent':
-            if (mode === 'edit') {
-                document.getElementById('parentFields').classList.remove('hidden');
-            } else {
-                document.getElementById('viewParentInfo').classList.remove('hidden');
-                document.getElementById('viewAddress').textContent = 'N/A'; // Placeholder
-            }
-            break;
-        case 'teacher':
-            if (mode === 'edit') {
-                document.getElementById('teacherFields').classList.remove('hidden');
-            } else {
-                document.getElementById('viewTeacherInfo').classList.remove('hidden');
-                document.getElementById('viewSubject').textContent = 'N/A'; // Placeholder
-                document.getElementById('viewDepartment').textContent = 'N/A'; // Placeholder
-            }
-            break;
-        case 'administrator':
-        case 'principal':
-            if (mode === 'edit') {
-                document.getElementById('adminFields').classList.remove('hidden');
-            } else {
-                document.getElementById('viewAdminInfo').classList.remove('hidden');
-                document.getElementById('viewAdminLevel').textContent = role === 'principal' ? 'Principal' : 'Administrator';
-            }
-            break;
+        
+        // Show relevant fields based on role
+        if (role === 'parent') {
+            document.getElementById('viewParentInfo').classList.remove('hidden');
+        } else if (role === 'teacher') {
+            document.getElementById('viewTeacherInfo').classList.remove('hidden');
+        }
+        // No special fields for administrator or principal roles
     }
 }
 
-// Role change handler for edit modal
-document.getElementById('editRole').addEventListener('change', function() {
-    showRoleSpecificFields(this.value, 'edit');
-});
-
-// Delete User Function
 function deleteUser(userId) {
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-        // Here you would typically send a DELETE request to your backend
-        console.log('Delete user with ID:', userId);
-        alert('Delete user functionality will be implemented here');
-        
-        // You can implement the actual deletion here
-        // Example: 
-        // fetch(`/principal/users/${userId}`, { method: 'DELETE' })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         if (data.success) {
-        //             location.reload(); // Reload the page to show updated list
-        //         }
-        //     });
+        alert('Delete functionality will be implemented here');
+        // TODO: Implement delete functionality
     }
 }
-
-// Form submission handler
-document.getElementById('editUserForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (!currentEditingUserId) {
-        alert('Error: No user selected for editing');
-        return;
-    }
-    
-    // Get form data
-    const formData = new FormData(this);
-    formData.append('userID', currentEditingUserId);
-    
-    // Convert FormData to regular object for display
-    const formDataObj = Object.fromEntries(formData);
-    
-    // Here you would typically send the data to your backend
-    console.log('Form data for user ID', currentEditingUserId, ':', formDataObj);
-    
-    // For now, just show an alert
-    alert('User update functionality will be implemented here');
-    
-    // Example of how you would implement the actual update:
-    // fetch(`/principal/users/${currentEditingUserId}`, {
-    //     method: 'PUT',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-    //     },
-    //     body: JSON.stringify(formDataObj)
-    // })
-    // .then(response => response.json())
-    // .then(data => {
-    //     if (data.success) {
-    //         closeEditModal();
-    //         location.reload(); // Reload to show updated data
-    //     } else {
-    //         alert('Error updating user: ' + data.message);
-    //     }
-    // })
-    // .catch(error => {
-    //     console.error('Error:', error);
-    //     alert('An error occurred while updating the user');
-    // });
-    
-    // Close the modal for now
-    closeEditModal();
-});
-
-// Close modals when clicking outside
-window.addEventListener('click', function(event) {
-    const editModal = document.getElementById('editUserModal');
-    const viewModal = document.getElementById('viewUserModal');
-    
-    if (event.target === editModal) {
-        closeEditModal();
-    }
-    if (event.target === viewModal) {
-        closeViewModal();
-    }
-});
 </script>
 @endsection

@@ -16,9 +16,31 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+        
+        // Determine which profile view to show based on user role
+        switch ($user->user_type) {
+            case 'parent':
+                return view('profile.parent-profile', [
+                    'user' => $user,
+                ]);
+            case 'administrator':
+                return view('profile.admin-profile', [
+                    'user' => $user,
+                ]);
+            case 'principal':
+                return view('profile.principal-profile', [
+                    'user' => $user,
+                ]);
+            case 'teacher':
+                return view('profile.teacher-profile', [
+                    'user' => $user,
+                ]);
+            default:
+                return view('profile.edit', [
+                    'user' => $user,
+                ]);
+        }
     }
 
     /**

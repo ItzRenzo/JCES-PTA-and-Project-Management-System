@@ -1,12 +1,6 @@
 @extends('layouts.pr-sidebar')
 
 @section('content')
-    <!-- Principal Dashboard Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Principal Dashboard</h1>
-        <p class="text-gray-600">Welcome back, {{ auth()->user()->first_name }}! Here's your school overview.</p>
-    </div>
-
     <!-- Principal Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <!-- Total Students Card -->

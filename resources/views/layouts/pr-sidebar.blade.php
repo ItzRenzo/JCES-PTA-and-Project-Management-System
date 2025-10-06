@@ -95,15 +95,17 @@
                     <span>Sign Out</span>
                 </a>
 
-                <div class="flex items-center gap-3 px-4">
+                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors w-full">
                     <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                        <span class="text-green-600 font-semibold text-sm">JD</span>
+                        <span class="text-green-600 font-semibold text-sm">
+                            {{ strtoupper(substr(Auth::user()->first_name ?? Auth::user()->username ?? 'U', 0, 1) . substr(Auth::user()->last_name ?? '', 0, 1)) }}
+                        </span>
                     </div>
                     <div class="text-white">
-                        <div class="text-sm font-semibold">Juan Dela Cruz</div>
+                        <div class="text-sm font-semibold">{{ Auth::user()->name ?? Auth::user()->username ?? 'Principal' }}</div>
                         <div class="text-xs opacity-90">Principal</div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 

@@ -16,7 +16,7 @@
                 <div class="flex items-center gap-3">
                     <img src="http://127.0.0.1:8000/images/logos/jces-logo.png" 
                          alt="JCES Logo" 
-                         class="w-12 h-12 rounded-full">
+                         class="w-12 h-12 object-contain">
                     <div>
                         <div class="text-sm font-semibold text-gray-900">J. Cruz Sr.</div>
                         <div class="text-xs text-gray-600">Elementary School</div>
@@ -60,12 +60,12 @@
                     <span>Payments</span>
                 </a>
 
-                <a href="#" 
-                   class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
+                <a href="{{ route('administrator.users') }}" 
+                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.users') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
                     </svg>
-                    <span>Parents</span>
+                    <span>Users</span>
                 </a>
 
                 <a href="{{ route('administrator.create-account') }}" 
@@ -95,17 +95,17 @@
                     <span>Sign Out</span>
                 </a>
 
-                <div class="flex items-center gap-3 px-4">
+                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
                         <span class="text-green-600 font-semibold text-sm">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 1)) }}{{ strtoupper(substr(explode(' ', auth()->user()->name ?? 'Admin')[1] ?? explode(' ', auth()->user()->name ?? 'Admin')[0], 0, 1)) }}
+                            {{ strtoupper(substr(auth()->user()->first_name ?? 'A', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? 'D', 0, 1)) }}
                         </span>
                     </div>
                     <div class="text-white">
                         <div class="text-sm font-semibold">{{ auth()->user()->name ?? 'Administrator' }}</div>
-                        <div class="text-xs opacity-90">Administrator</div>
+                        <div class="text-xs opacity-90">System Administrator</div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 

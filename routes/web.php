@@ -30,6 +30,10 @@ Route::get('/principal/users', [PrincipalController::class, 'users'])
     ->middleware(['auth', 'verified'])
     ->name('principal.users');
 
+Route::put('/principal/users/{id}', [PrincipalController::class, 'updateUser'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.users.update');
+
 // Administrator routes (using same controller and views as Principal)
 Route::get('/administrator', [PrincipalController::class, 'adminIndex'])
     ->middleware(['auth', 'verified'])
@@ -42,6 +46,14 @@ Route::get('/administrator/create-account', [PrincipalController::class, 'adminC
 Route::post('/administrator/create-account', [PrincipalController::class, 'adminStoreAccount'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.store-account');
+
+Route::get('/administrator/users', [PrincipalController::class, 'adminUsers'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.users');
+
+Route::put('/administrator/users/{id}', [PrincipalController::class, 'adminUpdateUser'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.users.update');
 
 // Logout route that redirects to login
 Route::get('/sign-out', function () {
