@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\SecurityAuditLog;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class PrincipalController extends Controller
@@ -49,7 +51,7 @@ class PrincipalController extends Controller
             $counter++;
         }
 
-        User::create([
+        $user = User::create([
             'username' => $username,
             'password_hash' => Hash::make($request->password),
             'user_type' => $request->role,
@@ -59,6 +61,23 @@ class PrincipalController extends Controller
             'last_name' => $request->last_name,
             'is_active' => true,
         ]);
+
+        // Log the account creation activity
+        SecurityAuditLog::logActivity(
+            Auth::user()->userID,
+            'create_user_account',
+            'users',
+            $user->userID,
+            null,
+            [
+                'created_user' => $user->first_name . ' ' . $user->last_name,
+                'username' => $username,
+                'email' => $user->email,
+                'user_type' => $user->user_type
+            ],
+            true,
+            null
+        );
 
         return redirect()->route('principal.create-account')
             ->with('success', 'Account created successfully! Username: ' . $username);
@@ -148,7 +167,7 @@ class PrincipalController extends Controller
             $counter++;
         }
 
-        User::create([
+        $user = User::create([
             'username' => $username,
             'password_hash' => Hash::make($request->password),
             'user_type' => $request->role,
@@ -158,6 +177,24 @@ class PrincipalController extends Controller
             'last_name' => $request->last_name,
             'is_active' => true,
         ]);
+
+        // Log the account creation activity
+        SecurityAuditLog::logActivity(
+            Auth::user()->userID,
+            'create_user_account',
+            'users',
+            $user->userID,
+            null,
+            [
+                'created_user' => $user->first_name . ' ' . $user->last_name,
+                'username' => $username,
+                'email' => $user->email,
+                'user_type' => $user->user_type,
+                'created_by_admin' => true
+            ],
+            true,
+            null
+        );
 
         return redirect()->route('administrator.create-account')
             ->with('success', 'Account created successfully! Username: ' . $username);
@@ -182,6 +219,16 @@ class PrincipalController extends Controller
                 'password' => ['nullable', 'string', 'min:8'],
             ]);
 
+            // Store old values for logging
+            $oldValues = [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'user_type' => $user->user_type,
+                'is_active' => $user->is_active
+            ];
+
             // Update user data
             $user->first_name = $request->first_name;
             $user->last_name = $request->last_name;
@@ -190,12 +237,36 @@ class PrincipalController extends Controller
             $user->user_type = $request->user_type;
             $user->is_active = $request->is_active;
 
+            $passwordChanged = false;
             // Update password if provided
             if ($request->filled('password')) {
                 $user->password_hash = Hash::make($request->password);
+                $passwordChanged = true;
             }
 
             $user->save();
+
+            // Log the user update activity
+            $newValues = [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'user_type' => $user->user_type,
+                'is_active' => $user->is_active,
+                'password_changed' => $passwordChanged
+            ];
+
+            SecurityAuditLog::logActivity(
+                Auth::user()->userID,
+                'update_user_account',
+                'users',
+                $user->userID,
+                $oldValues,
+                $newValues,
+                true,
+                null
+            );
 
             return response()->json([
                 'success' => true,
@@ -275,6 +346,16 @@ class PrincipalController extends Controller
                 'password' => ['nullable', 'string', 'min:8'],
             ]);
 
+            // Store old values for logging
+            $oldValues = [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'user_type' => $user->user_type,
+                'is_active' => $user->is_active
+            ];
+
             // Update user data
             $user->first_name = $request->first_name;
             $user->last_name = $request->last_name;
@@ -283,12 +364,37 @@ class PrincipalController extends Controller
             $user->user_type = $request->user_type;
             $user->is_active = $request->is_active;
 
+            $passwordChanged = false;
             // Update password if provided
             if ($request->filled('password')) {
                 $user->password_hash = Hash::make($request->password);
+                $passwordChanged = true;
             }
 
             $user->save();
+
+            // Log the user update activity
+            $newValues = [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'user_type' => $user->user_type,
+                'is_active' => $user->is_active,
+                'password_changed' => $passwordChanged,
+                'updated_by_admin' => true
+            ];
+
+            SecurityAuditLog::logActivity(
+                Auth::user()->userID,
+                'admin_update_user_account',
+                'users',
+                $user->userID,
+                $oldValues,
+                $newValues,
+                true,
+                null
+            );
 
             return response()->json([
                 'success' => true,

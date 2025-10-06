@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PrincipalController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\ReportsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -55,6 +56,27 @@ Route::put('/principal/users/{id}', [PrincipalController::class, 'updateUser'])
     ->middleware(['auth', 'verified'])
     ->name('principal.users.update');
 
+// Principal Reports routes
+Route::get('/principal/reports', [ReportsController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports');
+
+Route::get('/principal/reports/activity-logs', [ReportsController::class, 'activityLogs'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.activity-logs');
+
+Route::get('/principal/reports/security-logs', [ReportsController::class, 'securityLogs'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.security-logs');
+
+Route::get('/principal/reports/user-activity', [ReportsController::class, 'userActivity'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.user-activity');
+
+Route::get('/principal/reports/export', [ReportsController::class, 'exportLogs'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.export');
+
 // Administrator routes (using same controller and views as Principal)
 Route::get('/administrator', [PrincipalController::class, 'adminIndex'])
     ->middleware(['auth', 'verified'])
@@ -75,6 +97,27 @@ Route::get('/administrator/users', [PrincipalController::class, 'adminUsers'])
 Route::put('/administrator/users/{id}', [PrincipalController::class, 'adminUpdateUser'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.users.update');
+
+// Administrator Reports routes
+Route::get('/administrator/reports', [ReportsController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports');
+
+Route::get('/administrator/reports/activity-logs', [ReportsController::class, 'activityLogs'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.activity-logs');
+
+Route::get('/administrator/reports/security-logs', [ReportsController::class, 'securityLogs'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.security-logs');
+
+Route::get('/administrator/reports/user-activity', [ReportsController::class, 'userActivity'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.user-activity');
+
+Route::get('/administrator/reports/export', [ReportsController::class, 'exportLogs'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.export');
 
 // Teacher routes
 Route::get('/teacher', [TeacherController::class, 'index'])
