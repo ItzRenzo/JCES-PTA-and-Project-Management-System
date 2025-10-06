@@ -41,8 +41,35 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Find user by email
+        $user = \App\Models\User::where('email', $this->email)->first();
+
+        // Check if user exists and is active
+        if ($user) {
+            // Check if account is locked
+            if ($user->isLocked()) {
+                $minutes = $user->account_locked_until->diffInMinutes(now());
+                throw ValidationException::withMessages([
+                    'email' => "Your account is locked due to too many failed login attempts. Please try again in {$minutes} minutes.",
+                ]);
+            }
+
+            // Check if account is active
+            if (!$user->is_active) {
+                throw ValidationException::withMessages([
+                    'email' => 'Your account has been deactivated. Please contact the administrator.',
+                ]);
+            }
+        }
+
+        // Attempt login - use 'password' field which will be mapped to password_hash via model accessor
+        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+
+            // Increment failed login attempts if user exists
+            if ($user) {
+                $user->incrementFailedLoginAttempts();
+            }
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),

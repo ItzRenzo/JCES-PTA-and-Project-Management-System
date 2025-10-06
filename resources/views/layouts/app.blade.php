@@ -16,7 +16,7 @@
                 <div class="flex items-center gap-3">
                     <img src="http://127.0.0.1:8000/images/logos/jces-logo.png" 
                          alt="JCES Logo" 
-                         class="w-12 h-12 rounded-full">
+                         class="w-12 h-12 object-contain">
                     <div>
                         <div class="text-sm font-semibold text-gray-900">J. Cruz Sr.</div>
                         <div class="text-xs text-gray-600">Elementary School</div>

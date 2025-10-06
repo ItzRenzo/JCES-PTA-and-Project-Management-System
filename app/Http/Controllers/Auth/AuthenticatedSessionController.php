@@ -28,7 +28,26 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Update last login timestamp
+        $user = Auth::user();
+        $user->updateLastLogin();
+
+        // Redirect based on user type
+        return $this->redirectUserByType($user);
+    }
+
+    /**
+     * Redirect user based on their type
+     */
+    protected function redirectUserByType($user): RedirectResponse
+    {
+        return match($user->user_type) {
+            'administrator' => redirect()->route('dashboard'),
+            'principal' => redirect()->route('principal.dashboard'),
+            'teacher' => redirect()->route('dashboard'),
+            'parent' => redirect()->route('dashboard'),
+            default => redirect()->route('dashboard'),
+        };
     }
 
     /**

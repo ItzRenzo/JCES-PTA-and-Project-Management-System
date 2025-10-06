@@ -47,16 +47,23 @@ A comprehensive web-based management system for JCES Elementary School's PTA (Pa
 
 ## 📋 Table of Contents
 
+- [Quick Start](#-quick-start)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Database Setup](#-database-setup)
 - [Configuration](#configuration)
 - [Running the Application](#running-the-application)
 - [Project Structure](#project-structure)
-- [Adding Assets](#adding-assets)
+- [Login System](#-login-system)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
+
+## 📚 Additional Guides
+
+- **[Database Setup Guide](SETUP_DATABASE.md)** - Step-by-step MySQL setup
+- **[Login Integration Guide](LOGIN_INTEGRATION.md)** - Authentication system details
 
 ## ✨ Features
 
@@ -72,10 +79,21 @@ A comprehensive web-based management system for JCES Elementary School's PTA (Pa
   - Mobile-friendly interface
   - Custom CSS styling without build dependencies
 
-- **Security**
-  - Laravel Breeze authentication
+- **Security Features**
+  - Laravel Breeze authentication integrated with custom database
+  - Account locking after 5 failed login attempts
+  - Active/inactive account status management
   - CSRF protection
-  - Secure password hashing
+  - Secure password hashing (bcrypt)
+  - Session management with audit logging
+  - Failed login attempt tracking
+  - Last login timestamp tracking
+
+- **User Management**
+  - Four user types: Parent, Teacher, Principal, Administrator
+  - Role-based access control
+  - User permissions system
+  - Security audit logs
   - Session management
 
 ## 🔧 Requirements
