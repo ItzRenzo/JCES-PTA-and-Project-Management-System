@@ -77,6 +77,41 @@ class PrincipalController extends Controller
     }
 
     /**
+     * Display the users page.
+     */
+    public function users(Request $request)
+    {
+        $query = User::query();
+
+        // Apply search filter
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply role filter
+        if ($request->has('role') && $request->role) {
+            $query->where('user_type', $request->role);
+        }
+
+        // Apply status filter (assuming you have a status field)
+        if ($request->has('status') && $request->status) {
+            if ($request->status === 'active') {
+                $query->whereNotNull('email_verified_at');
+            } elseif ($request->status === 'inactive') {
+                $query->whereNull('email_verified_at');
+            }
+        }
+
+        $users = $query->paginate(10);
+
+        return view('principal.users', compact('users'));
+    }
+
+    /**
      * Show the create account form for administrators.
      */
     public function adminCreateAccount()

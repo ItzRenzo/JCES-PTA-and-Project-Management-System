@@ -26,6 +26,10 @@ Route::post('/principal/create-account', [PrincipalController::class, 'storeAcco
     ->middleware(['auth', 'verified'])
     ->name('principal.store-account');
 
+Route::get('/principal/users', [PrincipalController::class, 'users'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.users');
+
 // Administrator routes (using same controller and views as Principal)
 Route::get('/administrator', [PrincipalController::class, 'adminIndex'])
     ->middleware(['auth', 'verified'])
