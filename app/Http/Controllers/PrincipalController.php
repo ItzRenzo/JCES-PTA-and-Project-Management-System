@@ -87,8 +87,10 @@ class PrincipalController extends Controller
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%");
             });
         }
 
@@ -97,14 +99,17 @@ class PrincipalController extends Controller
             $query->where('user_type', $request->role);
         }
 
-        // Apply status filter (assuming you have a status field)
+        // Apply status filter
         if ($request->has('status') && $request->status) {
             if ($request->status === 'active') {
-                $query->whereNotNull('email_verified_at');
+                $query->where('is_active', true);
             } elseif ($request->status === 'inactive') {
-                $query->whereNull('email_verified_at');
+                $query->where('is_active', false);
             }
         }
+
+        // Order by created_date (newest first)
+        $query->orderBy('created_date', 'desc');
 
         $users = $query->paginate(10);
 
