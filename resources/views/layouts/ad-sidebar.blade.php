@@ -26,8 +26,8 @@
 
             <!-- Navigation Menu -->
             <nav class="flex-1 px-3 py-6 space-y-2">
-                <a href="#" 
-                   class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
+                <a href="{{ route('administrator.dashboard') }}" 
+                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                     </svg>
@@ -39,7 +39,7 @@
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
                     </svg>
-                    <span>Announcements</span>
+                    <span>Announcement</span>
                 </a>
 
                 <a href="#" 
@@ -68,8 +68,8 @@
                     <span>Parents</span>
                 </a>
 
-                <a href="{{ route('admin.create') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('admin.create') ? 'bg-lime-400 text-gray-900' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                <a href="{{ route('administrator.create-account') }}" 
+                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.create-account') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
                     </svg>
@@ -79,7 +79,8 @@
                 <a href="#" 
                    class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                        <path d="M16.707 3.293a1 1 0 010 1.414L15.414 6l1.293 1.293a1 1 0 01-1.414 1.414L14 7.414l-1.293 1.293a1 1 0 01-1.414-1.414L12.586 6l-1.293-1.293a1 1 0 011.414-1.414L14 4.586l1.293-1.293a1 1 0 011.414 0z"/>
                     </svg>
                     <span>Reports</span>
                 </a>
@@ -96,11 +97,13 @@
 
                 <div class="flex items-center gap-3 px-4">
                     <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                        <span class="text-green-600 font-semibold text-sm">JD</span>
+                        <span class="text-green-600 font-semibold text-sm">
+                            {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 1)) }}{{ strtoupper(substr(explode(' ', auth()->user()->name ?? 'Admin')[1] ?? explode(' ', auth()->user()->name ?? 'Admin')[0], 0, 1)) }}
+                        </span>
                     </div>
                     <div class="text-white">
-                        <div class="text-sm font-semibold">Juan Dela Cruz</div>
-                        <div class="text-xs opacity-90">Principal</div>
+                        <div class="text-sm font-semibold">{{ auth()->user()->name ?? 'Administrator' }}</div>
+                        <div class="text-xs opacity-90">Administrator</div>
                     </div>
                 </div>
             </div>
@@ -109,42 +112,18 @@
         <!-- Main Content Area -->
         <div class="flex-1 overflow-y-auto">
             <!-- Top Header -->
-            @if (isset($header))
-            <header class="bg-white border-b border-gray-200 px-8 py-4">
+            <header class="bg-gradient-to-r from-green-50 to-green-100 border-b border-gray-200 px-8 py-4">
                 <div class="flex items-center justify-between">
-                    {{ $header }}
-                    
-                    <!-- User Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 focus:outline-none">
-                            <span>{{ Auth::user()->name ?? 'User' }}</span>
-                            <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    <div class="flex items-center gap-3">
+                        <button class="text-gray-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
                         </button>
-
-                        <!-- Dropdown Menu -->
-                        <div x-show="open" 
-                             @click.away="open = false"
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-95"
-                             x-transition:enter-end="opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-150"
-                             x-transition:leave-start="opacity-100 scale-100"
-                             x-transition:leave-end="opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
-                             style="display: none;">
-                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                <span>Profile</span>
-                            </a>
-                        </div>
+                        <h1 class="text-2xl font-bold text-gray-900">@yield('title', 'Home')</h1>
                     </div>
                 </div>
             </header>
-            @endif
 
             <!-- Page Content -->
             <main class="p-8">

@@ -26,6 +26,19 @@ Route::post('/principal/create-account', [PrincipalController::class, 'storeAcco
     ->middleware(['auth', 'verified'])
     ->name('principal.store-account');
 
+// Administrator routes (using same controller and views as Principal)
+Route::get('/administrator', [PrincipalController::class, 'adminIndex'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.dashboard');
+
+Route::get('/administrator/create-account', [PrincipalController::class, 'adminCreateAccount'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.create-account');
+
+Route::post('/administrator/create-account', [PrincipalController::class, 'adminStoreAccount'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.store-account');
+
 // Logout route that redirects to login
 Route::get('/sign-out', function () {
     Auth::logout();

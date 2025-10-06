@@ -63,4 +63,63 @@ class PrincipalController extends Controller
         return redirect()->route('principal.create-account')
             ->with('success', 'Account created successfully! Username: ' . $username);
     }
+
+    /**
+     * Administrator methods (same functionality, different layout)
+     */
+    
+    /**
+     * Display the administrator dashboard.
+     */
+    public function adminIndex()
+    {
+        return view('administrator.dashboard');
+    }
+
+    /**
+     * Show the create account form for administrators.
+     */
+    public function adminCreateAccount()
+    {
+        return view('administrator.create-account');
+    }
+
+    /**
+     * Store a newly created account (administrator version).
+     */
+    public function adminStoreAccount(Request $request)
+    {
+        $request->validate([
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
+            'role' => ['required', 'in:parent,teacher,administrator,principal'],
+            'phone' => ['required', 'string', 'max:20'],
+            'email' => ['required', 'string', 'email', 'max:150', 'unique:users'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        // Generate username from first name + last name + random number
+        $baseUsername = strtolower($request->first_name . $request->last_name);
+        $username = $baseUsername;
+        $counter = 1;
+        
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
+        User::create([
+            'username' => $username,
+            'password_hash' => Hash::make($request->password),
+            'user_type' => $request->role,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'is_active' => true,
+        ]);
+
+        return redirect()->route('administrator.create-account')
+            ->with('success', 'Account created successfully! Username: ' . $username);
+    }
 }

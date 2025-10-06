@@ -42,7 +42,7 @@ class AuthenticatedSessionController extends Controller
     protected function redirectUserByType($user): RedirectResponse
     {
         return match($user->user_type) {
-            'administrator' => redirect()->route('dashboard'),
+            'administrator' => redirect()->route('administrator.dashboard'),
             'principal' => redirect()->route('principal.dashboard'),
             'teacher' => redirect()->route('dashboard'),
             'parent' => redirect()->route('dashboard'),
