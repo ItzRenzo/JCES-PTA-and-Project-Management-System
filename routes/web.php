@@ -56,6 +56,10 @@ Route::put('/principal/users/{id}', [PrincipalController::class, 'updateUser'])
     ->middleware(['auth', 'verified'])
     ->name('principal.users.update');
 
+Route::delete('/principal/users/{id}', [PrincipalController::class, 'deleteUser'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.users.delete');
+
 // Principal Reports routes
 Route::get('/principal/reports', [ReportsController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -97,6 +101,10 @@ Route::get('/administrator/users', [PrincipalController::class, 'adminUsers'])
 Route::put('/administrator/users/{id}', [PrincipalController::class, 'adminUpdateUser'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.users.update');
+
+Route::delete('/administrator/users/{id}', [PrincipalController::class, 'adminDeleteUser'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.users.delete');
 
 // Administrator Reports routes
 Route::get('/administrator/reports', [ReportsController::class, 'index'])

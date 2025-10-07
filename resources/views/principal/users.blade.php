@@ -4,6 +4,8 @@
 
 @section('content')
 <div class="space-y-6">
+    <!-- Hidden CSRF Token for JavaScript -->
+    <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-lg shadow p-6">
@@ -555,19 +557,58 @@ document.getElementById('editRole').addEventListener('change', function() {
 // Delete User Function
 function deleteUser(userId) {
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-        // Here you would typically send a DELETE request to your backend
-        console.log('Delete user with ID:', userId);
-        alert('Delete user functionality will be implemented here');
+        // Get CSRF token
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                     document.querySelector('input[name="_token"]')?.value;
+
+        // Find the delete button that was clicked
+        const deleteButtons = document.querySelectorAll(`button[onclick="deleteUser(${userId})"]`);
+        const deleteBtn = deleteButtons[0];
         
-        // You can implement the actual deletion here
-        // Example: 
-        // fetch(`/principal/users/${userId}`, { method: 'DELETE' })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         if (data.success) {
-        //             location.reload(); // Reload the page to show updated list
-        //         }
-        //     });
+        if (deleteBtn) {
+            // Show loading state
+            const originalHtml = deleteBtn.innerHTML;
+            deleteBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
+            deleteBtn.disabled = true;
+        }
+
+        // Send DELETE request to backend
+        fetch(`/principal/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert(data.message || 'User deleted successfully!');
+                // Reload the page to show updated list
+                location.reload();
+            } else {
+                // Show error message
+                alert(data.message || 'Error deleting user. Please try again.');
+                
+                // Reset button state
+                if (deleteBtn) {
+                    deleteBtn.innerHTML = originalHtml;
+                    deleteBtn.disabled = false;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the user. Please try again.');
+            
+            // Reset button state
+            if (deleteBtn) {
+                deleteBtn.innerHTML = originalHtml;
+                deleteBtn.disabled = false;
+            }
+        });
     }
 }
 
