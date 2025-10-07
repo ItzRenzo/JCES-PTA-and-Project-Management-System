@@ -104,7 +104,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </button>
-                                <button onclick="deleteUser({{ $user->userID }})" 
+                                <button onclick="openDeleteModal({{ json_encode($user) }})" 
                                         class="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-200" title="Delete">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -355,6 +355,71 @@
   </div>
 </div>
 
+<!-- Delete User Confirmation Modal -->
+<div id="deleteUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-full px-4 py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                        <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Delete User</h3>
+                </div>
+                <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="mt-6">
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-2">Are you sure you want to delete this user? This action cannot be undone.</p>
+                    <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                        <div class="flex items-center">
+                            <div id="deleteUserAvatar" class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span id="deleteUserInitials" class="text-red-600 font-semibold text-sm"></span>
+                            </div>
+                            <div class="ml-3">
+                                <div id="deleteUserName" class="text-sm font-medium text-gray-900"></div>
+                                <div id="deleteUserEmail" class="text-sm text-gray-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        To confirm, type "<span id="confirmationUserName" class="font-semibold text-red-600"></span>" in the box below:
+                    </label>
+                    <input type="text" id="deleteConfirmationInput" 
+                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                           placeholder="Type the user name here">
+                    <div id="confirmationError" class="text-red-600 text-xs mt-1 hidden">
+                        The name you entered does not match. Please try again.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end gap-3 pt-6 border-t">
+                <button type="button" onclick="closeDeleteModal()"
+                        class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button type="button" id="confirmDeleteButton" onclick="confirmDeleteUser()" disabled
+                        class="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <script>
@@ -554,62 +619,164 @@ document.getElementById('editRole').addEventListener('change', function() {
     showRoleSpecificFields(this.value, 'edit');
 });
 
-// Delete User Function
-function deleteUser(userId) {
-    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-        // Get CSRF token
-        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                     document.querySelector('input[name="_token"]')?.value;
+// Delete User Modal Functions
+let userToDelete = null;
 
-        // Find the delete button that was clicked
-        const deleteButtons = document.querySelectorAll(`button[onclick="deleteUser(${userId})"]`);
-        const deleteBtn = deleteButtons[0];
-        
-        if (deleteBtn) {
-            // Show loading state
-            const originalHtml = deleteBtn.innerHTML;
-            deleteBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
-            deleteBtn.disabled = true;
+function openDeleteModal(user) {
+    console.log('openDeleteModal called with user:', user);
+    userToDelete = user;
+    
+    // Get the user's display name (combining first_name and last_name or using name field)
+    const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown User';
+    console.log('Determined user name:', userName);
+    
+    // Generate user initials
+    const initials = userName.split(' ').map(name => name.charAt(0).toUpperCase()).join('').substring(0, 2);
+    
+    // Populate modal content
+    document.getElementById('deleteUserName').textContent = userName;
+    document.getElementById('deleteUserEmail').textContent = user.email || 'No email';
+    document.getElementById('deleteUserInitials').textContent = initials;
+    document.getElementById('confirmationUserName').textContent = userName;
+    
+    // Reset confirmation input and button state
+    document.getElementById('deleteConfirmationInput').value = '';
+    document.getElementById('confirmDeleteButton').disabled = true;
+    document.getElementById('confirmationError').classList.add('hidden');
+    
+    // Show the modal
+    document.getElementById('deleteUserModal').classList.remove('hidden');
+    
+    // Focus on the input field
+    setTimeout(() => {
+        document.getElementById('deleteConfirmationInput').focus();
+    }, 100);
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteUserModal').classList.add('hidden');
+    userToDelete = null;
+}
+
+function validateDeleteConfirmation() {
+    const input = document.getElementById('deleteConfirmationInput');
+    const confirmButton = document.getElementById('confirmDeleteButton');
+    const errorDiv = document.getElementById('confirmationError');
+    const expectedName = userToDelete ? (userToDelete.name || `${userToDelete.first_name || ''} ${userToDelete.last_name || ''}`.trim()) : '';
+    
+    if (input.value.trim() === expectedName) {
+        confirmButton.disabled = false;
+        errorDiv.classList.add('hidden');
+    } else {
+        confirmButton.disabled = true;
+        if (input.value.trim().length > 0) {
+            errorDiv.classList.remove('hidden');
+        } else {
+            errorDiv.classList.add('hidden');
         }
-
-        // Send DELETE request to backend
-        fetch(`/principal/users/${userId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token,
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Show success message
-                alert(data.message || 'User deleted successfully!');
-                // Reload the page to show updated list
-                location.reload();
-            } else {
-                // Show error message
-                alert(data.message || 'Error deleting user. Please try again.');
-                
-                // Reset button state
-                if (deleteBtn) {
-                    deleteBtn.innerHTML = originalHtml;
-                    deleteBtn.disabled = false;
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while deleting the user. Please try again.');
-            
-            // Reset button state
-            if (deleteBtn) {
-                deleteBtn.innerHTML = originalHtml;
-                deleteBtn.disabled = false;
-            }
-        });
     }
+}
+
+function confirmDeleteUser() {
+    console.log('confirmDeleteUser called');
+    console.log('userToDelete:', userToDelete);
+    
+    if (!userToDelete) {
+        alert('Error: No user selected for deletion');
+        return;
+    }
+    
+    const expectedName = userToDelete.name || `${userToDelete.first_name || ''} ${userToDelete.last_name || ''}`.trim();
+    const inputValue = document.getElementById('deleteConfirmationInput').value.trim();
+    
+    console.log('Expected name:', expectedName);
+    console.log('Input value:', inputValue);
+    console.log('Names match:', inputValue === expectedName);
+    
+    if (inputValue !== expectedName) {
+        console.log('Names do not match, showing error');
+        document.getElementById('confirmationError').classList.remove('hidden');
+        return;
+    }
+    
+    console.log('Names match, proceeding with deletion');
+    
+    // Show loading state on the delete button
+    const deleteButton = document.getElementById('confirmDeleteButton');
+    const originalButtonText = deleteButton.innerHTML;
+    deleteButton.disabled = true;
+    deleteButton.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Deleting...';
+    
+    // Call the actual delete function
+    deleteUserWithCallback(userToDelete.userID, () => {
+        // Reset button state if delete fails
+        deleteButton.disabled = false;
+        deleteButton.innerHTML = originalButtonText;
+    });
+}
+
+function deleteUserWithCallback(userId, onError) {
+    console.log('Attempting to delete user with ID:', userId);
+    
+    // Get CSRF token
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                 document.querySelector('input[name="_token"]')?.value;
+    
+    console.log('CSRF token found:', token ? 'Yes' : 'No');
+
+    // Send DELETE request to backend
+    fetch(`/principal/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        
+        // Close the modal
+        closeDeleteModal();
+        
+        if (data.success) {
+            // Show success message
+            alert(data.message || 'User deleted successfully!');
+            // Reload the page to show updated list
+            location.reload();
+        } else {
+            // Show error message
+            alert(data.message || 'Error deleting user. Please try again.');
+            if (onError) onError();
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        
+        // Close the modal
+        closeDeleteModal();
+        
+        alert('An error occurred while deleting the user: ' + error.message);
+        if (onError) onError();
+    });
+}
+
+// Add event listener for real-time validation
+document.getElementById('deleteConfirmationInput').addEventListener('input', validateDeleteConfirmation);
+
+// Delete User Function (kept for backward compatibility)
+function deleteUser(userId) {
+    deleteUserWithCallback(userId, null);
 }
 
 // Form submission handler
@@ -662,12 +829,16 @@ document.getElementById('editUserForm').addEventListener('submit', function(e) {
 window.addEventListener('click', function(event) {
     const editModal = document.getElementById('editUserModal');
     const viewModal = document.getElementById('viewUserModal');
+    const deleteModal = document.getElementById('deleteUserModal');
     
     if (event.target === editModal) {
         closeEditModal();
     }
     if (event.target === viewModal) {
         closeViewModal();
+    }
+    if (event.target === deleteModal) {
+        closeDeleteModal();
     }
 });
 </script>
