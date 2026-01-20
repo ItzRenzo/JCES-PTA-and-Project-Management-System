@@ -58,6 +58,8 @@ class ReportsController extends Controller
         
         $query = SecurityAuditLog::with('user')
             ->whereIn('action', $securityActions)
+            ->selectRaw('MAX(logID) as logID, userID, action, ip_address, session_id, timestamp, success, error_message')
+            ->groupBy('userID', 'action', 'ip_address', 'session_id', 'timestamp', 'success', 'error_message')
             ->orderBy('timestamp', 'desc');
 
         // Apply filters
