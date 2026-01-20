@@ -108,7 +108,7 @@
             </a>
         </div>
 
-        <!-- Security Logs -->
+        <!-- Audit Logs -->
         <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
             <div class="flex items-center gap-4 mb-4">
                 <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -117,14 +117,14 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Security Logs</h3>
-                    <p class="text-sm text-gray-600">Authentication and security events</p>
+                    <h3 class="text-lg font-semibold text-gray-900">Audit Logs</h3>
+                    <p class="text-sm text-gray-600">Authentication and audit events</p>
                 </div>
             </div>
-            <p class="text-gray-700 mb-4">Monitor login attempts, authentication failures, and security-related activities for compliance.</p>
+            <p class="text-gray-700 mb-4">Monitor login attempts, authentication failures, and audit-related activities for compliance.</p>
             <a href="{{ route('administrator.reports.security-logs') }}" 
                class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
-                View Security Logs
+                View Audit Logs
                 <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
