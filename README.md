@@ -1,21 +1,20 @@
-# JCES-PTA and Project Management System
+# JCSES - Parent and Project Management System
 
-A comprehensive web-based management system for JCES Elementary School's PTA (Parent-Teacher Association) and project management needs. Built with Laravel 12.0 and featuring a custom-designed authentication interface with JCES school branding.
+A  web-based management system for JCSES Elementary School's parent and project (PTA) management needs.
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.0-red.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-## 🚀 Quick Start
+## Quick Start
 
 **First time setup? Follow these steps:**
 
 1. **Install Prerequisites:**
    - [PHP 8.2+](https://www.php.net/downloads)
    - [Composer](https://getcomposer.org/download/)
-   - [Node.js LTS](https://nodejs.org/) ⭐ **Required for Vite**
-   - [XAMPP](https://www.apachefriends.org/) (for Apache & MySQL)
+   - [Node.js LTS](https://nodejs.org/)
+   - [XAMPP](https://www.apachefriends.org/)
 
 2. **Install Dependencies:**
    ```powershell
@@ -45,7 +44,7 @@ A comprehensive web-based management system for JCES Elementary School's PTA (Pa
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Quick Start](#-quick-start)
 - [Features](#features)
@@ -57,46 +56,89 @@ A comprehensive web-based management system for JCES Elementary School's PTA (Pa
 - [Project Structure](#project-structure)
 - [Login System](#-login-system)
 - [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## 📚 Additional Guides
 
 - **[Database Setup Guide](SETUP_DATABASE.md)** - Step-by-step MySQL setup
 - **[Login Integration Guide](LOGIN_INTEGRATION.md)** - Authentication system details
 
-## ✨ Features
+## Features
 
-- **Custom Authentication System**
-  - Beautiful login and registration pages with JCES branding
-  - Password visibility toggle with custom eye icons
-  - "Remember Me" functionality
-  - Password recovery system
-  - Form validation with user-friendly error messages
+### Authentication & Authorization
+- Multi-role authentication system (Parent, Teacher, Principal, Administrator)
+- Custom login/registration with JCSES branding
+- Password recovery and reset functionality
+- Session management with "Remember Me" option
+- Account security features (lockout after 5 failed attempts)
+- Role-based access control (RBAC)
 
-- **Responsive Design**
-  - Split-screen layout (green/white theme)
-  - Mobile-friendly interface
-  - Custom CSS styling without build dependencies
+### Profile Management System
+**Parent Account Management:**
+- Administrator-created parent accounts with secure credential generation
+- Parent profile viewing and updating capabilities
+- Family relationship management (parent-child linking)
+- Contact information management
 
-- **Security Features**
-  - Laravel Breeze authentication integrated with custom database
-  - Account locking after 5 failed login attempts
-  - Active/inactive account status management
-  - CSRF protection
-  - Secure password hashing (bcrypt)
-  - Session management with audit logging
-  - Failed login attempt tracking
-  - Last login timestamp tracking
+**Student Management:**
+- Student enrollment tracking
+- Grade level and section assignment
+- Student transfer functionality with historical records
+- Multi-guardian relationship support
 
-- **User Management**
-  - Four user types: Parent, Teacher, Principal, Administrator
-  - Role-based access control
-  - User permissions system
-  - Security audit logs
-  - Session management
+### Project Management System
+**PTA Project Lifecycle:**
+- Principal-initiated project creation with goals, budgets, and timelines
+- Project status management (Active, In Progress, Completed)
+- Project activation for parent contributions
+- Progress tracking and milestone management
+- Project archival with complete audit trails
 
-## 🔧 Requirements
+**Parent Participation:**
+- Browse active PTA projects
+- View project descriptions, goals, and progress
+- Make contributions through integrated payment system
+- Track personal participation history
+
+### Payment Processing & Financial Management
+**Transaction Processing:**
+- Multiple payment method support (cash, check, bank transfer)
+- Manual payment recording by administrators
+- Automatic receipt generation
+- Real-time contribution tracking
+
+**Financial Operations:**
+- Complete transaction audit trails
+- Financial transparency reporting
+
+### User Management & Security
+**Account Administration:**
+- CRUD operations for all user types
+- Role-based permission assignment
+- Account activation/deactivation
+- Password reset functionality
+
+**Security & Compliance:**
+- Comprehensive activity logging
+- Security audit trails (login attempts, authentication events)
+- Session timeout enforcement (30 minutes)
+- User activity monitoring
+- FERPA and Philippine Data Privacy Act compliance
+
+### Reporting & Analytics Dashboard
+**Report Generation:**
+- Parent participation reports
+- Financial summaries by project and period
+- Enrollment statistics
+- User activity reports
+- Custom report creation
+
+**Analytics & Insights:**
+- Real-time performance metrics
+- Project completion rates and ROI analysis
+- Contribution trends and patterns
+- Exportable reports (PDF, Excel, CSV)
+
+## Requirements
 
 Before you begin, ensure you have the following installed:
 
@@ -107,16 +149,17 @@ Before you begin, ensure you have the following installed:
   - MySQL/MariaDB
 - **Git** (optional, for version control)
 
-## 📥 Installation
+
+## Installation
 
 ### Step 1: Clone or Download the Repository
 
 ```bash
 # Using Git
-git clone https://github.com/ItzRenzo/JCES-PTA-and-Project-Management-System.git
+git clone https://github.com/ItzRenzo/JCSES-Parent-and-Project-Management-System.git
 
 # Or download the ZIP file and extract it to:
-# C:\xampp\htdocs\Web Developement\JCES-PTA and Project Management System
+# C:\xampp\htdocs\Web Developement\JCSES-Parent and Project Management System
 ```
 
 ### Step 2: Install PHP Dependencies
@@ -124,7 +167,7 @@ git clone https://github.com/ItzRenzo/JCES-PTA-and-Project-Management-System.git
 Open PowerShell or Command Prompt and navigate to the project directory:
 
 ```powershell
-cd "C:\xampp\htdocs\Web Developement\JCES-PTA and Project Management System"
+cd "C:\xampp\htdocs\Web Developement\JCSES-Parent and Project Management System"
 composer install
 ```
 
@@ -150,13 +193,13 @@ php artisan key:generate
 
 ```env
 DB_CONNECTION=sqlite
-DB_DATABASE=C:\xampp\htdocs\Web Developement\JCES-PTA and Project Management System\database\database.sqlite
+DB_DATABASE=C:\xampp\htdocs\Web Developement\JCSES-Parent and Project Management System\database\database.sqlite
 
 # Or if using MySQL:
 # DB_CONNECTION=mysql
 # DB_HOST=127.0.0.1
 # DB_PORT=3306
-# DB_DATABASE=jces_pta
+# DB_DATABASE=jcses_pta
 # DB_USERNAME=root
 # DB_PASSWORD=
 ```
@@ -165,7 +208,7 @@ DB_DATABASE=C:\xampp\htdocs\Web Developement\JCES-PTA and Project Management Sys
 
 4. If using MySQL, create the database:
    - Open phpMyAdmin (http://localhost/phpmyadmin)
-   - Create a new database named `jces_pta`
+   - Create a new database named `jcses_pta`
 
 ### Step 5: Install Node.js and npm (Required for Vite)
 
@@ -198,7 +241,7 @@ DB_DATABASE=C:\xampp\htdocs\Web Developement\JCES-PTA and Project Management Sys
 
 4. **Install Project Dependencies**:
    ```powershell
-   cd "C:\xampp\htdocs\Web Developement\JCES-PTA and Project Management System"
+   cd "C:\xampp\htdocs\Web Developement\JCSES-Parent and Project Management System"
    npm install
    ```
    
@@ -217,14 +260,14 @@ php artisan migrate
 
 This will create all the necessary database tables.
 
-## ⚙️ Configuration
+## Configuration
 
 ### Adding Custom Assets
 
 The application requires custom images for full branding. Add these files to complete the setup:
 
-1. **School Logo** (JCES Elementary School logo)
-   - Path: `public/images/logos/jces-logo.png`
+1. **School Logo** (JCSES Elementary School logo)
+   - Path: `public/images/logos/jcses-logo.png`
    - Recommended size: 200x200px or similar
    - Format: PNG with transparent background
 
@@ -242,7 +285,7 @@ public/
       view.png       ← Add your "show password" eye icon
       hide.png       ← Add your "hide password" eye icon
     logos/
-      jces-logo.png  ← Add your school logo
+      jcses-logo.png  ← Add your school logo
     backgrounds/     ← Optional: custom background images
 ```
 
@@ -255,7 +298,7 @@ For development with **hot module replacement (HMR)** and auto-refresh, you need
 #### Terminal 1: Start Vite Development Server
 
 ```powershell
-cd "C:\xampp\htdocs\Web Developement\JCES-PTA and Project Management System"
+cd "C:\xampp\htdocs\Web Developement\JCSES-Parent and Project Management System"
 npm run dev
 ```
 
@@ -279,7 +322,7 @@ VITE v7.x.x  ready in xxx ms
 In a **new terminal window**:
 
 ```powershell
-cd "C:\xampp\htdocs\Web Developement\JCES-PTA and Project Management System"
+cd "C:\xampp\htdocs\Web Developement\JCSES-PTA and Project Management System"
 php artisan serve
 ```
 
@@ -310,7 +353,7 @@ If you prefer not to use Vite:
 1. Build assets once: `npm run build`
 2. Ensure project is in XAMPP `htdocs` directory
 3. Start Apache and MySQL from XAMPP Control Panel
-4. Access at: **http://localhost/Web%20Developement/JCES-PTA%20and%20Project%20Management%20System/public**
+4. Access at: **http://localhost/Web%20Developement/JCSES-PTA%20and%20Project%20Management%20System/public**
 
 **Note**: Without `npm run dev`, you won't have hot module replacement. You'll need to run `npm run build` after every CSS/JS change.
 
@@ -326,7 +369,7 @@ If you prefer not to use Vite:
 ## 📁 Project Structure
 
 ```
-JCES-PTA and Project Management System/
+JCSES-PTA and Project Management System/
 ├── app/
 │   ├── Http/
 │   │   └── Controllers/        # Application controllers
@@ -350,7 +393,7 @@ JCES-PTA and Project Management System/
 │   │   │   ├── login.blade.php
 │   │   │   └── register.blade.php
 │   │   └── layouts/
-│   │       └── guest.blade.php # Guest layout with JCES branding
+│   │       └── guest.blade.php # Guest layout with JCSES branding
 │   ├── css/                    # CSS files
 │   └── js/                     # JavaScript files
 ├── routes/
@@ -478,7 +521,7 @@ php artisan view:clear
 
 ### Changing Colors
 
-The main color scheme uses JCES green (#28a745). To customize:
+The main color scheme uses JCSES green (#28a745). To customize:
 
 1. Open `resources/views/layouts/guest.blade.php`
 2. Find the `<style>` section
@@ -538,7 +581,7 @@ php artisan tinker
 # Create a new user
 User::create([
     'name' => 'Admin User',
-    'email' => 'admin@jces.edu',
+    'email' => 'admin@jcses.edu',
     'password' => Hash::make('password123')
 ]);
 ```
@@ -551,79 +594,4 @@ php artisan config:show          # Show configuration
 tail storage/logs/laravel.log    # View logs (PowerShell: Get-Content -Tail 50)
 ```
 
----
-
-## �👥 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-## 📞 Support
-
-For support and questions, please contact the development team or create an issue in the GitHub repository.
-
----
-
-**Developed for JCES Elementary School** | Built with ❤️ using Laravel
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Developed for JCSES Elementary School**
