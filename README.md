@@ -57,7 +57,7 @@ A  web-based management system for JCSES Elementary School's parent and project 
 - [Login System](#-login-system)
 - [Troubleshooting](#troubleshooting)
 
-## 📚 Additional Guides
+## Additional Guides
 
 - **[Database Setup Guide](SETUP_DATABASE.md)** - Step-by-step MySQL setup
 - **[Login Integration Guide](LOGIN_INTEGRATION.md)** - Authentication system details
@@ -289,7 +289,7 @@ public/
     backgrounds/     ← Optional: custom background images
 ```
 
-## 🚀 Running the Application
+## Running the Application
 
 ### Development Mode (Recommended)
 
@@ -366,7 +366,7 @@ If you prefer not to use Vite:
 - **Forgot Password**: `/forgot-password`
 - **Reset Password**: `/reset-password`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 JCSES-PTA and Project Management System/
@@ -408,7 +408,7 @@ JCSES-PTA and Project Management System/
 └── README.md                   # This file
 ```
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### Common Issues and Solutions
 
@@ -517,7 +517,7 @@ php artisan route:clear
 php artisan view:clear
 ```
 
-## 🎨 Customization
+## Customization
 
 ### Changing Colors
 
