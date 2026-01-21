@@ -9,6 +9,17 @@ use Illuminate\Support\Facades\DB;
 
 class ReportsController extends Controller
 {
+    private function resolveReportsView(string $view): string
+    {
+        $user = auth()->user();
+
+        if ($user && $user->user_type === 'administrator') {
+            return "administrator.reports.$view";
+        }
+
+        return "principal.reports.$view";
+    }
+
     /**
      * Display the reports dashboard.
      */
@@ -22,7 +33,7 @@ class ReportsController extends Controller
             ->distinct('userID')->count();
         $topActions = SecurityAuditLog::getActionStats(7);
 
-        return view('principal.reports.index', compact(
+        return view($this->resolveReportsView('index'), compact(
             'recentActivityCount',
             'failedActionsCount', 
             'uniqueUsersCount',
@@ -43,7 +54,7 @@ class ReportsController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        return view('principal.reports.activity-logs', compact('logs', 'users', 'filters'));
+        return view($this->resolveReportsView('activity-logs'), compact('logs', 'users', 'filters'));
     }
 
     /**
@@ -58,6 +69,8 @@ class ReportsController extends Controller
         
         $query = SecurityAuditLog::with('user')
             ->whereIn('action', $securityActions)
+            ->selectRaw('MAX(logID) as logID, userID, action, ip_address, session_id, timestamp, success, error_message')
+            ->groupBy('userID', 'action', 'ip_address', 'session_id', 'timestamp', 'success', 'error_message')
             ->orderBy('timestamp', 'desc');
 
         // Apply filters
@@ -88,7 +101,7 @@ class ReportsController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        return view('principal.reports.security-logs', compact('logs', 'users', 'filters'));
+        return view($this->resolveReportsView('security-logs'), compact('logs', 'users', 'filters'));
     }
 
     /**
@@ -117,7 +130,7 @@ class ReportsController extends Controller
             ->orderBy('hour')
             ->get();
 
-        return view('principal.reports.user-activity', compact(
+        return view($this->resolveReportsView('user-activity'), compact(
             'userStats',
             'actionStats', 
             'dailyActivity',
