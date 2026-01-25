@@ -6,18 +6,28 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin Dashboard - {{ config('app.name', 'JCES-PTA') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        [x-cloak] { display: none !important; }
+        .sidebar { width: 13rem; transition: width 0.3s ease; }
+        .sidebar-collapsed .sidebar { width: 5rem; }
+        .sidebar-collapsed .sidebar-label { display: none; }
+        .sidebar-collapsed .sidebar-logo { justify-content: center; }
+        .sidebar-collapsed .sidebar-link { justify-content: center; }
+        .sidebar-collapsed .sidebar-profile { justify-content: center; }
+        .sidebar-collapsed .sidebar-padding { padding-left: 0.75rem; padding-right: 0.75rem; }
+    </style>
 </head>
 <body class="font-sans antialiased bg-gray-50">
-    <div class="flex h-screen">
+    <div class="flex h-screen" x-data="{ sidebarOpen: true }" :class="sidebarOpen ? '' : 'sidebar-collapsed'">
         <!-- Sidebar -->
-        <div class="w-52 bg-gradient-to-b from-green-500 to-green-600 flex flex-col">
+        <div id="sidebar" class="sidebar bg-gradient-to-b from-green-500 to-green-600 flex flex-col overflow-hidden">
             <!-- Logo and School Name -->
-            <div class="p-6 bg-white border-r border-gray-200">
-                <div class="flex items-center gap-3">
+            <div class="p-6 bg-white border-r border-gray-200 sidebar-padding">
+                <div class="flex items-center gap-3 sidebar-logo">
                     <img src="http://127.0.0.1:8000/images/logos/jces-logo.png" 
                          alt="JCES Logo" 
                          class="w-12 h-12 object-contain">
-                    <div>
+                    <div class="sidebar-label" x-cloak>
                         <div class="text-sm font-semibold text-gray-900">J. Cruz Sr.</div>
                         <div class="text-xs text-gray-600">Elementary School</div>
                     </div>
@@ -27,80 +37,80 @@
             <!-- Navigation Menu -->
             <nav class="flex-1 px-3 py-6 space-y-2">
                 <a href="{{ route('administrator.dashboard') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                     </svg>
-                    <span>Dashboard</span>
+                    <span class="sidebar-label" x-cloak>Dashboard</span>
                 </a>
 
                 <a href="{{ route('administrator.announcements') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.announcements') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.announcements') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
                     </svg>
-                    <span>Announcement</span>
+                    <span class="sidebar-label" x-cloak>Announcement</span>
                 </a>
 
                 <a href="{{ route('administrator.projects.index') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.projects*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.projects*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"/>
                         <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
                     </svg>
-                    <span>Projects</span>
+                    <span class="sidebar-label" x-cloak>Projects</span>
                 </a>
 
-                <a href="{{ route('administrator.contributions.index') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.contributions*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                     <a href="{{ route('administrator.payments.index') }}" 
+                         class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.payments*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
                         <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
                     </svg>
-                    <span>Payments</span>
+                    <span class="sidebar-label" x-cloak>Payments</span>
                 </a>
 
                 <a href="{{ route('administrator.users') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.users') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.users') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
                     </svg>
-                    <span>Users</span>
+                    <span class="sidebar-label" x-cloak>Users</span>
                 </a>
 
                 <a href="{{ route('administrator.create-account') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.create-account') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.create-account') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
                     </svg>
-                    <span>Create Account</span>
+                    <span class="sidebar-label" x-cloak>Create Account</span>
                 </a>
 
                 <a href="{{ route('administrator.reports') }}" 
-                   class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.reports*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('administrator.reports*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
                     </svg>
-                    <span>Reports</span>
+                    <span class="sidebar-label" x-cloak>Reports</span>
                 </a>
             </nav>
 
             <!-- User Profile and Sign Out -->
             <div class="p-4 border-t border-green-700">
-                <a href="{{ route('sign-out') }}" class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors w-full mb-3 block">
+                <a href="{{ route('sign-out') }}" class="sidebar-link flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors w-full mb-3 block">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
-                    <span>Sign Out</span>
+                    <span class="sidebar-label" x-cloak>Sign Out</span>
                 </a>
 
-                <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
+                <a href="{{ route('profile.edit') }}" class="sidebar-profile flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
                         <span class="text-green-600 font-semibold text-sm">
                             {{ strtoupper(substr(auth()->user()->first_name ?? 'A', 0, 1)) }}{{ strtoupper(substr(auth()->user()->last_name ?? 'D', 0, 1)) }}
                         </span>
                     </div>
-                    <div class="text-white">
+                    <div class="text-white sidebar-label" x-cloak>
                         <div class="text-sm font-semibold">{{ auth()->user()->name ?? 'Administrator' }}</div>
                         <div class="text-xs opacity-90">System Administrator</div>
                     </div>
@@ -114,7 +124,7 @@
             <header class="bg-gradient-to-r from-green-50 to-green-100 border-b border-gray-200 px-8 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <button class="text-gray-700">
+                        <button class="text-gray-700" @click="sidebarOpen = !sidebarOpen" :aria-expanded="sidebarOpen.toString()" aria-controls="sidebar" aria-label="Toggle sidebar">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
@@ -137,5 +147,6 @@
             <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"/>
         </svg>
     </button>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

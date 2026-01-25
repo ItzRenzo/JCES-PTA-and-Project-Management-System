@@ -16,7 +16,7 @@ class ContributionController extends Controller
         $user = auth()->user();
 
         if ($user && $user->user_type === 'administrator') {
-            return "administrator.contributions.$view";
+            return "administrator.payments.$view";
         }
 
         return "principal.contributions.$view";

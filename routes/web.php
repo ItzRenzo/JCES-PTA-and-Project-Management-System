@@ -268,17 +268,17 @@ Route::delete('/administrator/projects/{projectID}/updates/{updateID}', [Project
     ->middleware(['auth', 'verified'])
     ->name('administrator.projects.updates.destroy');
 
-Route::get('/administrator/contributions', [ContributionController::class, 'index'])
+Route::get('/administrator/payments', [ContributionController::class, 'index'])
     ->middleware(['auth', 'verified'])
-    ->name('administrator.contributions.index');
+    ->name('administrator.payments.index');
 
-Route::post('/administrator/contributions', [ContributionController::class, 'store'])
+Route::post('/administrator/payments', [ContributionController::class, 'store'])
     ->middleware(['auth', 'verified'])
-    ->name('administrator.contributions.store');
+    ->name('administrator.payments.store');
 
-Route::put('/administrator/contributions/{contributionID}', [ContributionController::class, 'update'])
+Route::put('/administrator/payments/{contributionID}', [ContributionController::class, 'update'])
     ->middleware(['auth', 'verified'])
-    ->name('administrator.contributions.update');
+    ->name('administrator.payments.update');
 
 // Teacher routes
 Route::get('/teacher', [TeacherController::class, 'index'])
