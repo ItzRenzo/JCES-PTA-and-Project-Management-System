@@ -162,5 +162,124 @@
             </a>
         </div>
     </div>
+
+    <!-- Analytics & Financial Reports -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Enrollment Statistics -->
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Enrollment Statistics</h3>
+                    <p class="text-sm text-gray-600">Student counts and trends</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">View enrollment totals by academic year and grade level with active rates.</p>
+            <a href="{{ route('principal.reports.enrollment') }}" 
+               class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200">
+                View Enrollment Report
+                <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Participation Report -->
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 7H7v6h6V7z"/>
+                        <path fill-rule="evenodd" d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Parent Participation</h3>
+                    <p class="text-sm text-gray-600">Contributions by period</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">Analyze parent participation by project and time period with totals.</p>
+            <a href="{{ route('principal.reports.participation') }}" 
+               class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+                View Participation Report
+                <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Project Analytics -->
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Project Analytics</h3>
+                    <p class="text-sm text-gray-600">Completion rates and budgets</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">Track project performance, completion rates, and funding progress.</p>
+            <a href="{{ route('principal.reports.project-analytics') }}" 
+               class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200">
+                View Project Analytics
+                <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v1a3 3 0 00-1 5.83V13a1 1 0 102 0v-1a3 3 0 001-5.83V5z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Financial Summary</h3>
+                    <p class="text-sm text-gray-600">Transactions and totals</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">Review payment totals by method and export summaries.</p>
+            <a href="{{ route('principal.reports.financial-summary') }}" 
+               class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                View Financial Summary
+                <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- KPI Dashboard -->
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">KPI Dashboard</h3>
+                    <p class="text-sm text-gray-600">Real-time performance metrics</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">Track key indicators across enrollment, projects, and finance.</p>
+            <a href="{{ route('principal.reports.kpis') }}" 
+               class="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors duration-200">
+                View KPI Dashboard
+                <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
+    </div>
 </div>
 @endsection

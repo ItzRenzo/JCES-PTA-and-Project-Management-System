@@ -8,18 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
-    // If user is authenticated, redirect to their appropriate dashboard
-    if (Auth::check()) {
-        $user = Auth::user();
-        return match($user->user_type) {
-            'administrator' => redirect()->route('administrator.dashboard'),
-            'principal' => redirect()->route('principal.dashboard'),
-            'teacher' => redirect()->route('teacher.dashboard'),
-            'parent' => redirect()->route('dashboard'),
-            default => redirect()->route('dashboard'),
-        };
-    }
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
@@ -77,9 +66,33 @@ Route::get('/principal/reports/user-activity', [ReportsController::class, 'userA
     ->middleware(['auth', 'verified'])
     ->name('principal.reports.user-activity');
 
+Route::get('/principal/reports/enrollment', [ReportsController::class, 'enrollmentStats'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.enrollment');
+
+Route::get('/principal/reports/participation', [ReportsController::class, 'participationReport'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.participation');
+
+Route::get('/principal/reports/project-analytics', [ReportsController::class, 'projectAnalytics'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.project-analytics');
+
+Route::get('/principal/reports/financial-summary', [ReportsController::class, 'financialSummary'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.financial-summary');
+
+Route::get('/principal/reports/kpis', [ReportsController::class, 'dashboardMetrics'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.kpis');
+
 Route::get('/principal/reports/export', [ReportsController::class, 'exportLogs'])
     ->middleware(['auth', 'verified'])
     ->name('principal.reports.export');
+
+Route::get('/principal/reports/financial-export', [ReportsController::class, 'exportFinancialSummary'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.financial-export');
 
 // Administrator routes (using same controller and views as Principal)
 Route::get('/administrator', [PrincipalController::class, 'adminIndex'])
@@ -123,9 +136,33 @@ Route::get('/administrator/reports/user-activity', [ReportsController::class, 'u
     ->middleware(['auth', 'verified'])
     ->name('administrator.reports.user-activity');
 
+Route::get('/administrator/reports/enrollment', [ReportsController::class, 'enrollmentStats'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.enrollment');
+
+Route::get('/administrator/reports/participation', [ReportsController::class, 'participationReport'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.participation');
+
+Route::get('/administrator/reports/project-analytics', [ReportsController::class, 'projectAnalytics'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.project-analytics');
+
+Route::get('/administrator/reports/financial-summary', [ReportsController::class, 'financialSummary'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.financial-summary');
+
+Route::get('/administrator/reports/kpis', [ReportsController::class, 'dashboardMetrics'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.kpis');
+
 Route::get('/administrator/reports/export', [ReportsController::class, 'exportLogs'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.reports.export');
+
+Route::get('/administrator/reports/financial-export', [ReportsController::class, 'exportFinancialSummary'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.financial-export');
 
 // Teacher routes
 Route::get('/teacher', [TeacherController::class, 'index'])
