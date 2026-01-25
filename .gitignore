@@ -24,3 +24,6 @@ Homestead.yaml
 Thumbs.db
 TEST_ACCOUNTS.md
 DATABASE_STRUCTURE.md
+public\images\projects\*
+public/images/projects/*
+public/images/projects/**

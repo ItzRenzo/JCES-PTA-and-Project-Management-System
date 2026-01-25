@@ -40,6 +40,11 @@ class Project extends Model
         return $this->hasMany(ProjectContribution::class, 'projectID', 'projectID');
     }
 
+    public function updates()
+    {
+        return $this->hasMany(ProjectUpdate::class, 'projectID', 'projectID');
+    }
+
     public function transactions()
     {
         return $this->hasMany(PaymentTransaction::class, 'projectID', 'projectID');
