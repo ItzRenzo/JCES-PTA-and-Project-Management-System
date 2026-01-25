@@ -48,6 +48,27 @@ class ReportsController extends Controller
     }
 
     /**
+     * Display payments and contribution history report.
+     */
+    public function paymentsReport(Request $request)
+    {
+        $payments = ProjectContribution::with(['parent', 'project'])
+            ->orderBy('contribution_date', 'desc')
+            ->paginate(9)
+            ->appends($request->all());
+
+        $recentContributions = ProjectContribution::with(['parent', 'project'])
+            ->orderBy('contribution_date', 'desc')
+            ->take(10)
+            ->get();
+
+        return view($this->resolveReportsView('payments'), compact(
+            'payments',
+            'recentContributions'
+        ));
+    }
+
+    /**
      * Display user activity logs.
      */
     public function activityLogs(Request $request)

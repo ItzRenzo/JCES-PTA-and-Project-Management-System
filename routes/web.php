@@ -80,6 +80,10 @@ Route::get('/principal/reports/participation', [ReportsController::class, 'parti
     ->middleware(['auth', 'verified'])
     ->name('principal.reports.participation');
 
+Route::get('/principal/reports/payments', [ReportsController::class, 'paymentsReport'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.reports.payments');
+
 Route::get('/principal/reports/project-analytics', [ReportsController::class, 'projectAnalytics'])
     ->middleware(['auth', 'verified'])
     ->name('principal.reports.project-analytics');
@@ -202,6 +206,10 @@ Route::get('/administrator/reports/enrollment', [ReportsController::class, 'enro
 Route::get('/administrator/reports/participation', [ReportsController::class, 'participationReport'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.reports.participation');
+
+Route::get('/administrator/reports/payments', [ReportsController::class, 'paymentsReport'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.reports.payments');
 
 Route::get('/administrator/reports/project-analytics', [ReportsController::class, 'projectAnalytics'])
     ->middleware(['auth', 'verified'])

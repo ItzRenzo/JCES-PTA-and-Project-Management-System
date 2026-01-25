@@ -165,6 +165,28 @@
 
     <!-- Analytics & Financial Reports -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Payments & Contributions -->
+        <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5 5a3 3 0 016 0v1h2a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h2V5zm2 1h2V5a1 1 0 10-2 0v1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Payments & Contributions</h3>
+                    <p class="text-sm text-gray-600">Payment history and statuses</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-4">Review payments, contribution status, and recent history.</p>
+            <a href="{{ route('principal.reports.payments') }}" 
+               class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors duration-200">
+                View Payments
+                <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
         <!-- Enrollment Statistics -->
         <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
             <div class="flex items-center gap-4 mb-4">
