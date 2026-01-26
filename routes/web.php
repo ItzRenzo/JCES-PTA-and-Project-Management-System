@@ -21,7 +21,7 @@ Route::get('/dashboard', function () {
         'administrator' => redirect()->route('administrator.dashboard'),
         'principal' => redirect()->route('principal.dashboard'),
         'teacher' => redirect()->route('teacher.dashboard'),
-        'parent' => view('dashboard'),
+        'parent' => view('parent.dashboard'),
         default => view('dashboard'),
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
