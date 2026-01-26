@@ -16,6 +16,7 @@
         .sidebar-collapsed .sidebar-profile { justify-content: center; }
         .sidebar-collapsed .sidebar-padding { padding-left: 0.75rem; padding-right: 0.75rem; }
     </style>
+    @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-50">
     <div class="flex h-screen" x-data="{ sidebarOpen: true }" :class="sidebarOpen ? '' : 'sidebar-collapsed'">
