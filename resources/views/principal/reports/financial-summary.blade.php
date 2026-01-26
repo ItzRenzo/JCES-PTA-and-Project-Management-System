@@ -3,19 +3,40 @@
 @section('title', 'Financial Summary')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" id="printable-content">
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Financial Summary</h1>
                 <p class="text-gray-600 mt-1">Review transactions by date range and payment method.</p>
             </div>
-            <div>
-                <a href="{{ route('principal.reports.financial-export', request()->query()) }}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Export CSV</a>
+            <div class="flex gap-2 print:hidden">
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" type="button" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        Export
+                        <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                        <a href="{{ route('principal.reports.financial-export', request()->query()) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <svg class="inline w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                            Export as CSV
+                        </a>
+                        <button onclick="window.print()" class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <svg class="inline w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Print / Save as PDF
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <form method="GET" class="mt-6 grid grid-cols-1 md:grid-cols-5 gap-4">
+        <form method="GET" class="mt-6 grid grid-cols-1 md:grid-cols-5 gap-4 print:hidden">
             <div>
                 <label class="block text-sm font-medium text-gray-700">Date From</label>
                 <input type="date" name="date_from" value="{{ $dateFrom }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
@@ -145,9 +166,34 @@
             </table>
         </div>
 
-        <div class="mt-4">
+        <div class="mt-4 print:hidden">
             {{ $transactions->links() }}
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printable-content, #printable-content * {
+            visibility: visible;
+        }
+        #printable-content {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .print\:hidden {
+            display: none !important;
+        }
+        .shadow {
+            box-shadow: none !important;
+        }
+    }
+</style>
+@endpush
 @endsection

@@ -1,4 +1,4 @@
-@extends('layouts.ad-sidebar')
+@extends('layouts.te-sidebar')
 
 @section('title', 'Edit Project')
 
@@ -23,7 +23,7 @@
         <p class="text-gray-600 mt-1">Update project details and status.</p>
     </div>
 
-    <form method="POST" action="{{ route('administrator.projects.update', $project->projectID) }}" class="bg-white rounded-lg shadow p-6">
+    <form method="POST" action="{{ route('teacher.projects.update', $project->projectID) }}" class="bg-white rounded-lg shadow p-6">
         @csrf
         @method('PUT')
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -120,7 +120,7 @@
         </div>
 
         <div class="flex items-center justify-end gap-3 mt-6">
-            <a href="{{ route('administrator.projects.show', $project->projectID) }}" class="px-4 py-2 text-gray-700 border rounded-md">Cancel</a>
+            <a href="{{ route('teacher.projects.show', $project->projectID) }}" class="px-4 py-2 text-gray-700 border rounded-md">Cancel</a>
             <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Save Changes</button>
         </div>
     </form>

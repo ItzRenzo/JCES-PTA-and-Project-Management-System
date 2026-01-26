@@ -77,16 +77,12 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left">
-                            <input type="checkbox" id="selectAll" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Parent</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Required Payment</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount Paid</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Project</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Parent</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Payment</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Project</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600">Receipt</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -146,50 +142,15 @@
                             <td class="px-6 py-3 text-sm font-medium text-gray-900">₱{{ number_format($contribution->contribution_amount, 2) }}</td>
                             <td class="px-6 py-3 text-sm text-gray-700">{{ $contribution->project?->project_name ?? 'Unknown Project' }}</td>
                             <td class="px-6 py-3 text-sm text-gray-700">{{ optional($contribution->contribution_date)->format('m-d-Y') }}</td>
-                            <td class="px-6 py-3">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
-                                    {{ $statusLabel }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-3">
-                                <div class="flex items-center justify-center gap-2">
-                                    <!-- Edit Button -->
-                                    <button
-                                        @click="openEditModal({{ $contribution->contributionID }}, '{{ $status }}')"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-all duration-200"
-                                        title="Edit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
-                                    <!-- Receipt Button -->
-                                    <button
-                                        @click="openReceiptModal({
-                                            txn: '{{ $contribution->receipt_number ?? $sample['txn'] }}',
-                                            date: '{{ optional($contribution->contribution_date)->format('F d, Y \a\t h:i A') }}',
-                                            method: '{{ ucfirst($contribution->payment_method ?? $sample['method']) }}',
-                                            name: '{{ addslashes($contribution->parent ? $contribution->parent->first_name . ' ' . $contribution->parent->last_name : $sample['name']) }}',
-                                            phone: '{{ $contribution->parent->phone ?? $sample['phone'] }}',
-                                            address: '{{ addslashes($contribution->parent->city ?? $sample['address']) }}',
-                                            project: '{{ addslashes($contribution->project?->project_name ?? $sample['project']) }}',
-                                            amount: {{ $contribution->contribution_amount }}
-                                        })"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 transition-all duration-200"
-                                        title="Receipt">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                    </button>
-                                    <!-- Archive Button -->
-                                    <button
-                                        @click="openArchiveModal({{ $contribution->contributionID }})"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200"
-                                        title="Archive">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                                        </svg>
-                                    </button>
-                                </div>
+                            <td class="px-6 py-3 text-sm text-gray-700">{{ $statusLabel }}</td>
+                            <td class="px-6 py-3 text-right">
+                                @if($contribution->receipt_number)
+                                    <a href="{{ route('administrator.payments.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                                        Print
+                                    </a>
+                                @else
+                                    <span class="text-gray-400 text-sm">N/A</span>
+                                @endif
                             </td>
                         </tr>
                     @empty

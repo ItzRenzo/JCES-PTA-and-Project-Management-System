@@ -42,7 +42,7 @@
             <select name="project_status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                 @foreach ($statusOptions as $option)
                     <option value="{{ $option }}" {{ old('project_status', 'created') === $option ? 'selected' : '' }}>
-                        {{ ucfirst(str_replace('_', ' ', $option)) }}
+                        {{ $option === 'created' ? 'Not Started' : ucfirst(str_replace('_', ' ', $option)) }}
                     </option>
                 @endforeach
             </select>

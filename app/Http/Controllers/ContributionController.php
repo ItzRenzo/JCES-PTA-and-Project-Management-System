@@ -222,4 +222,13 @@ class ContributionController extends Controller
 
         return redirect()->back();
     }
+
+    public function receipt(int $contributionID)
+    {
+        $contribution = ProjectContribution::with(['project', 'parent', 'processedBy'])
+            ->where('contributionID', $contributionID)
+            ->firstOrFail();
+
+        return view('receipts.print', compact('contribution'));
+    }
 }

@@ -1,4 +1,4 @@
-@extends('layouts.ad-sidebar')
+@extends('layouts.te-sidebar')
 
 @section('title', 'Projects')
 
@@ -73,7 +73,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-start justify-between">
-                                        <a href="{{ route('administrator.projects.show', $project->projectID) }}" class="hover:underline">
+                                        <a href="{{ route('teacher.projects.show', $project->projectID) }}" class="hover:underline">
                                             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $project->project_name }}</h3>
                                         </a>
                                         <div class="flex items-center gap-2">
@@ -88,7 +88,7 @@
                                                 {{ $project->project_status === 'created' ? 'Not Started' : ucfirst(str_replace('_', ' ', $project->project_status)) }}
                                             </span>
                                             @if($project->project_status === 'created')
-                                                <form method="POST" action="{{ route('administrator.projects.activate', $project->projectID) }}" class="inline">
+                                                <form method="POST" action="{{ route('teacher.projects.activate', $project->projectID) }}" class="inline">
                                                     @csrf
                                                     <button type="submit" class="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700" onclick="return confirm('Activate this project for parent contributions?')">
                                                         Activate
@@ -151,7 +151,7 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-start justify-between">
-                                        <a href="{{ route('administrator.projects.show', $project->projectID) }}" class="hover:underline">
+                                        <a href="{{ route('teacher.projects.show', $project->projectID) }}" class="hover:underline">
                                             <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $project->project_name }}</h3>
                                         </a>
                                         <div class="flex items-center gap-2">
@@ -166,7 +166,7 @@
                                                 {{ $project->project_status === 'created' ? 'Not Started' : ucfirst(str_replace('_', ' ', $project->project_status)) }}
                                             </span>
                                             @if($project->project_status === 'created')
-                                                <form method="POST" action="{{ route('administrator.projects.activate', $project->projectID) }}" class="inline">
+                                                <form method="POST" action="{{ route('teacher.projects.activate', $project->projectID) }}" class="inline">
                                                     @csrf
                                                     <button type="submit" class="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700" onclick="return confirm('Activate this project for parent contributions?')">
                                                         Activate

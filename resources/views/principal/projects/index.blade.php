@@ -12,7 +12,7 @@
                     <option value="">All Statuses</option>
                     @foreach ($statusOptions as $option)
                         <option value="{{ $option }}" {{ $status === $option ? 'selected' : '' }}>
-                            {{ ucfirst(str_replace('_', ' ', $option)) }}
+                            {{ $option === 'created' ? 'Not Started' : ucfirst(str_replace('_', ' ', $option)) }}
                         </option>
                     @endforeach
                 </select>
@@ -23,52 +23,163 @@
             </div>
             <div class="flex items-center gap-3">
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Filter</button>
-                <button type="button" id="openCreateProjectModal" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Create</button>
+                <button type="button" id="openCreateProjectModal" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Create Project</button>
             </div>
         </form>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Project</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Start Date</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Target Budget</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Current Amount</th>
-                        <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    @forelse ($projects as $project)
-                        <tr>
-                            <td class="px-4 py-2 text-sm text-gray-700">{{ $project->project_name }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $project->project_status)) }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-700">{{ optional($project->start_date)->format('Y-m-d') }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-900 text-right">₱{{ number_format($project->target_budget, 2) }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-900 text-right">₱{{ number_format($project->current_amount, 2) }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-700 text-right space-x-2">
-                                <a href="{{ route('principal.projects.show', $project->projectID) }}" class="text-blue-600 hover:text-blue-800">View</a>
-                                <a href="{{ route('principal.projects.edit', $project->projectID) }}" class="text-green-600 hover:text-green-800">Edit</a>
-                                <form method="POST" action="{{ route('principal.projects.destroy', $project->projectID) }}" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-800" onclick="return confirm('Archive this project?')">Archive</button>
-                                </form>
-                            </td>
-                        </tr>
+    <div class="mt-6">
+        @php
+            $today = \Carbon\Carbon::today();
+            $upcoming = $projects->filter(function ($project) use ($today) {
+                $startDate = $project->start_date ? \Carbon\Carbon::parse($project->start_date) : null;
+                return $startDate ? $startDate->isSameDay($today) || $startDate->isAfter($today) : false;
+            });
+            $previous = $projects->filter(function ($project) use ($today) {
+                $startDate = $project->start_date ? \Carbon\Carbon::parse($project->start_date) : null;
+                return $startDate ? $startDate->isBefore($today) : false;
+            });
+        @endphp
+
+        <div class="space-y-8">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Upcoming</h2>
+                <div class="space-y-4">
+                    @forelse ($upcoming as $project)
+                        @php
+                            $detailMap = [];
+                            $lines = preg_split('/\r\n|\r|\n/', $project->description ?? '');
+                            foreach ($lines as $line) {
+                                if (strpos($line, ':') !== false) {
+                                    [$key, $value] = array_map('trim', explode(':', $line, 2));
+                                    if (!empty($key)) {
+                                        $detailMap[$key] = $value;
+                                    }
+                                }
+                            }
+                            $photo = $detailMap['Photo'] ?? null;
+                            $title = $detailMap['Title'] ?? $project->project_name;
+                            $time = $detailMap['Time'] ?? null;
+                            $venue = $detailMap['Venue'] ?? null;
+                            $objective = $project->goals ?? null;
+                        @endphp
+                        <div class="block bg-slate-50 border-l-4 border-blue-500 rounded-lg p-6 hover:shadow-md transition-shadow">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="w-32 h-32 bg-white rounded-md border flex items-center justify-center overflow-hidden">
+                                    @if ($photo)
+                                        <img src="{{ $photo }}" alt="{{ $project->project_name }}" class="w-full h-full object-cover">
+                                    @else
+                                        <span class="text-xs text-gray-400">No Image</span>
+                                    @endif
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between">
+                                        <a href="{{ route('principal.projects.show', $project->projectID) }}" class="hover:underline">
+                                            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $project->project_name }}</h3>
+                                        </a>
+                                        <span class="px-2 py-1 text-xs font-medium rounded 
+                                            {{ $project->project_status === 'created' ? 'bg-gray-100 text-gray-700' : '' }}
+                                            {{ $project->project_status === 'active' ? 'bg-green-100 text-green-700' : '' }}
+                                            {{ $project->project_status === 'in_progress' ? 'bg-blue-100 text-blue-700' : '' }}
+                                            {{ $project->project_status === 'completed' ? 'bg-purple-100 text-purple-700' : '' }}
+                                            {{ $project->project_status === 'archived' ? 'bg-gray-100 text-gray-500' : '' }}
+                                            {{ $project->project_status === 'cancelled' ? 'bg-red-100 text-red-700' : '' }}
+                                        ">
+                                            {{ $project->project_status === 'created' ? 'Not Started' : ucfirst(str_replace('_', ' ', $project->project_status)) }}
+                                        </span>
+                                    </div>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li>Project Title: {{ $title }}</li>
+                                        <li>Date: {{ optional($project->start_date)->format('F j, Y') }} - {{ optional($project->target_completion_date)->format('F j, Y') }}</li>
+                                        @if ($time)
+                                            <li>Time: {{ $time }}</li>
+                                        @endif
+                                        @if ($venue)
+                                            <li>Venue: {{ $venue }}</li>
+                                        @endif
+                                        @if ($objective)
+                                            <li>Objective: {{ $objective }}</li>
+                                        @endif
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                        <tr>
-                            <td colspan="6" class="px-4 py-4 text-sm text-gray-500 text-center">No projects found.</td>
-                        </tr>
+                        <p class="text-sm text-gray-500">No upcoming projects.</p>
                     @endforelse
-                </tbody>
-            </table>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Previous</h2>
+                <div class="space-y-4">
+                    @forelse ($previous as $project)
+                        @php
+                            $detailMap = [];
+                            $lines = preg_split('/\r\n|\r|\n/', $project->description ?? '');
+                            foreach ($lines as $line) {
+                                if (strpos($line, ':') !== false) {
+                                    [$key, $value] = array_map('trim', explode(':', $line, 2));
+                                    if (!empty($key)) {
+                                        $detailMap[$key] = $value;
+                                    }
+                                }
+                            }
+                            $photo = $detailMap['Photo'] ?? null;
+                            $title = $detailMap['Title'] ?? $project->project_name;
+                            $time = $detailMap['Time'] ?? null;
+                            $venue = $detailMap['Venue'] ?? null;
+                            $objective = $project->goals ?? null;
+                        @endphp
+                        <div class="block bg-purple-50 border-l-4 border-purple-500 rounded-lg p-6 hover:shadow-md transition-shadow">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="w-32 h-32 bg-white rounded-md border flex items-center justify-center overflow-hidden">
+                                    @if ($photo)
+                                        <img src="{{ $photo }}" alt="{{ $project->project_name }}" class="w-full h-full object-cover">
+                                    @else
+                                        <span class="text-xs text-gray-400">No Image</span>
+                                    @endif
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between">
+                                        <a href="{{ route('principal.projects.show', $project->projectID) }}" class="hover:underline">
+                                            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ $project->project_name }}</h3>
+                                        </a>
+                                        <span class="px-2 py-1 text-xs font-medium rounded 
+                                            {{ $project->project_status === 'created' ? 'bg-gray-100 text-gray-700' : '' }}
+                                            {{ $project->project_status === 'active' ? 'bg-green-100 text-green-700' : '' }}
+                                            {{ $project->project_status === 'in_progress' ? 'bg-blue-100 text-blue-700' : '' }}
+                                            {{ $project->project_status === 'completed' ? 'bg-purple-100 text-purple-700' : '' }}
+                                            {{ $project->project_status === 'archived' ? 'bg-gray-100 text-gray-500' : '' }}
+                                            {{ $project->project_status === 'cancelled' ? 'bg-red-100 text-red-700' : '' }}
+                                        ">
+                                            {{ $project->project_status === 'created' ? 'Not Started' : ucfirst(str_replace('_', ' ', $project->project_status)) }}
+                                        </span>
+                                    </div>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li>Project Title: {{ $title }}</li>
+                                        <li>Date: {{ optional($project->start_date)->format('F j, Y') }} - {{ optional($project->target_completion_date)->format('F j, Y') }}</li>
+                                        @if ($time)
+                                            <li>Time: {{ $time }}</li>
+                                        @endif
+                                        @if ($venue)
+                                            <li>Venue: {{ $venue }}</li>
+                                        @endif
+                                        @if ($objective)
+                                            <li>Objective: {{ $objective }}</li>
+                                        @endif
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-sm text-gray-500">No previous projects.</p>
+                    @endforelse
+                </div>
+            </div>
         </div>
 
-        <div class="mt-4">
+        <div class="mt-6">
             {{ $projects->links() }}
         </div>
     </div>

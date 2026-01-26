@@ -1,4 +1,4 @@
-@extends('layouts.pr-sidebar')
+@extends('layouts.te-sidebar')
 
 @section('title', 'Create Project')
 
@@ -9,7 +9,7 @@
         <p class="text-gray-600 mt-1">Define objectives, budgets, and timelines.</p>
     </div>
 
-    <form method="POST" action="{{ route('principal.projects.store') }}" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <form method="POST" action="{{ route('teacher.projects.store') }}" class="bg-white rounded-lg shadow p-6 space-y-6">
         @csrf
         <div>
             <label class="block text-sm font-medium text-gray-700">Project Name</label>
@@ -48,7 +48,7 @@
             </select>
         </div>
         <div class="flex items-center justify-end gap-3">
-            <a href="{{ route('principal.projects.index') }}" class="px-4 py-2 text-gray-700 border rounded-md">Cancel</a>
+            <a href="{{ route('teacher.projects.index') }}" class="px-4 py-2 text-gray-700 border rounded-md">Cancel</a>
             <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Create Project</button>
         </div>
     </form>

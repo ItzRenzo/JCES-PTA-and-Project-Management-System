@@ -1,0 +1,176 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Project;
+use App\Models\ProjectContribution;
+use App\Models\ParentProfile;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class ParentContributionController extends Controller
+{
+    /**
+     * Display the parent's contribution history.
+     */
+    public function index(Request $request)
+    {
+        $parentProfile = Auth::user()->parentProfile;
+        
+        if (!$parentProfile) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Parent profile not found. Please contact administrator.');
+        }
+
+        $query = ProjectContribution::with(['project', 'processedBy'])
+            ->where('parentID', $parentProfile->parentID)
+            ->orderBy('contribution_date', 'desc');
+
+        // Filter by payment status
+        if ($request->has('status') && $request->status) {
+            $query->where('payment_status', $request->status);
+        }
+
+        // Search by project name
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->whereHas('project', function($q) use ($search) {
+                $q->where('project_name', 'like', "%{$search}%");
+            });
+        }
+
+        $contributions = $query->paginate(15);
+
+        // Calculate statistics
+        $stats = [
+            'total_contributions' => ProjectContribution::where('parentID', $parentProfile->parentID)
+                ->where('payment_status', 'completed')
+                ->count(),
+            'total_amount' => ProjectContribution::where('parentID', $parentProfile->parentID)
+                ->where('payment_status', 'completed')
+                ->sum('contribution_amount'),
+            'pending_amount' => ProjectContribution::where('parentID', $parentProfile->parentID)
+                ->where('payment_status', 'pending')
+                ->sum('contribution_amount'),
+            'projects_supported' => ProjectContribution::where('parentID', $parentProfile->parentID)
+                ->distinct('projectID')
+                ->count('projectID'),
+        ];
+
+        return view('parent.contributions.index', compact('contributions', 'stats'));
+    }
+
+    /**
+     * Show the form for creating a new contribution.
+     */
+    public function create()
+    {
+        $parentProfile = Auth::user()->parentProfile;
+        
+        if (!$parentProfile) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Parent profile not found. Please contact administrator.');
+        }
+
+        // Get active projects that can receive contributions
+        $projects = Project::whereIn('project_status', ['active', 'in_progress'])
+            ->orderBy('project_name')
+            ->get();
+
+        // Calculate progress for each project
+        foreach ($projects as $project) {
+            $project->progress_percentage = $project->target_budget > 0 
+                ? min(100, round(($project->current_amount / $project->target_budget) * 100, 1))
+                : 0;
+            $project->remaining_amount = max(0, $project->target_budget - $project->current_amount);
+        }
+
+        return view('parent.contributions.create', compact('projects'));
+    }
+
+    /**
+     * Store a newly created contribution in storage.
+     */
+    public function store(Request $request)
+    {
+        $parentProfile = Auth::user()->parentProfile;
+        
+        if (!$parentProfile) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Parent profile not found. Please contact administrator.');
+        }
+
+        $validated = $request->validate([
+            'project_id' => ['required', 'exists:projects,projectID'],
+            'contribution_amount' => ['required', 'numeric', 'min:1'],
+            'payment_method' => ['required', 'in:cash,check,bank_transfer'],
+            'notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        // Verify project is active
+        $project = Project::whereIn('project_status', ['active', 'in_progress'])
+            ->findOrFail($validated['project_id']);
+
+        DB::beginTransaction();
+        
+        try {
+            // Generate receipt number
+            $year = date('Y');
+            $lastReceipt = ProjectContribution::where('receipt_number', 'like', "RCT-{$year}-%")
+                ->orderBy('receipt_number', 'desc')
+                ->first();
+            
+            if ($lastReceipt) {
+                $lastNumber = intval(substr($lastReceipt->receipt_number, -5));
+                $newNumber = $lastNumber + 1;
+            } else {
+                $newNumber = 1;
+            }
+            
+            $receiptNumber = sprintf("RCT-%s-%05d", $year, $newNumber);
+
+            // Create contribution with pending status (requires admin verification)
+            $contribution = ProjectContribution::create([
+                'projectID' => $validated['project_id'],
+                'parentID' => $parentProfile->parentID,
+                'contribution_amount' => $validated['contribution_amount'],
+                'payment_method' => $validated['payment_method'],
+                'payment_status' => 'pending', // Requires admin verification
+                'contribution_date' => now(),
+                'receipt_number' => $receiptNumber,
+                'notes' => $validated['notes'],
+                'processed_by' => null, // Will be set when admin verifies
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('parent.contributions.index')
+                ->with('success', 'Contribution submitted successfully. It will be reviewed by the administrator.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to submit contribution. Please try again.');
+        }
+    }
+
+    /**
+     * Display the specified contribution receipt.
+     */
+    public function receipt($contributionID)
+    {
+        $parentProfile = Auth::user()->parentProfile;
+        
+        if (!$parentProfile) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $contribution = ProjectContribution::with(['project', 'parent', 'processedBy'])
+            ->where('parentID', $parentProfile->parentID)
+            ->findOrFail($contributionID);
+
+        return view('receipts.print', compact('contribution'));
+    }
+}

@@ -1,4 +1,4 @@
-@extends('layouts.ad-sidebar')
+@extends('layouts.te-sidebar')
 
 @section('title', 'Project Details')
 
@@ -12,7 +12,7 @@
             </div>
             <div class="flex items-center gap-3">
                 @if($project->project_status === 'created')
-                    <form method="POST" action="{{ route('administrator.projects.activate', $project->projectID) }}">
+                    <form method="POST" action="{{ route('teacher.projects.activate', $project->projectID) }}">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700" onclick="return confirm('Activate this project for parent contributions?')">
                             Activate Project
@@ -20,14 +20,14 @@
                     </form>
                 @endif
                 @if(in_array($project->project_status, ['active', 'in_progress']))
-                    <form method="POST" action="{{ route('administrator.projects.request-closure', $project->projectID) }}">
+                    <form method="POST" action="{{ route('teacher.projects.request-closure', $project->projectID) }}">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700" onclick="return confirm('Request closure for this project?')">
                             Request Closure
                         </button>
                     </form>
                 @endif
-                <a href="{{ route('administrator.projects.edit', $project->projectID) }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Edit Project</a>
+                <a href="{{ route('teacher.projects.edit', $project->projectID) }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Edit Project</a>
             </div>
         </div>
     </div>
@@ -68,7 +68,7 @@
 
     <div class="bg-white rounded-lg shadow p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Add Project Update</h2>
-        <form method="POST" action="{{ route('administrator.projects.updates.store', $project->projectID) }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form method="POST" action="{{ route('teacher.projects.updates.store', $project->projectID) }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             @csrf
             <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700">Update Title</label>
@@ -102,7 +102,7 @@
                             <h3 class="text-sm font-semibold text-gray-900">{{ $update->update_title }}</h3>
                             <p class="text-xs text-gray-500">{{ optional($update->update_date)->format('Y-m-d H:i') }}</p>
                         </div>
-                        <form method="POST" action="{{ route('administrator.projects.updates.destroy', [$project->projectID, $update->updateID]) }}">
+                        <form method="POST" action="{{ route('teacher.projects.updates.destroy', [$project->projectID, $update->updateID]) }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="text-sm text-red-600 hover:text-red-800" onclick="return confirm('Delete this update?')">Delete</button>
@@ -144,7 +144,7 @@
                             <td class="px-4 py-2 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $contribution->payment_method)) }}</td>
                             <td class="px-4 py-2 text-sm text-gray-700">
                                 @if($contribution->receipt_number)
-                                    <a href="{{ route('administrator.payments.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                                    <a href="{{ route('teacher.payments.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
                                         Print
                                     </a>
                                 @else

@@ -8,10 +8,18 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">{{ $project->project_name }}</h1>
-                <p class="text-gray-600 mt-1">Status: {{ ucfirst(str_replace('_', ' ', $project->project_status)) }}</p>
+                <p class="text-gray-600 mt-1">Status: {{ $project->project_status === 'created' ? 'Not Started' : ucfirst(str_replace('_', ' ', $project->project_status)) }}</p>
             </div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('principal.projects.edit', $project->projectID) }}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Edit Project</a>
+                @if($project->project_status === 'completed')
+                    <form method="POST" action="{{ route('principal.projects.approve-closure', $project->projectID) }}">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700" onclick="return confirm('Approve closure and archive this project?')">
+                            Approve Closure
+                        </button>
+                    </form>
+                @endif
+                <a href="{{ route('principal.projects.edit', $project->projectID) }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Edit Project</a>
             </div>
         </div>
     </div>
@@ -126,7 +134,15 @@
                             </td>
                             <td class="px-4 py-2 text-sm text-gray-900 text-right">₱{{ number_format($contribution->contribution_amount, 2) }}</td>
                             <td class="px-4 py-2 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $contribution->payment_method)) }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-700">{{ $contribution->receipt_number ?? 'N/A' }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-700">
+                                @if($contribution->receipt_number)
+                                    <a href="{{ route('principal.contributions.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                                        Print
+                                    </a>
+                                @else
+                                    <span class="text-gray-400 text-sm">N/A</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
