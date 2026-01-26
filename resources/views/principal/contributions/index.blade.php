@@ -145,7 +145,15 @@
                             <td class="px-4 py-2 text-sm text-gray-900 text-right">₱{{ number_format($contribution->contribution_amount, 2) }}</td>
                             <td class="px-4 py-2 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $contribution->payment_method)) }}</td>
                             <td class="px-4 py-2 text-sm text-gray-700">{{ ucfirst($contribution->payment_status) }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-700">{{ $contribution->receipt_number ?? 'N/A' }}</td>
+                            <td class="px-4 py-2 text-sm text-gray-700">
+                                @if($contribution->receipt_number)
+                                    <a href="{{ route('principal.contributions.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                                        Print
+                                    </a>
+                                @else
+                                    <span class="text-gray-400 text-sm">N/A</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>

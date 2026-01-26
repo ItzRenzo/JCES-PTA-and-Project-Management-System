@@ -7,6 +7,7 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectUpdateController;
 use App\Http\Controllers\ContributionController;
+use App\Http\Controllers\ParentProjectController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,6 +26,15 @@ Route::get('/dashboard', function () {
         default => view('dashboard'),
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Parent routes
+Route::get('/parent/projects', [ParentProjectController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.projects.index');
+
+Route::get('/parent/projects/{projectID}', [ParentProjectController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.projects.show');
 
 // Principal routes
 Route::get('/principal', [PrincipalController::class, 'index'])
@@ -133,6 +143,10 @@ Route::delete('/principal/projects/{projectID}', [ProjectController::class, 'des
     ->middleware(['auth', 'verified'])
     ->name('principal.projects.destroy');
 
+Route::post('/principal/projects/{projectID}/approve-closure', [ProjectController::class, 'approveClosure'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.projects.approve-closure');
+
 Route::post('/principal/projects/{projectID}/updates', [ProjectUpdateController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('principal.projects.updates.store');
@@ -152,6 +166,10 @@ Route::post('/principal/contributions', [ContributionController::class, 'store']
 Route::put('/principal/contributions/{contributionID}', [ContributionController::class, 'update'])
     ->middleware(['auth', 'verified'])
     ->name('principal.contributions.update');
+
+Route::get('/principal/contributions/{contributionID}/receipt', [ContributionController::class, 'receipt'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.contributions.receipt');
 
 // Administrator routes (using same controller and views as Principal)
 Route::get('/administrator', [PrincipalController::class, 'adminIndex'])
@@ -236,14 +254,6 @@ Route::get('/administrator/projects', [ProjectController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.projects.index');
 
-Route::get('/administrator/projects/create', [ProjectController::class, 'create'])
-    ->middleware(['auth', 'verified'])
-    ->name('administrator.projects.create');
-
-Route::post('/administrator/projects', [ProjectController::class, 'store'])
-    ->middleware(['auth', 'verified'])
-    ->name('administrator.projects.store');
-
 Route::get('/administrator/projects/{projectID}', [ProjectController::class, 'show'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.projects.show');
@@ -259,6 +269,14 @@ Route::put('/administrator/projects/{projectID}', [ProjectController::class, 'up
 Route::delete('/administrator/projects/{projectID}', [ProjectController::class, 'destroy'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.projects.destroy');
+
+Route::post('/administrator/projects/{projectID}/request-closure', [ProjectController::class, 'requestClosure'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.projects.request-closure');
+
+Route::post('/administrator/projects/{projectID}/activate', [ProjectController::class, 'activate'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.projects.activate');
 
 Route::post('/administrator/projects/{projectID}/updates', [ProjectUpdateController::class, 'store'])
     ->middleware(['auth', 'verified'])
@@ -280,10 +298,54 @@ Route::put('/administrator/payments/{contributionID}', [ContributionController::
     ->middleware(['auth', 'verified'])
     ->name('administrator.payments.update');
 
+Route::get('/administrator/payments/{contributionID}/receipt', [ContributionController::class, 'receipt'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.payments.receipt');
+
 // Teacher routes
 Route::get('/teacher', [TeacherController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.dashboard');
+
+Route::get('/teacher/projects', [ProjectController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.index');
+
+Route::get('/teacher/projects/{projectID}', [ProjectController::class, 'show'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.show');
+
+Route::get('/teacher/projects/{projectID}/edit', [ProjectController::class, 'edit'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.edit');
+
+Route::put('/teacher/projects/{projectID}', [ProjectController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.update');
+
+Route::delete('/teacher/projects/{projectID}', [ProjectController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.destroy');
+
+Route::post('/teacher/projects/{projectID}/activate', [ProjectController::class, 'activate'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.activate');
+
+Route::post('/teacher/projects/{projectID}/request-closure', [ProjectController::class, 'requestClosure'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.request-closure');
+
+Route::post('/teacher/projects/{projectID}/updates', [ProjectUpdateController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.updates.store');
+
+Route::delete('/teacher/projects/{projectID}/updates/{updateID}', [ProjectUpdateController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.updates.destroy');
+
+Route::get('/teacher/payments/{contributionID}/receipt', [ContributionController::class, 'receipt'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.receipt');
 
 Route::get('/teacher/create-account', [TeacherController::class, 'createAccount'])
     ->middleware(['auth', 'verified'])

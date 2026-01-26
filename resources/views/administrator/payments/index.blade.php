@@ -39,7 +39,7 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Project</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Status</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600">Actions</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600">Receipt</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -57,11 +57,13 @@
                             <td class="px-6 py-3 text-sm text-gray-700">{{ optional($contribution->contribution_date)->format('m-d-Y') }}</td>
                             <td class="px-6 py-3 text-sm text-gray-700">{{ $statusLabel }}</td>
                             <td class="px-6 py-3 text-right">
-                                <button type="button" class="text-gray-400 hover:text-gray-600">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
-                                    </svg>
-                                </button>
+                                @if($contribution->receipt_number)
+                                    <a href="{{ route('administrator.payments.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                                        Print
+                                    </a>
+                                @else
+                                    <span class="text-gray-400 text-sm">N/A</span>
+                                @endif
                             </td>
                         </tr>
                     @empty

@@ -52,7 +52,7 @@
                     <span class="sidebar-label" x-cloak>Announcements</span>
                 </a>
 
-                <a href="#" 
+                <a href="{{ route('parent.projects.index') }}" 
                    class="sidebar-link flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"/>
@@ -60,7 +60,7 @@
                     </svg>
                     <span class="sidebar-label" x-cloak>Projects</span>
                 </a>
-
+                
                 <a href="#" 
                    class="sidebar-link flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -68,7 +68,7 @@
                         <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
                     </svg>
                     <span class="sidebar-label" x-cloak>Payments</span>
-                </a>
+                </a>                
             </nav>
 
             <!-- User Profile and Sign Out -->

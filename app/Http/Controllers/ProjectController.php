@@ -17,6 +17,10 @@ class ProjectController extends Controller
             return "administrator.projects.$view";
         }
 
+        if ($user && $user->user_type === 'teacher') {
+            return "teacher.projects.$view";
+        }
+
         return "principal.projects.$view";
     }
 
@@ -28,7 +32,38 @@ class ProjectController extends Controller
             return "administrator.projects.$route";
         }
 
+        if ($user && $user->user_type === 'teacher') {
+            return "teacher.projects.$route";
+        }
+
         return "principal.projects.$route";
+    }
+
+    /**
+     * Check if current user can create projects (Principal only)
+     */
+    private function canCreateProject(): bool
+    {
+        $user = auth()->user();
+        return $user && $user->user_type === 'principal';
+    }
+
+    /**
+     * Check if current user can manage projects (Administrator/Teacher)
+     */
+    private function canManageProject(): bool
+    {
+        $user = auth()->user();
+        return $user && in_array($user->user_type, ['administrator', 'teacher']);
+    }
+
+    /**
+     * Check if current user can approve project closure (Principal only)
+     */
+    private function canApproveClosure(): bool
+    {
+        $user = auth()->user();
+        return $user && $user->user_type === 'principal';
     }
 
     public function index(Request $request)
@@ -58,6 +93,11 @@ class ProjectController extends Controller
 
     public function create()
     {
+        // Only Principal can create projects
+        if (!$this->canCreateProject()) {
+            abort(403, 'Only the Principal can create new projects.');
+        }
+
         $statusOptions = ['created', 'active', 'in_progress', 'completed', 'archived', 'cancelled'];
 
         return view($this->resolveProjectsView('create'), compact('statusOptions'));
@@ -65,6 +105,11 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
+        // Only Principal can create projects
+        if (!$this->canCreateProject()) {
+            abort(403, 'Only the Principal can create new projects.');
+        }
+
         $validated = $request->validate([
             'project_name' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string'],
@@ -189,8 +234,86 @@ class ProjectController extends Controller
         return redirect()->route($this->resolveProjectsRoute('show'), $project->projectID);
     }
 
+    public function requestClosure(int $projectID)
+    {
+        $user = auth()->user();
+
+        // Administrator or Teacher can request closure
+        if (!$user || !in_array($user->user_type, ['administrator', 'teacher'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $project = Project::where('projectID', $projectID)->firstOrFail();
+
+        if (!in_array($project->project_status, ['active', 'in_progress'])) {
+            return redirect()->back();
+        }
+
+        $project->project_status = 'completed';
+        $project->updated_date = now();
+        $project->actual_completion_date = $project->actual_completion_date ?? now()->toDateString();
+        $project->save();
+
+        return redirect()->route($this->resolveProjectsRoute('show'), $project->projectID);
+    }
+
+    /**
+     * Activate a project for parent contributions (Administrator/Teacher only)
+     */
+    public function activate(int $projectID)
+    {
+        $user = auth()->user();
+
+        // Only Administrator or Teacher can activate projects
+        if (!$user || !in_array($user->user_type, ['administrator', 'teacher'])) {
+            abort(403, 'Only Administrator or Teacher can activate projects.');
+        }
+
+        $project = Project::where('projectID', $projectID)->firstOrFail();
+
+        // Can only activate projects with 'created' status
+        if ($project->project_status !== 'created') {
+            return redirect()->back()->with('error', 'Only projects with "Not Started" status can be activated.');
+        }
+
+        $project->project_status = 'active';
+        $project->updated_date = now();
+        $project->save();
+
+        return redirect()->route($this->resolveProjectsRoute('show'), $project->projectID);
+    }
+
+    public function approveClosure(int $projectID)
+    {
+        $user = auth()->user();
+
+        if (!$user || $user->user_type !== 'principal') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $project = Project::where('projectID', $projectID)->firstOrFail();
+
+        if ($project->project_status !== 'completed') {
+            return redirect()->back();
+        }
+
+        $project->project_status = 'archived';
+        $project->updated_date = now();
+        $project->actual_completion_date = $project->actual_completion_date ?? now()->toDateString();
+        $project->save();
+
+        return redirect()->route($this->resolveProjectsRoute('show'), $project->projectID);
+    }
+
     public function destroy(int $projectID)
     {
+        $user = auth()->user();
+
+        // Administrator or Teacher can archive projects
+        if (!$user || !in_array($user->user_type, ['administrator', 'teacher'])) {
+            abort(403, 'Only Administrator or Teacher can archive projects.');
+        }
+
         $project = Project::where('projectID', $projectID)->firstOrFail();
         $project->project_status = 'archived';
         $project->updated_date = now();
