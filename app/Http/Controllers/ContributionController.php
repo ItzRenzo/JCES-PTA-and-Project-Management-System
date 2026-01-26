@@ -7,13 +7,15 @@ use App\Models\PaymentTransaction;
 use App\Models\Project;
 use App\Models\ProjectContribution;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ContributionController extends Controller
 {
     private function resolveContributionsView(string $view): string
     {
-        $user = auth()->user();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
         if ($user && $user->user_type === 'administrator') {
             return "administrator.payments.$view";
@@ -24,9 +26,67 @@ class ContributionController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only(['project_id', 'date_from', 'date_to', 'payment_method', 'payment_status']);
+        $filters = $request->only(['project_id', 'date_from', 'date_to', 'payment_method', 'payment_status', 'search', 'status', 'school_year', 'date_range']);
 
         $contributionsQuery = ProjectContribution::with(['project', 'parent', 'processedBy']);
+
+        // Search filter
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $contributionsQuery->where(function($q) use ($search) {
+                $q->whereHas('parent', function($pq) use ($search) {
+                    $pq->where('first_name', 'like', "%{$search}%")
+                       ->orWhere('last_name', 'like', "%{$search}%");
+                })->orWhereHas('project', function($prq) use ($search) {
+                    $prq->where('project_name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Status filter (from dropdown)
+        if (!empty($filters['status'])) {
+            $contributionsQuery->where('payment_status', $filters['status']);
+        }
+
+        // Date range filter (Today, This Week, This Month, This Year)
+        if (!empty($filters['date_range'])) {
+            $now = now();
+            switch ($filters['date_range']) {
+                case 'today':
+                    $contributionsQuery->whereDate('contribution_date', $now->toDateString());
+                    break;
+                case 'this_week':
+                    $contributionsQuery->whereBetween('contribution_date', [
+                        $now->startOfWeek()->toDateString(),
+                        $now->copy()->endOfWeek()->toDateString()
+                    ]);
+                    break;
+                case 'this_month':
+                    $contributionsQuery->whereMonth('contribution_date', $now->month)
+                                       ->whereYear('contribution_date', $now->year);
+                    break;
+                case 'this_year':
+                    $contributionsQuery->whereYear('contribution_date', $now->year);
+                    break;
+            }
+        }
+
+        // School year filter
+        if (!empty($filters['school_year'])) {
+            $years = explode('-', $filters['school_year']);
+            if (count($years) === 2) {
+                $startYear = (int)$years[0];
+                $endYear = (int)$years[1];
+                $contributionsQuery->where(function($q) use ($startYear, $endYear) {
+                    $q->whereYear('contribution_date', $startYear)
+                      ->whereMonth('contribution_date', '>=', 6) // June onwards
+                      ->orWhere(function($q2) use ($endYear) {
+                          $q2->whereYear('contribution_date', $endYear)
+                             ->whereMonth('contribution_date', '<=', 5); // Until May
+                      });
+                });
+            }
+        }
 
         if (!empty($filters['project_id'])) {
             $contributionsQuery->where('projectID', $filters['project_id']);
@@ -53,13 +113,33 @@ class ContributionController extends Controller
 
         $contributions = $contributionsQuery
             ->orderBy('contribution_date', 'desc')
-            ->paginate(15)
+            ->paginate(10)
             ->appends($request->all());
 
         $projects = Project::orderBy('project_name')->get();
         $parents = ParentProfile::orderBy('last_name')->get();
         $paymentMethods = ['cash', 'check', 'bank_transfer'];
         $paymentStatuses = ['pending', 'completed', 'refunded'];
+
+        // Calculate payment per parent for each project
+        $totalParents = ParentProfile::count();
+        $projectPayments = [];
+        foreach ($projects as $project) {
+            $paymentPerParent = $totalParents > 0 ? $project->target_budget / $totalParents : 0;
+            $projectPayments[$project->projectID] = $paymentPerParent;
+        }
+
+        // Generate school year options (current and past 3 years)
+        $currentYear = (int) date('Y');
+        $currentMonth = (int) date('m');
+        // If we're in June or later, current school year starts this year
+        // If we're before June, current school year started last year
+        $startSchoolYear = $currentMonth >= 6 ? $currentYear : $currentYear - 1;
+        $schoolYears = [];
+        for ($i = 0; $i < 4; $i++) {
+            $sy = ($startSchoolYear - $i) . '-' . ($startSchoolYear - $i + 1);
+            $schoolYears[] = $sy;
+        }
 
         return view($this->resolveContributionsView('index'), compact(
             'contributions',
@@ -69,7 +149,10 @@ class ContributionController extends Controller
             'paymentStatuses',
             'filters',
             'totalAmount',
-            'totalCount'
+            'totalCount',
+            'totalParents',
+            'projectPayments',
+            'schoolYears'
         ));
     }
 
@@ -96,7 +179,7 @@ class ContributionController extends Controller
             'contribution_date' => $contributionDate,
             'receipt_number' => $receiptNumber,
             'notes' => $validated['notes'] ?? null,
-            'processed_by' => auth()->user()->userID,
+            'processed_by' => Auth::user()->userID,
         ]);
 
         PaymentTransaction::create([
@@ -109,7 +192,7 @@ class ContributionController extends Controller
             'transaction_date' => $contributionDate,
             'receipt_number' => $receiptNumber,
             'reference_number' => null,
-            'processed_by' => auth()->user()->userID,
+            'processed_by' => Auth::user()->userID,
             'notes' => $validated['notes'] ?? null,
         ]);
 
