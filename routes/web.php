@@ -17,7 +17,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
-    
+
     return match($user->user_type) {
         'administrator' => redirect()->route('administrator.dashboard'),
         'principal' => redirect()->route('principal.dashboard'),
@@ -363,6 +363,11 @@ Route::put('/teacher/users/{id}', [TeacherController::class, 'updateUser'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.users.update');
 
+// Parent routes
+Route::get('/parent/payments', function () {
+    return view('parent.payment.index');
+})->middleware(['auth', 'verified'])->name('parent.payments');
+
 // Logout route that redirects to login
 Route::get('/sign-out', function () {
     Auth::logout();
@@ -370,7 +375,7 @@ Route::get('/sign-out', function () {
     request()->session()->regenerateToken();
     return redirect()->route('login');
 })->name('sign-out');
-    
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

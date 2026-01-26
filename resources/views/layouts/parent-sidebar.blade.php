@@ -24,8 +24,8 @@
             <!-- Logo and School Name -->
             <div class="p-6 bg-white border-r border-gray-200 sidebar-padding">
                 <div class="flex items-center gap-3 sidebar-logo">
-                    <img src="http://127.0.0.1:8000/images/logos/jces-logo.png" 
-                         alt="JCES Logo" 
+                    <img src="http://127.0.0.1:8000/images/logos/jces-logo.png"
+                         alt="JCES Logo"
                          class="w-12 h-12 object-contain">
                     <div class="sidebar-label" x-cloak>
                         <div class="text-sm font-semibold text-gray-900">J. Cruz Sr.</div>
@@ -36,7 +36,7 @@
 
             <!-- Navigation Menu -->
             <nav class="flex-1 px-3 py-6 space-y-2">
-                <a href="{{ route('dashboard') }}" 
+                <a href="{{ route('dashboard') }}"
                    class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
@@ -44,7 +44,7 @@
                     <span class="sidebar-label" x-cloak>Home</span>
                 </a>
 
-                <a href="#" 
+                <a href="#"
                    class="sidebar-link flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
@@ -60,9 +60,9 @@
                     </svg>
                     <span class="sidebar-label" x-cloak>Projects</span>
                 </a>
-                
-                <a href="#" 
-                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
+
+                <a href="{{ route('parent.payments') }}"
+                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('parent.payments') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
                         <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
