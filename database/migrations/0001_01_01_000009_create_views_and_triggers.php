@@ -11,11 +11,12 @@ return new class extends Migration
     public function up(): void
     {
         // Create views for common reporting queries
+        DB::statement("DROP VIEW IF EXISTS active_parent_students");
         DB::statement("
-            CREATE OR REPLACE VIEW active_parent_students AS
-            SELECT 
-                p.parentID, 
-                p.first_name as parent_first_name, 
+            CREATE VIEW active_parent_students AS
+            SELECT
+                p.parentID,
+                p.first_name as parent_first_name,
                 p.last_name as parent_last_name,
                 p.email,
                 p.phone,
@@ -30,9 +31,10 @@ return new class extends Migration
             WHERE p.account_status = 'active' AND s.enrollment_status = 'active'
         ");
 
+        DB::statement("DROP VIEW IF EXISTS project_financial_summary");
         DB::statement("
-            CREATE OR REPLACE VIEW project_financial_summary AS
-            SELECT 
+            CREATE VIEW project_financial_summary AS
+            SELECT
                 p.projectID,
                 p.project_name,
                 p.target_budget,
@@ -53,10 +55,10 @@ return new class extends Migration
             AFTER INSERT ON project_contributions
             FOR EACH ROW
             BEGIN
-                UPDATE projects 
+                UPDATE projects
                 SET current_amount = (
-                    SELECT COALESCE(SUM(contribution_amount), 0) 
-                    FROM project_contributions 
+                    SELECT COALESCE(SUM(contribution_amount), 0)
+                    FROM project_contributions
                     WHERE projectID = NEW.projectID AND payment_status = 'completed'
                 )
                 WHERE projectID = NEW.projectID;
@@ -70,10 +72,10 @@ return new class extends Migration
             AFTER UPDATE ON project_contributions
             FOR EACH ROW
             BEGIN
-                UPDATE projects 
+                UPDATE projects
                 SET current_amount = (
-                    SELECT COALESCE(SUM(contribution_amount), 0) 
-                    FROM project_contributions 
+                    SELECT COALESCE(SUM(contribution_amount), 0)
+                    FROM project_contributions
                     WHERE projectID = NEW.projectID AND payment_status = 'completed'
                 )
                 WHERE projectID = NEW.projectID;
@@ -89,7 +91,7 @@ return new class extends Migration
         // Drop triggers
         DB::statement("DROP TRIGGER IF EXISTS update_project_amount_after_contribution_update");
         DB::statement("DROP TRIGGER IF EXISTS update_project_amount_after_contribution");
-        
+
         // Drop views
         DB::statement("DROP VIEW IF EXISTS project_financial_summary");
         DB::statement("DROP VIEW IF EXISTS active_parent_students");
