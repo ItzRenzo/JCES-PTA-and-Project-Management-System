@@ -8,6 +8,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectUpdateController;
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\ParentProjectController;
+use App\Http\Controllers\ParentContributionController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -364,9 +365,9 @@ Route::put('/teacher/users/{id}', [TeacherController::class, 'updateUser'])
     ->name('teacher.users.update');
 
 // Parent routes
-Route::get('/parent/payments', function () {
-    return view('parent.payment.index');
-})->middleware(['auth', 'verified'])->name('parent.payments');
+Route::get('/parent/payments', [ParentContributionController::class, 'paymentIndex'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.payments');
 
 // Logout route that redirects to login
 Route::get('/sign-out', function () {

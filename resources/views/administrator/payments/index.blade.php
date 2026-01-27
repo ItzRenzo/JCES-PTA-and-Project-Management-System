@@ -16,19 +16,21 @@
                     type="text"
                     name="search"
                     id="searchInput"
+                    x-model="searchQuery"
+                    @input.debounce.300ms="filterTable()"
                     value="{{ request('search') }}"
                     placeholder="Search parent or project"
-                    class="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-gray-200 focus:ring-2 focus:ring-green-200 focus:border-green-400"
+                    class="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-gray-200 focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition-all"
                 />
             </div>
-            <div class="flex flex-wrap items-center gap-3">
-                <!-- Status Filter -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Status Filter - Primary action style -->
                 <div class="relative">
-                    <select name="status" id="statusFilter" onchange="document.getElementById('filterForm').submit()" class="appearance-none px-4 py-2 pr-8 text-sm font-semibold bg-green-600 text-white rounded-md focus:ring-2 focus:ring-green-200 focus:outline-none cursor-pointer min-w-[120px]">
-                        <option value="" class="bg-white text-gray-900">Status</option>
-                        <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }} class="bg-white text-gray-900">Paid</option>
-                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }} class="bg-white text-gray-900">Pending</option>
-                        <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }} class="bg-white text-gray-900">Unpaid</option>
+                    <select name="status" id="statusFilter" x-model="statusFilter" @change="filterTable()" class="appearance-none px-4 py-2 pr-8 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700 focus:ring-2 focus:ring-green-300 focus:ring-offset-1 focus:outline-none cursor-pointer min-w-[110px] transition-colors">
+                        <option value="">Status</option>
+                        <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Paid</option>
+                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Unpaid</option>
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,14 +38,14 @@
                         </svg>
                     </span>
                 </div>
-                <!-- Date Range Filter -->
+                <!-- Date Range Filter - Primary action style -->
                 <div class="relative">
-                    <select name="date_range" id="dateRangeFilter" onchange="document.getElementById('filterForm').submit()" class="appearance-none px-4 py-2 pr-8 text-sm font-semibold bg-green-600 text-white rounded-md focus:ring-2 focus:ring-green-200 focus:outline-none cursor-pointer min-w-[130px]">
-                        <option value="" class="bg-white text-gray-900">Date Range</option>
-                        <option value="today" {{ request('date_range') === 'today' ? 'selected' : '' }} class="bg-white text-gray-900">Today</option>
-                        <option value="this_week" {{ request('date_range') === 'this_week' ? 'selected' : '' }} class="bg-white text-gray-900">This Week</option>
-                        <option value="this_month" {{ request('date_range') === 'this_month' ? 'selected' : '' }} class="bg-white text-gray-900">This Month</option>
-                        <option value="this_year" {{ request('date_range') === 'this_year' ? 'selected' : '' }} class="bg-white text-gray-900">This Year</option>
+                    <select name="date_range" id="dateRangeFilter" x-model="dateRangeFilter" @change="filterTable()" class="appearance-none px-4 py-2 pr-8 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700 focus:ring-2 focus:ring-green-300 focus:ring-offset-1 focus:outline-none cursor-pointer min-w-[120px] transition-colors">
+                        <option value="">Date Range</option>
+                        <option value="today" {{ request('date_range') === 'today' ? 'selected' : '' }}>Today</option>
+                        <option value="this_week" {{ request('date_range') === 'this_week' ? 'selected' : '' }}>This Week</option>
+                        <option value="this_month" {{ request('date_range') === 'this_month' ? 'selected' : '' }}>This Month</option>
+                        <option value="this_year" {{ request('date_range') === 'this_year' ? 'selected' : '' }}>This Year</option>
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,12 +53,12 @@
                         </svg>
                     </span>
                 </div>
-                <!-- School Year Filter -->
+                <!-- School Year Filter - Primary action style -->
                 <div class="relative">
-                    <select name="school_year" id="schoolYearFilter" onchange="document.getElementById('filterForm').submit()" class="appearance-none px-4 py-2 pr-8 text-sm font-semibold bg-green-600 text-white rounded-md focus:ring-2 focus:ring-green-200 focus:outline-none cursor-pointer min-w-[140px]">
-                        <option value="" class="bg-white text-gray-900">All Years</option>
+                    <select name="school_year" id="schoolYearFilter" x-model="schoolYearFilter" @change="filterTable()" class="appearance-none px-4 py-2 pr-8 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700 focus:ring-2 focus:ring-green-300 focus:ring-offset-1 focus:outline-none cursor-pointer min-w-[130px] transition-colors">
+                        <option value="">All Years</option>
                         @foreach($schoolYears as $sy)
-                            <option value="{{ $sy }}" {{ request('school_year') === $sy ? 'selected' : '' }} class="bg-white text-gray-900">S.Y {{ $sy }}</option>
+                            <option value="{{ $sy }}" {{ request('school_year') === $sy ? 'selected' : '' }}>S.Y {{ $sy }}</option>
                         @endforeach
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
@@ -65,24 +67,31 @@
                         </svg>
                     </span>
                 </div>
-                @if(request()->hasAny(['search', 'status', 'date_range', 'school_year']))
-                    <a href="{{ route('administrator.payments.index') }}" class="px-4 py-2 text-sm font-semibold bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
-                        Clear
-                    </a>
-                @endif
+                <!-- Clear Button - Secondary/Ghost style -->
+                <button
+                    type="button"
+                    x-show="searchQuery || statusFilter || dateRangeFilter || schoolYearFilter"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    @click="clearFilters()"
+                    class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-800 hover:border-gray-400 focus:ring-2 focus:ring-gray-200 focus:outline-none transition-all"
+                >
+                    Clear
+                </button>
             </div>
         </form>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table id="paymentsTable" class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Parent</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Payment</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600" colspan="2">Payment</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Project</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Status</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600">Receipt</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600" colspan="2">Receipt</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -130,19 +139,30 @@
                             $requiredPayment = isset($projectPayments[$contribution->projectID]) ? $projectPayments[$contribution->projectID] : 0;
                             $sampleIndex = $index % count($samplePayments);
                             $sample = $samplePayments[$sampleIndex];
+                            $parentName = $contribution->parent ? $contribution->parent->first_name . ' ' . $contribution->parent->last_name : 'Unknown Parent';
+                            $projectName = $contribution->project?->project_name ?? 'Unknown Project';
                         @endphp
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50 transition-colors"
+                            data-parent="{{ $parentName }}"
+                            data-project="{{ $projectName }}"
+                            data-status="{{ $status }}"
+                            data-date="{{ optional($contribution->contribution_date)->format('Y-m-d') }}">
                             <td class="px-6 py-3">
                                 <input type="checkbox" name="selected[]" value="{{ $contribution->contributionID }}" class="row-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
-                            </td>
-                            <td class="px-6 py-3 text-sm text-gray-700">
-                                {{ $contribution->parent ? $contribution->parent->first_name . ' ' . $contribution->parent->last_name : 'Unknown Parent' }}
+                                <span class="ml-2 text-sm text-green-600 hover:text-green-700 font-medium cursor-pointer">
+                                    {{ $parentName }}
+                                </span>
                             </td>
                             <td class="px-6 py-3 text-sm text-gray-500">₱{{ number_format($requiredPayment, 2) }}</td>
                             <td class="px-6 py-3 text-sm font-medium text-gray-900">₱{{ number_format($contribution->contribution_amount, 2) }}</td>
-                            <td class="px-6 py-3 text-sm text-gray-700">{{ $contribution->project?->project_name ?? 'Unknown Project' }}</td>
+                            <td class="px-6 py-3 text-sm text-gray-700">{{ $projectName }}</td>
                             <td class="px-6 py-3 text-sm text-gray-700">{{ optional($contribution->contribution_date)->format('m-d-Y') }}</td>
-                            <td class="px-6 py-3 text-sm text-gray-700">{{ $statusLabel }}</td>
+                            <td class="px-6 py-3">
+                                <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full {{ $status === 'completed' ? 'bg-green-100 text-green-700' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
+                                    {{ $statusLabel }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-3 text-sm text-gray-500">{{ optional($contribution->contribution_date)->format('m-d-Y') }}</td>
                             <td class="px-6 py-3 text-right">
                                 @if($contribution->receipt_number)
                                     <a href="{{ route('administrator.payments.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
@@ -159,61 +179,28 @@
                             @php
                                 $status = $payment['status'];
                                 $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Unpaid');
-                                $statusClass = $status === 'completed' ? 'bg-green-100 text-green-800' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
                             @endphp
-                            <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50 transition-colors"
+                                data-parent="{{ $payment['name'] }}"
+                                data-project="{{ $payment['project'] }}"
+                                data-status="{{ $status }}"
+                                data-date="{{ \Carbon\Carbon::parse($payment['date'])->format('Y-m-d') }}">
                                 <td class="px-6 py-3">
                                     <input type="checkbox" name="selected[]" value="{{ $index + 1 }}" class="row-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
+                                    <span class="ml-2 text-sm text-green-600 hover:text-green-700 font-medium cursor-pointer">{{ $payment['name'] }}</span>
                                 </td>
-                                <td class="px-6 py-3 text-sm text-gray-700">{{ $payment['name'] }}</td>
                                 <td class="px-6 py-3 text-sm text-gray-500">₱{{ number_format($payment['required'], 2) }}</td>
                                 <td class="px-6 py-3 text-sm font-medium text-gray-900">₱{{ number_format($payment['paid'], 2) }}</td>
                                 <td class="px-6 py-3 text-sm text-gray-700">{{ $payment['project'] }}</td>
                                 <td class="px-6 py-3 text-sm text-gray-700">{{ \Carbon\Carbon::parse($payment['date'])->format('m-d-Y') }}</td>
                                 <td class="px-6 py-3">
-                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusClass }}">
+                                    <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full {{ $status === 'completed' ? 'bg-green-100 text-green-700' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
                                         {{ $statusLabel }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-3">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <!-- Edit Button -->
-                                        <button
-                                            @click="openEditModal({{ $index + 1 }}, '{{ $status }}')"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition-all duration-200"
-                                            title="Edit">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </button>
-                                        <!-- Receipt Button -->
-                                        <button
-                                            @click="openReceiptModal({
-                                                txn: '{{ $payment['txn'] }}',
-                                                date: '{{ \Carbon\Carbon::parse($payment['date'])->format('F d, Y \a\t h:i A') }}',
-                                                method: '{{ $payment['method'] }}',
-                                                name: '{{ $payment['name'] }}',
-                                                phone: '{{ $payment['phone'] }}',
-                                                address: '{{ $payment['address'] }}',
-                                                project: '{{ $payment['project'] }}',
-                                                amount: {{ $payment['paid'] }}
-                                            })"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 transition-all duration-200"
-                                            title="Receipt">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
-                                        </button>
-                                        <!-- Archive Button -->
-                                        <button
-                                            @click="openArchiveModal({{ $index + 1 }})"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-all duration-200"
-                                            title="Archive">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                                            </svg>
-                                        </button>
-                                    </div>
+                                <td class="px-6 py-3 text-sm text-gray-500">{{ \Carbon\Carbon::parse($payment['date'])->format('m-d-Y') }}</td>
+                                <td class="px-6 py-3 text-right">
+                                    <a href="#" class="text-green-600 hover:text-green-700 text-sm font-medium">Print</a>
                                 </td>
                             </tr>
                         @endforeach
@@ -225,7 +212,7 @@
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="text-sm text-gray-600">
+                <div id="resultsCount" class="text-sm text-gray-600">
                     @if($contributions->count() > 0)
                         Showing <span class="font-medium text-green-600">{{ $contributions->firstItem() ?? 0 }}</span> to <span class="font-medium text-green-600">{{ $contributions->lastItem() ?? 0 }}</span> of <span class="font-medium text-green-600">{{ $contributions->total() }}</span> results
                     @else
@@ -237,7 +224,7 @@
                         @if ($contributions->onFirstPage())
                             <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&lt;</span>
                         @else
-                            <a href="{{ $contributions->previousPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">&lt;</a>
+                            <a href="{{ $contributions->previousPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&lt;</a>
                         @endif
                         @php
                             $currentPage = $contributions->currentPage();
@@ -249,11 +236,11 @@
                             @if ($page == $currentPage)
                                 <span class="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-md">{{ $page }}</span>
                             @else
-                                <a href="{{ $contributions->url($page) }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">{{ $page }}</a>
+                                <a href="{{ $contributions->url($page) }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">{{ $page }}</a>
                             @endif
                         @endfor
                         @if ($contributions->hasMorePages())
-                            <a href="{{ $contributions->nextPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">&gt;</a>
+                            <a href="{{ $contributions->nextPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&gt;</a>
                         @else
                             <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&gt;</span>
                         @endif
@@ -527,6 +514,12 @@
             archiveConfirmText: '',
             receiptData: { txn: '', date: '', method: '', name: '', phone: '', address: '', project: '', amount: 0 },
 
+            // Filter states
+            searchQuery: '{{ request('search') }}',
+            statusFilter: '{{ request('status') }}',
+            dateRangeFilter: '{{ request('date_range') }}',
+            schoolYearFilter: '{{ request('school_year') }}',
+
             openEditModal(id, status) {
                 this.editContributionId = id;
                 this.editStatus = status;
@@ -562,36 +555,120 @@
                 printWindow.document.write('<html><head><title>Receipt - ' + this.receiptData.txn + '</title><style>body{font-family:Arial,sans-serif;padding:20px;max-width:400px;margin:0 auto}.text-center{text-align:center}.text-xs{font-size:12px}.text-sm{font-size:14px}.text-lg{font-size:18px}.text-xl{font-size:20px}.font-bold{font-weight:bold}.font-semibold{font-weight:600}.font-medium{font-weight:500}.text-gray-500{color:#6b7280}.text-gray-600{color:#4b5563}.text-gray-900{color:#111827}.text-green-600{color:#059669}.border-dashed{border-style:dashed}.border-gray-300{border-color:#d1d5db}.border-t-2{border-top-width:2px}.my-4{margin:16px 0}.mb-4{margin-bottom:16px}.mt-2{margin-top:8px}.mt-6{margin-top:24px}.py-2{padding:8px 0}.space-y-2>*+*{margin-top:8px}.flex{display:flex}.justify-between{justify-content:space-between}.items-center{align-items:center}.tracking-widest{letter-spacing:.1em}.uppercase{text-transform:uppercase}</style></head><body>' + content + '</body></html>');
                 printWindow.document.close();
                 printWindow.print();
+            },
+
+            // Real-time filtering
+            filterTable() {
+                const rows = document.querySelectorAll('#paymentsTable tbody tr');
+                const searchLower = this.searchQuery.toLowerCase().trim();
+                let visibleCount = 0;
+
+                rows.forEach(row => {
+                    const parentName = row.getAttribute('data-parent')?.toLowerCase() || '';
+                    const projectName = row.getAttribute('data-project')?.toLowerCase() || '';
+                    const status = row.getAttribute('data-status') || '';
+                    const date = row.getAttribute('data-date') || '';
+
+                    let show = true;
+
+                    // Search filter
+                    if (searchLower && !parentName.includes(searchLower) && !projectName.includes(searchLower)) {
+                        show = false;
+                    }
+
+                    // Status filter
+                    if (this.statusFilter && status !== this.statusFilter) {
+                        show = false;
+                    }
+
+                    // Date range filter
+                    if (this.dateRangeFilter && date) {
+                        const rowDate = new Date(date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+
+                        switch(this.dateRangeFilter) {
+                            case 'today':
+                                const todayStr = today.toISOString().split('T')[0];
+                                const rowDateStr = rowDate.toISOString().split('T')[0];
+                                if (todayStr !== rowDateStr) show = false;
+                                break;
+                            case 'this_week':
+                                const weekStart = new Date(today);
+                                weekStart.setDate(today.getDate() - today.getDay());
+                                const weekEnd = new Date(weekStart);
+                                weekEnd.setDate(weekStart.getDate() + 6);
+                                if (rowDate < weekStart || rowDate > weekEnd) show = false;
+                                break;
+                            case 'this_month':
+                                if (rowDate.getMonth() !== today.getMonth() || rowDate.getFullYear() !== today.getFullYear()) show = false;
+                                break;
+                            case 'this_year':
+                                if (rowDate.getFullYear() !== today.getFullYear()) show = false;
+                                break;
+                        }
+                    }
+
+                    // School year filter (simplified - you may need to adjust based on actual school year logic)
+                    if (this.schoolYearFilter && date) {
+                        const rowDate = new Date(date);
+                        const year = rowDate.getFullYear();
+                        const month = rowDate.getMonth();
+                        // School year typically starts in June
+                        const schoolYear = month >= 5 ? `${year}-${year + 1}` : `${year - 1}-${year}`;
+                        if (schoolYear !== this.schoolYearFilter) show = false;
+                    }
+
+                    row.style.display = show ? '' : 'none';
+                    if (show) visibleCount++;
+                });
+
+                // Update visible count display
+                this.updateResultsCount(visibleCount);
+            },
+
+            updateResultsCount(count) {
+                const resultsText = document.getElementById('resultsCount');
+                if (resultsText) {
+                    const total = document.querySelectorAll('#paymentsTable tbody tr').length;
+                    resultsText.innerHTML = `Showing <span class="font-medium text-green-600">1</span> to <span class="font-medium text-green-600">${count}</span> of <span class="font-medium text-green-600">${total}</span> results`;
+                }
+            },
+
+            clearFilters() {
+                this.searchQuery = '';
+                this.statusFilter = '';
+                this.dateRangeFilter = '';
+                this.schoolYearFilter = '';
+                this.filterTable();
+
+                // Also clear the form inputs
+                document.getElementById('searchInput').value = '';
+                document.getElementById('statusFilter').value = '';
+                document.getElementById('dateRangeFilter').value = '';
+                document.getElementById('schoolYearFilter').value = '';
             }
         }
     }
-    document.getElementById('selectAll').addEventListener('change', function() {
-        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked);
-    });
+
+    // Select all functionality
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked);
+        });
+    }
+
     document.querySelectorAll('.row-checkbox').forEach(cb => {
         cb.addEventListener('change', function() {
             const total = document.querySelectorAll('.row-checkbox').length;
             const checked = document.querySelectorAll('.row-checkbox:checked').length;
-            document.getElementById('selectAll').checked = total === checked;
-            document.getElementById('selectAll').indeterminate = checked > 0 && checked < total;
+            const selectAll = document.getElementById('selectAll');
+            if (selectAll) {
+                selectAll.checked = total === checked;
+                selectAll.indeterminate = checked > 0 && checked < total;
+            }
         });
-    });
-
-    // Search input with debounce
-    let searchTimeout;
-    document.getElementById('searchInput').addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            document.getElementById('filterForm').submit();
-        }, 500);
-    });
-
-    // Submit on Enter key
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            clearTimeout(searchTimeout);
-            document.getElementById('filterForm').submit();
-        }
     });
 </script>
 @endsection
