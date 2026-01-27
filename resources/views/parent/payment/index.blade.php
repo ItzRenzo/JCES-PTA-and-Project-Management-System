@@ -8,10 +8,12 @@
     <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
         <!-- Select All Button -->
         <div class="flex justify-end mb-6">
+            @if(count($paymentItems) > 0)
             <button type="button" id="selectAllBtn" onclick="toggleSelectAll()"
                     class="px-5 py-2 bg-white border-2 border-green-500 hover:bg-green-50 text-green-600 text-sm font-semibold rounded-lg transition-all">
                 Select All
             </button>
+            @endif
         </div>
 
         <!-- Inner Content Box -->
@@ -23,51 +25,54 @@
 
             <!-- Payment Items -->
             <div class="divide-y divide-gray-200 bg-white">
-                <!-- Fun Run for a Cause -->
-                <label class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors">
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" name="payment[]" value="500"
-                               class="payment-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
-                               onchange="updateTotal()">
-                        <span class="text-sm text-gray-900">Fun Run for a Cause</span>
+                @forelse($paymentItems as $item)
+                    <label class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors">
+                        <div class="flex items-center gap-4">
+                            <input type="checkbox"
+                                   name="payment[]"
+                                   value="{{ $item['amount'] }}"
+                                   data-project-id="{{ $item['project']->projectID }}"
+                                   data-project-name="{{ $item['project']->project_name }}"
+                                   class="payment-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
+                                   onchange="updateTotal()"
+                                   @if($item['is_pending']) disabled @endif>
+                            <div class="flex flex-col">
+                                <span class="text-sm text-gray-900">{{ $item['project']->project_name }}</span>
+                                @if($item['is_pending'])
+                                    <span class="text-xs text-yellow-600">Payment pending verification</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm font-medium text-gray-900">₱{{ number_format($item['amount'], 2) }}</span>
+                            @if($item['is_pending'])
+                                <span class="block text-xs text-yellow-600">Pending: ₱{{ number_format($item['pending_amount'], 2) }}</span>
+                            @endif
+                        </div>
+                    </label>
+                @empty
+                    <div class="px-6 py-8 text-center">
+                        <svg class="w-12 h-12 mx-auto text-green-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-gray-600 font-medium">All payments are up to date!</p>
+                        <p class="text-sm text-gray-500 mt-1">You have no pending payments at this time.</p>
                     </div>
-                    <span class="text-sm font-medium text-gray-900">₱500</span>
-                </label>
-
-                <!-- Fundraising Projects -->
-                <label class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors">
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" name="payment[]" value="250"
-                               class="payment-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
-                               onchange="updateTotal()">
-                        <span class="text-sm text-gray-900">Fundraising Projects</span>
-                    </div>
-                    <span class="text-sm font-medium text-gray-900">₱250</span>
-                </label>
-
-                <!-- Community and Parent Involvement -->
-                <label class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors">
-                    <div class="flex items-center gap-4">
-                        <input type="checkbox" name="payment[]" value="100"
-                               class="payment-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
-                               onchange="updateTotal()">
-                        <span class="text-sm text-gray-900">Community and Parent Involvement</span>
-                    </div>
-                    <span class="text-sm font-medium text-gray-900">₱100</span>
-                </label>
+                @endforelse
             </div>
 
             <!-- Empty space and Total -->
             <div class="bg-gray-50 px-6 py-8">
                 <div class="flex justify-end">
                     <div class="text-base font-semibold text-gray-900">
-                        Total: <span id="totalAmount" class="text-gray-900">₱850</span>
+                        Total: <span id="totalAmount" class="text-gray-900">₱0.00</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Action Buttons -->
+        @if(count($paymentItems) > 0)
         <div class="flex justify-end gap-4 mt-6">
             <button type="button" onclick="exportPayments()"
                     class="px-6 py-3 bg-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-lg transition-all flex items-center gap-2">
@@ -77,14 +82,16 @@
                 Export
             </button>
 
-            <button type="button" onclick="processPayment()"
-                    class="px-8 py-3 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+            <button type="button" onclick="processPayment()" id="payBtn"
+                    class="px-8 py-3 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+                    disabled>
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                 </svg>
                 Pay
             </button>
         </div>
+        @endif
     </div>
 </div>
 
@@ -197,27 +204,35 @@
 
 <script>
     function updateTotal() {
-        const checkboxes = document.querySelectorAll('.payment-checkbox:checked');
+        const checkboxes = document.querySelectorAll('.payment-checkbox:checked:not(:disabled)');
         let total = 0;
 
         checkboxes.forEach(checkbox => {
             total += parseFloat(checkbox.value);
         });
 
-        document.getElementById('totalAmount').textContent = '₱' + total.toFixed(0);
+        document.getElementById('totalAmount').textContent = '₱' + total.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         // Update Select All button text
-        const allCheckboxes = document.querySelectorAll('.payment-checkbox');
+        const allCheckboxes = document.querySelectorAll('.payment-checkbox:not(:disabled)');
         const selectAllBtn = document.getElementById('selectAllBtn');
-        if (checkboxes.length === allCheckboxes.length && allCheckboxes.length > 0) {
-            selectAllBtn.textContent = 'Deselect All';
-        } else {
-            selectAllBtn.textContent = 'Select All';
+        if (selectAllBtn) {
+            if (checkboxes.length === allCheckboxes.length && allCheckboxes.length > 0) {
+                selectAllBtn.textContent = 'Deselect All';
+            } else {
+                selectAllBtn.textContent = 'Select All';
+            }
+        }
+
+        // Enable/disable Pay button
+        const payBtn = document.getElementById('payBtn');
+        if (payBtn) {
+            payBtn.disabled = checkboxes.length === 0;
         }
     }
 
     function toggleSelectAll() {
-        const checkboxes = document.querySelectorAll('.payment-checkbox');
+        const checkboxes = document.querySelectorAll('.payment-checkbox:not(:disabled)');
         const selectAllBtn = document.getElementById('selectAllBtn');
         const allChecked = Array.from(checkboxes).every(cb => cb.checked);
 
@@ -229,7 +244,7 @@
     }
 
     function exportPayments() {
-        const checkboxes = document.querySelectorAll('.payment-checkbox:checked');
+        const checkboxes = document.querySelectorAll('.payment-checkbox:checked:not(:disabled)');
 
         if (checkboxes.length === 0) {
             alert('Please select at least one payment item to export.');
@@ -249,8 +264,7 @@
         let total = 0;
 
         checkboxes.forEach(checkbox => {
-            const row = checkbox.closest('label');
-            const projectName = row.querySelector('span.text-sm.text-gray-900').textContent;
+            const projectName = checkbox.getAttribute('data-project-name');
             const amount = parseFloat(checkbox.value);
             items.push({ name: projectName, amount: amount });
             total += amount;
@@ -267,10 +281,10 @@
         csvContent += "Description,Amount (PHP)\n";
 
         items.forEach(item => {
-            csvContent += item.name + "," + item.amount + "\n";
+            csvContent += item.name + "," + item.amount.toFixed(2) + "\n";
         });
 
-        csvContent += "\nTotal," + total + "\n";
+        csvContent += "\nTotal," + total.toFixed(2) + "\n";
 
         // Create and download file
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -285,7 +299,7 @@
     }
 
     function processPayment() {
-        const checkboxes = document.querySelectorAll('.payment-checkbox:checked');
+        const checkboxes = document.querySelectorAll('.payment-checkbox:checked:not(:disabled)');
 
         if (checkboxes.length === 0) {
             alert('Please select at least one payment item to proceed.');
@@ -297,9 +311,8 @@
         receiptItemsContainer.innerHTML = '';
 
         checkboxes.forEach(checkbox => {
-            const row = checkbox.closest('label');
-            const projectName = row.querySelector('span.text-sm.text-gray-900').textContent;
-            const amount = checkbox.value;
+            const projectName = checkbox.getAttribute('data-project-name');
+            const amount = parseFloat(checkbox.value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             const itemDiv = document.createElement('div');
             itemDiv.className = 'flex justify-between items-center py-2 border-b border-gray-100';

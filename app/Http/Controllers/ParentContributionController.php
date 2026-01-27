@@ -17,7 +17,7 @@ class ParentContributionController extends Controller
     public function index(Request $request)
     {
         $parentProfile = Auth::user()->parentProfile;
-        
+
         if (!$parentProfile) {
             return redirect()->route('dashboard')
                 ->with('error', 'Parent profile not found. Please contact administrator.');
@@ -67,7 +67,7 @@ class ParentContributionController extends Controller
     public function create()
     {
         $parentProfile = Auth::user()->parentProfile;
-        
+
         if (!$parentProfile) {
             return redirect()->route('dashboard')
                 ->with('error', 'Parent profile not found. Please contact administrator.');
@@ -80,7 +80,7 @@ class ParentContributionController extends Controller
 
         // Calculate progress for each project
         foreach ($projects as $project) {
-            $project->progress_percentage = $project->target_budget > 0 
+            $project->progress_percentage = $project->target_budget > 0
                 ? min(100, round(($project->current_amount / $project->target_budget) * 100, 1))
                 : 0;
             $project->remaining_amount = max(0, $project->target_budget - $project->current_amount);
@@ -95,7 +95,7 @@ class ParentContributionController extends Controller
     public function store(Request $request)
     {
         $parentProfile = Auth::user()->parentProfile;
-        
+
         if (!$parentProfile) {
             return redirect()->route('dashboard')
                 ->with('error', 'Parent profile not found. Please contact administrator.');
@@ -113,21 +113,21 @@ class ParentContributionController extends Controller
             ->findOrFail($validated['project_id']);
 
         DB::beginTransaction();
-        
+
         try {
             // Generate receipt number
             $year = date('Y');
             $lastReceipt = ProjectContribution::where('receipt_number', 'like', "RCT-{$year}-%")
                 ->orderBy('receipt_number', 'desc')
                 ->first();
-            
+
             if ($lastReceipt) {
                 $lastNumber = intval(substr($lastReceipt->receipt_number, -5));
                 $newNumber = $lastNumber + 1;
             } else {
                 $newNumber = 1;
             }
-            
+
             $receiptNumber = sprintf("RCT-%s-%05d", $year, $newNumber);
 
             // Create contribution with pending status (requires admin verification)
@@ -162,7 +162,7 @@ class ParentContributionController extends Controller
     public function receipt($contributionID)
     {
         $parentProfile = Auth::user()->parentProfile;
-        
+
         if (!$parentProfile) {
             abort(403, 'Unauthorized access.');
         }
@@ -172,5 +172,69 @@ class ParentContributionController extends Controller
             ->findOrFail($contributionID);
 
         return view('receipts.print', compact('contribution'));
+    }
+
+    /**
+     * Display the parent payment page with projects requiring payment.
+     */
+    public function paymentIndex()
+    {
+        $parentProfile = Auth::user()->parentProfile;
+
+        if (!$parentProfile) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Parent profile not found. Please contact administrator.');
+        }
+
+        // Get total number of active parents for calculating per-parent payment
+        $totalParents = ParentProfile::where('account_status', 'active')->count();
+
+        // Default to 1 to avoid division by zero
+        $totalParents = $totalParents > 0 ? $totalParents : 1;
+
+        // Get active projects
+        $projects = Project::whereIn('project_status', ['active', 'in_progress'])
+            ->orderBy('project_name')
+            ->get();
+
+        // Calculate per-parent payment for each project
+        $paymentItems = [];
+        foreach ($projects as $project) {
+            // Check if parent has already paid for this project (completed payment)
+            $existingPayment = ProjectContribution::where('projectID', $project->projectID)
+                ->where('parentID', $parentProfile->parentID)
+                ->where('payment_status', 'completed')
+                ->first();
+
+            // Check for pending payments
+            $pendingPayment = ProjectContribution::where('projectID', $project->projectID)
+                ->where('parentID', $parentProfile->parentID)
+                ->where('payment_status', 'pending')
+                ->first();
+
+            // Calculate per-parent amount (total budget / number of parents)
+            $perParentAmount = round($project->target_budget / $totalParents, 2);
+
+            $paymentItems[] = [
+                'project' => $project,
+                'amount' => $perParentAmount,
+                'is_paid' => $existingPayment !== null,
+                'is_pending' => $pendingPayment !== null,
+                'paid_amount' => $existingPayment ? $existingPayment->contribution_amount : 0,
+                'pending_amount' => $pendingPayment ? $pendingPayment->contribution_amount : 0,
+            ];
+        }
+
+        // Filter to only show unpaid/pending items
+        $unpaidItems = array_filter($paymentItems, function($item) {
+            return !$item['is_paid'];
+        });
+
+        return view('parent.payment.index', [
+            'paymentItems' => $unpaidItems,
+            'allItems' => $paymentItems,
+            'totalParents' => $totalParents,
+            'parentProfile' => $parentProfile,
+        ]);
     }
 }
