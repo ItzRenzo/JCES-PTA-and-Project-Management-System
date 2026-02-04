@@ -126,6 +126,7 @@
 
             <!-- Page Content -->
             <main class="p-8">
+                @include('components.flash-messages')
                 {{ $slot }}
             </main>
         </div>
