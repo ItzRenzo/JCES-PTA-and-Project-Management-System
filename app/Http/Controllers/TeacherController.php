@@ -43,7 +43,7 @@ class TeacherController extends Controller
         $baseUsername = strtolower($request->first_name . $request->last_name);
         $username = $baseUsername;
         $counter = 1;
-        
+
         while (User::where('username', $username)->exists()) {
             $username = $baseUsername . $counter;
             $counter++;
@@ -57,6 +57,7 @@ class TeacherController extends Controller
             'phone' => $request->phone,
             'email' => $request->email,
             'password_hash' => Hash::make($request->password),
+            'plain_password' => $request->password,
             'is_active' => true,
         ]);
 
@@ -132,6 +133,7 @@ class TeacherController extends Controller
 
         if ($request->filled('password')) {
             $updateData['password_hash'] = Hash::make($request->password);
+            $updateData['plain_password'] = $request->password;
         }
 
         $user->update($updateData);

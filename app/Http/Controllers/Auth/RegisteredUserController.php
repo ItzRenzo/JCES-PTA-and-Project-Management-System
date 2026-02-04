@@ -44,7 +44,7 @@ class RegisteredUserController extends Controller
         $username = explode('@', $request->email)[0];
         $baseUsername = $username;
         $counter = 1;
-        
+
         // Ensure username is unique
         while (User::where('username', $username)->exists()) {
             $username = $baseUsername . $counter;
@@ -55,6 +55,7 @@ class RegisteredUserController extends Controller
             'username' => $username,
             'email' => $request->email,
             'password_hash' => Hash::make($request->password),
+            'plain_password' => $request->password,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'user_type' => 'parent', // Default user type for registration

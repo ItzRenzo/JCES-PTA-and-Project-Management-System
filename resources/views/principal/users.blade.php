@@ -1,4 +1,4 @@
-﻿@extends('layouts.pr-sidebar')
+@extends('layouts.pr-sidebar')
 
 @section('title', 'Users')
 
@@ -9,29 +9,61 @@
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route('principal.users') }}" class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search users..." 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+        <form method="GET" action="{{ route('principal.users') }}" class="space-y-4">
+            <!-- Main Search Bar -->
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Search by name, phone, email, or address..."
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                </div>
+                <select name="role" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    <option value="">All Roles</option>
+                    <option value="parent" {{ request('role') == 'parent' ? 'selected' : '' }}>Parent</option>
+                    <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
+                    <option value="administrator" {{ request('role') == 'administrator' ? 'selected' : '' }}>Administrator</option>
+                    <option value="principal" {{ request('role') == 'principal' ? 'selected' : '' }}>Principal</option>
+                </select>
+                <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    <option value="">All Status</option>
+                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Search
+                </button>
+                @if(request('search') || request('role') || request('status'))
+                <a href="{{ route('principal.users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2 transition-colors duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Clear
+                </a>
+                @endif
+                <button type="button" id="printSelectedBtn" onclick="printSelectedUsers()"
+                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 transition-colors duration-200 hidden">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print Selected (<span id="selectedCount">0</span>)
+                </button>
             </div>
-            <select name="role" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
-                <option value="">All Roles</option>
-                <option value="parent" {{ request('role') == 'parent' ? 'selected' : '' }}>Parent</option>
-                <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
-                <option value="administrator" {{ request('role') == 'administrator' ? 'selected' : '' }}>Administrator</option>
-                <option value="principal" {{ request('role') == 'principal' ? 'selected' : '' }}>Principal</option>
-            </select>
-            <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
-                <option value="">All Status</option>
-                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-            </select>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors duration-200">
+
+            <!-- Search Hints -->
+            <div class="text-xs text-gray-500 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Filter
-            </button>
+                <span>Tip: Search parents by name, phone number, email, street address, city, or barangay</span>
+            </div>
         </form>
     </div>
 
@@ -42,7 +74,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="w-12 px-4 py-3 text-left">
-                            <input type="checkbox" class="rounded border-gray-300">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
                         </th>
                         <th class="w-2/5 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                         <th class="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
@@ -53,66 +85,76 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($users as $user)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-4 whitespace-nowrap">
-                            <input type="checkbox" class="rounded border-gray-300">
+                    <tr class="hover:bg-gray-50" data-user-id="{{ $user->userID }}">
+                        <td class="px-4 py-4">
+                            <input type="checkbox" class="user-checkbox rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                   data-user='{{ json_encode($user) }}' onchange="updateSelectedUsers()">
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span class="text-green-600 font-semibold text-sm">
-                                        {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}{{ strtoupper(substr(explode(' ', $user->name ?? 'User')[1] ?? explode(' ', $user->name ?? 'User')[0], 0, 1)) }}
-                                    </span>
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                                        <span class="text-sm font-medium text-green-800">
+                                            {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="ml-3 min-w-0">
-                                    <div class="text-sm font-medium text-gray-900 truncate">{{ $user->name ?? 'N/A' }}</div>
-                                    <div class="text-sm text-gray-500 truncate">{{ $user->email }}</div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
+                                    <div class="text-sm text-gray-500">{{ $user->email }}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                @if($user->user_type == 'parent') bg-blue-100 text-blue-800
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                @if($user->user_type == 'principal') bg-purple-100 text-purple-800
+                                @elseif($user->user_type == 'administrator') bg-blue-100 text-blue-800
                                 @elseif($user->user_type == 'teacher') bg-green-100 text-green-800
-                                @elseif($user->user_type == 'administrator') bg-purple-100 text-purple-800
-                                @elseif($user->user_type == 'principal') bg-yellow-100 text-yellow-800
-                                @else bg-gray-100 text-gray-800 @endif">
-                                {{ ucfirst($user->user_type ?? 'Unknown') }}
+                                @else bg-gray-100 text-gray-800
+                                @endif">
+                                {{ ucfirst($user->user_type) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                 {{ $user->is_active ? 'Active' : 'Inactive' }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $user->created_date ? $user->created_date->format('M d, Y') : 'N/A' }}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ $user->created_date ? \Carbon\Carbon::parse($user->created_date)->format('M d, Y') : 'N/A' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center gap-1">
-                                <button onclick="openEditModal({{ json_encode($user) }})" 
-                                        class="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition-colors duration-200" title="Edit">
+                            <div class="flex items-center gap-2">
+                                <button onclick="openCredentialsModal({{ json_encode($user) }})"
+                                        class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition-colors duration-200"
+                                        title="Show Credentials">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                    </svg>
+                                </button>
+
+                                <button onclick="openEditModal({{ json_encode($user) }})"
+                                        class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-200"
+                                        title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
-                                <button onclick="openViewModal({{ json_encode($user) }})" 
-                                        class="p-1 text-green-600 hover:text-green-900 hover:bg-green-50 rounded transition-colors duration-200" title="View">
+
+                                <button onclick="openViewModal({{ json_encode($user) }})"
+                                        class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-200"
+                                        title="View">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </button>
-                                <button onclick="openDeleteModal({{ json_encode($user) }})" 
-                                        class="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors duration-200" title="Delete">
+
+                                <button onclick="openDeleteModal({{ json_encode($user) }})"
+                                        class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-200"
+                                        title="Delete">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                                <button class="p-1 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded transition-colors duration-200" title="More options">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                     </svg>
                                 </button>
                             </div>
@@ -120,14 +162,8 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                            <div class="flex flex-col items-center">
-                                <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                                <p class="text-lg font-medium">No users found</p>
-                                <p class="text-sm text-gray-400 mt-1">Try adjusting your search filters</p>
-                            </div>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                            No users found.
                         </td>
                     </tr>
                     @endforelse
@@ -163,7 +199,6 @@
 <div id="editUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
     <div class="flex items-center justify-center min-h-full px-4 py-6">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <!-- Modal Header -->
             <div class="flex items-center justify-between pb-4 border-b">
                 <h3 class="text-lg font-semibold text-gray-900">Edit User Details</h3>
                 <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
@@ -172,194 +207,130 @@
                     </svg>
                 </button>
             </div>
-
-            <!-- Modal Body -->
             <form id="editUserForm" class="mt-6" onsubmit="submitEditForm(event)">
                 @csrf
                 @method('PUT')
                 <input type="hidden" id="editUserId" name="user_id" value="">
                 <div class="space-y-4">
-                    <!-- Common Fields -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                        <input type="text" id="editFullName" name="full_name" 
-                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="text" id="editFullName" name="full_name" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" id="editEmail" name="email" 
-                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="email" id="editEmail" name="email" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                        <input type="text" id="editPhone" name="phone" 
-                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <input type="text" id="editPhone" name="phone" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                        <select id="editRole" name="role" 
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <select id="editRole" name="role" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="parent">Parent</option>
                             <option value="teacher">Teacher</option>
                             <option value="administrator">Administrator</option>
                             <option value="principal">Principal</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                        <select id="editStatus" name="status" 
-                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <select id="editStatus" name="status" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                         </select>
                     </div>
-
-                    <!-- Role-specific fields -->
                     <div id="parentFields" class="hidden">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                            <textarea id="editAddress" name="address" rows="3"
-                                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"></textarea>
-                        </div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                        <textarea id="editAddress" name="address" rows="3" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"></textarea>
                     </div>
-
                     <div id="teacherFields" class="hidden space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                            <input type="text" id="editSubject" name="subject" 
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <input type="text" id="editSubject" name="subject" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                            <input type="text" id="editDepartment" name="department" 
-                                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <input type="text" id="editDepartment" name="department" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                         </div>
                     </div>
-
-                    <div id="adminFields" class="hidden">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Admin Level</label>
-                            <select id="editAdminLevel" name="admin_level" 
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                                <option value="junior">Junior Admin</option>
-                                <option value="senior">Senior Admin</option>
-                                <option value="super">Super Admin</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">New Password (optional)</label>
-                        <input type="password" id="editPassword" name="password" 
-                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                               placeholder="Leave blank to keep current">
+                        <input type="password" id="editPassword" name="password" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Leave blank to keep current">
                     </div>
                 </div>
-
-                <!-- Modal Footer -->
                 <div class="flex items-center justify-end gap-3 pt-6 border-t mt-6">
-                    <button type="button" onclick="closeEditModal()" 
-                            class="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200">
-                        Cancel
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">
-                        Save Changes
-                    </button>
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">Save Changes</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
-
 <!-- View User Details Modal -->
 <div id="viewUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-  <div class="flex items-center justify-center min-h-full px-4 py-6">
-    <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
-      <div class="flex items-center justify-between pb-4 border-b">
-        <h3 class="text-lg font-semibold text-gray-900">User Details</h3>
-        <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-          <div id="viewFullName" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+    <div class="flex items-center justify-center min-h-full px-4 py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+            <div class="flex items-center justify-between pb-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-900">User Details</h3>
+                <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <div id="viewFullName" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <div id="viewEmail" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                    <div id="viewPhone" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                    <div id="viewRole" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <div id="viewStatus" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Created Date</label>
+                    <div id="viewCreatedDate" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                </div>
+                <div id="viewParentInfo" class="hidden md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <div id="viewAddress" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                </div>
+                <div id="viewTeacherInfo" class="hidden md:col-span-2 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                        <div id="viewSubject" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                        <div id="viewDepartment" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-center pt-6 border-t mt-6">
+                <button type="button" onclick="closeViewModal()" class="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">Close</button>
+            </div>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-          <div id="viewEmail" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-          <div id="viewPhone" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
-          <div id="viewRole" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-          <div id="viewStatus" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Created Date</label>
-          <div id="viewCreatedDate" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-        </div>
-
-        <!-- Role-specific display fields (span full width when present) -->
-        <div id="viewParentInfo" class="hidden md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
-          <div id="viewAddress" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-        </div>
-
-        <div id="viewTeacherInfo" class="hidden md:col-span-2 space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-            <div id="viewSubject" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-            <div id="viewDepartment" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-          </div>
-        </div>
-
-        <div id="viewAdminInfo" class="hidden md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Admin Level</label>
-          <div id="viewAdminLevel" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-center pt-6 border-t mt-6">
-        <button type="button" onclick="closeViewModal()"
-                class="px-6 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">
-          Close
-        </button>
-      </div>
     </div>
-  </div>
 </div>
 
 <!-- Delete User Confirmation Modal -->
 <div id="deleteUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
     <div class="flex items-center justify-center min-h-full px-4 py-6">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <!-- Modal Header -->
             <div class="flex items-center justify-between pb-4 border-b">
                 <div class="flex items-center">
                     <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
@@ -375,86 +346,154 @@
                     </svg>
                 </button>
             </div>
-
-            <!-- Modal Body -->
             <div class="mt-6">
-                <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-2">Are you sure you want to delete this user? This action cannot be undone.</p>
-                    <div class="bg-gray-50 rounded-lg p-3 mb-4">
-                        <div class="flex items-center">
-                            <div id="deleteUserAvatar" class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span id="deleteUserInitials" class="text-red-600 font-semibold text-sm"></span>
-                            </div>
-                            <div class="ml-3">
-                                <div id="deleteUserName" class="text-sm font-medium text-gray-900"></div>
-                                <div id="deleteUserEmail" class="text-sm text-gray-500"></div>
-                            </div>
+                <p class="text-sm text-gray-600 mb-2">Are you sure you want to delete this user? This action cannot be undone.</p>
+                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                    <div class="flex items-center">
+                        <div id="deleteUserAvatar" class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span id="deleteUserInitials" class="text-red-600 font-semibold text-sm"></span>
+                        </div>
+                        <div class="ml-3">
+                            <div id="deleteUserName" class="text-sm font-medium text-gray-900"></div>
+                            <div id="deleteUserEmail" class="text-sm text-gray-500"></div>
                         </div>
                     </div>
                 </div>
-                
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         To confirm, type "<span id="confirmationUserName" class="font-semibold text-red-600"></span>" in the box below:
                     </label>
-                    <input type="text" id="deleteConfirmationInput" 
-                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                           placeholder="Type the user name here">
-                    <div id="confirmationError" class="text-red-600 text-xs mt-1 hidden">
-                        The name you entered does not match. Please try again.
+                    <input type="text" id="deleteConfirmationInput" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Type the user name here">
+                    <div id="confirmationError" class="text-red-600 text-xs mt-1 hidden">The name you entered does not match. Please try again.</div>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 pt-6 border-t">
+                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">Cancel</button>
+                <button type="button" id="confirmDeleteButton" onclick="confirmDeleteUser()" disabled class="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Credentials Modal -->
+<div id="credentialsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-full px-4 py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div class="flex items-center justify-between pb-4 border-b">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">User Credentials</h3>
+                </div>
+                <button onclick="closeCredentialsModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="mt-6">
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="flex items-center mb-4">
+                        <div id="credentialsUserAvatar" class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span id="credentialsUserInitials" class="text-purple-600 font-semibold text-lg"></span>
+                        </div>
+                        <div class="ml-3">
+                            <div id="credentialsUserName" class="text-base font-medium text-gray-900"></div>
+                            <div id="credentialsUserRole" class="text-sm text-gray-500"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
+                            <div class="flex items-center">
+                                <input type="text" id="credentialsEmail" readonly class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-l text-sm text-gray-900">
+                                <button onclick="copyToClipboard('credentialsEmail')" class="px-3 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r hover:bg-gray-200 transition-colors" title="Copy">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Password</label>
+                            <div class="flex items-center">
+                                <input type="text" id="credentialsPassword" readonly class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-l text-sm text-gray-900">
+                                <button onclick="copyToClipboard('credentialsPassword')" class="px-3 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r hover:bg-gray-200 transition-colors" title="Copy">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Modal Footer -->
-            <div class="flex items-center justify-end gap-3 pt-6 border-t">
-                <button type="button" onclick="closeDeleteModal()"
-                        class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">
-                    Cancel
-                </button>
-                <button type="button" id="confirmDeleteButton" onclick="confirmDeleteUser()" disabled
-                        class="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200">
-                    Delete
+            <div class="flex items-center justify-end gap-3 pt-4 border-t">
+                <button type="button" onclick="closeCredentialsModal()" class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">Close</button>
+                <button type="button" onclick="printSingleCredential()" class="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors duration-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print
                 </button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Print Selected Users Modal -->
+<div id="printPreviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-full px-4 py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-4 border-b">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Print User Credentials</h3>
+                </div>
+                <button onclick="closePrintPreviewModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="printPreviewContent" class="mt-6"></div>
+            <div class="flex items-center justify-end gap-3 pt-4 border-t mt-4">
+                <button type="button" onclick="closePrintPreviewModal()" class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">Cancel</button>
+                <button type="button" onclick="executePrint()" class="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors duration-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-function openAddUserModal() {
-    // For now, this is a placeholder function
-    // You can implement a modal or redirect to a create user page
-    alert('Add User functionality will be implemented here');
-    // Example: window.location.href = '/principal/users/create';
-    // Or open a modal dialog
-}
-
-// Edit User Modal Functions
+let selectedUsers = [];
+let currentCredentialUser = null;
 let currentEditingUserId = null;
+let userToDelete = null;
 
 function openEditModal(user) {
     currentEditingUserId = user.userID;
-    
-    // Set the hidden user ID field
     document.getElementById('editUserId').value = user.userID;
-    
-    // Populate the common form fields - combine first_name and last_name
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
     document.getElementById('editFullName').value = fullName;
     document.getElementById('editEmail').value = user.email || '';
     document.getElementById('editPhone').value = user.phone || '';
     document.getElementById('editRole').value = user.user_type || '';
     document.getElementById('editStatus').value = user.is_active ? '1' : '0';
-    
-    // Clear password field
     document.getElementById('editPassword').value = '';
-    
-    // Show/hide role-specific fields
     showRoleSpecificFields(user.user_type || '', 'edit');
-    
-    // Show the modal
     document.getElementById('editUserModal').classList.remove('hidden');
 }
 
@@ -463,19 +502,14 @@ function closeEditModal() {
     currentEditingUserId = null;
 }
 
-// Form submission function
 function submitEditForm(event) {
     event.preventDefault();
-    
     const formData = new FormData();
     const userId = document.getElementById('editUserId').value;
-    
-    // Get form values
     const fullName = document.getElementById('editFullName').value.trim();
     const nameParts = fullName.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
-    
     formData.append('_token', document.querySelector('input[name="_token"]').value);
     formData.append('_method', 'PUT');
     formData.append('first_name', firstName);
@@ -484,68 +518,20 @@ function submitEditForm(event) {
     formData.append('phone', document.getElementById('editPhone').value);
     formData.append('user_type', document.getElementById('editRole').value);
     formData.append('is_active', document.getElementById('editStatus').value);
-    
     const password = document.getElementById('editPassword').value;
-    if (password) {
-        formData.append('password', password);
-    }
-    
-    // Show loading state
+    if (password) formData.append('password', password);
     const submitBtn = event.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Updating...';
     submitBtn.disabled = true;
-    
-    // Submit the form
-    fetch(`/principal/users/${userId}`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => Promise.reject(err));
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            // Show success message
-            alert('User updated successfully!');
-            // Close modal
-            closeEditModal();
-            // Reload the page to show updated data
-            window.location.reload();
-        } else {
-            alert('Error updating user: ' + (data.message || 'Unknown error'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        let errorMessage = 'Error updating user. Please try again.';
-        
-        if (error.errors) {
-            // Show validation errors
-            const errors = Object.values(error.errors).flat();
-            errorMessage = 'Validation errors:\n' + errors.join('\n');
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-        
-        alert(errorMessage);
-    })
-    .finally(() => {
-        // Reset button state
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    });
+    fetch(`/principal/users/${userId}`, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(response => response.ok ? response.json() : response.json().then(err => Promise.reject(err)))
+    .then(data => { if (data.success) { alert('User updated successfully!'); closeEditModal(); window.location.reload(); } else { alert('Error updating user: ' + (data.message || 'Unknown error')); } })
+    .catch(error => { alert('Error updating user. Please try again.'); })
+    .finally(() => { submitBtn.textContent = originalText; submitBtn.disabled = false; });
 }
 
-// View User Modal Functions
 function openViewModal(user) {
-    // Populate the view with user data - combine first_name and last_name
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'N/A';
     document.getElementById('viewFullName').textContent = fullName;
     document.getElementById('viewEmail').textContent = user.email || 'N/A';
@@ -553,293 +539,145 @@ function openViewModal(user) {
     document.getElementById('viewRole').textContent = (user.user_type || '').charAt(0).toUpperCase() + (user.user_type || '').slice(1);
     document.getElementById('viewStatus').textContent = user.is_active ? 'Active' : 'Inactive';
     document.getElementById('viewCreatedDate').textContent = user.created_date ? new Date(user.created_date).toLocaleDateString() : 'N/A';
-    
-    // Show/hide role-specific fields
     showRoleSpecificFields(user.user_type || '', 'view');
-    
-    // Show the modal
     document.getElementById('viewUserModal').classList.remove('hidden');
 }
 
-function closeViewModal() {
-    document.getElementById('viewUserModal').classList.add('hidden');
-}
+function closeViewModal() { document.getElementById('viewUserModal').classList.add('hidden'); }
 
-// Role-specific fields management
 function showRoleSpecificFields(role, mode) {
-    const prefix = mode === 'edit' ? 'edit' : 'view';
-    
-    // Hide all role-specific sections
-    const roleFields = ['parentFields', 'teacherFields', 'adminFields'];
-    const viewRoleFields = ['viewParentInfo', 'viewTeacherInfo', 'viewAdminInfo'];
-    
+    const roleFields = ['parentFields', 'teacherFields'];
+    const viewRoleFields = ['viewParentInfo', 'viewTeacherInfo'];
     if (mode === 'edit') {
-        roleFields.forEach(field => {
-            document.getElementById(field).classList.add('hidden');
-        });
+        roleFields.forEach(field => document.getElementById(field).classList.add('hidden'));
+        if (role === 'parent') document.getElementById('parentFields').classList.remove('hidden');
+        else if (role === 'teacher') document.getElementById('teacherFields').classList.remove('hidden');
     } else {
-        viewRoleFields.forEach(field => {
-            document.getElementById(field).classList.add('hidden');
-        });
-    }
-    
-    // Show relevant fields based on role
-    switch(role) {
-        case 'parent':
-            if (mode === 'edit') {
-                document.getElementById('parentFields').classList.remove('hidden');
-            } else {
-                document.getElementById('viewParentInfo').classList.remove('hidden');
-                document.getElementById('viewAddress').textContent = 'N/A'; // Placeholder
-            }
-            break;
-        case 'teacher':
-            if (mode === 'edit') {
-                document.getElementById('teacherFields').classList.remove('hidden');
-            } else {
-                document.getElementById('viewTeacherInfo').classList.remove('hidden');
-                document.getElementById('viewSubject').textContent = 'N/A'; // Placeholder
-                document.getElementById('viewDepartment').textContent = 'N/A'; // Placeholder
-            }
-            break;
-        case 'administrator':
-        case 'principal':
-            if (mode === 'edit') {
-                document.getElementById('adminFields').classList.remove('hidden');
-            } else {
-                document.getElementById('viewAdminInfo').classList.remove('hidden');
-                document.getElementById('viewAdminLevel').textContent = role === 'principal' ? 'Principal' : 'Administrator';
-            }
-            break;
+        viewRoleFields.forEach(field => document.getElementById(field).classList.add('hidden'));
+        if (role === 'parent') document.getElementById('viewParentInfo').classList.remove('hidden');
+        else if (role === 'teacher') document.getElementById('viewTeacherInfo').classList.remove('hidden');
     }
 }
-
-// Role change handler for edit modal
-document.getElementById('editRole').addEventListener('change', function() {
-    showRoleSpecificFields(this.value, 'edit');
-});
-
-// Delete User Modal Functions
-let userToDelete = null;
 
 function openDeleteModal(user) {
-    console.log('openDeleteModal called with user:', user);
     userToDelete = user;
-    
-    // Get the user's display name (combining first_name and last_name or using name field)
     const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown User';
-    console.log('Determined user name:', userName);
-    
-    // Generate user initials
     const initials = userName.split(' ').map(name => name.charAt(0).toUpperCase()).join('').substring(0, 2);
-    
-    // Populate modal content
     document.getElementById('deleteUserName').textContent = userName;
     document.getElementById('deleteUserEmail').textContent = user.email || 'No email';
     document.getElementById('deleteUserInitials').textContent = initials;
     document.getElementById('confirmationUserName').textContent = userName;
-    
-    // Reset confirmation input and button state
     document.getElementById('deleteConfirmationInput').value = '';
     document.getElementById('confirmDeleteButton').disabled = true;
     document.getElementById('confirmationError').classList.add('hidden');
-    
-    // Show the modal
     document.getElementById('deleteUserModal').classList.remove('hidden');
-    
-    // Focus on the input field
-    setTimeout(() => {
-        document.getElementById('deleteConfirmationInput').focus();
-    }, 100);
+    setTimeout(() => document.getElementById('deleteConfirmationInput').focus(), 100);
 }
 
-function closeDeleteModal() {
-    document.getElementById('deleteUserModal').classList.add('hidden');
-    userToDelete = null;
-}
+function closeDeleteModal() { document.getElementById('deleteUserModal').classList.add('hidden'); userToDelete = null; }
 
 function validateDeleteConfirmation() {
     const input = document.getElementById('deleteConfirmationInput');
     const confirmButton = document.getElementById('confirmDeleteButton');
     const errorDiv = document.getElementById('confirmationError');
     const expectedName = userToDelete ? (userToDelete.name || `${userToDelete.first_name || ''} ${userToDelete.last_name || ''}`.trim()) : '';
-    
-    if (input.value.trim() === expectedName) {
-        confirmButton.disabled = false;
-        errorDiv.classList.add('hidden');
-    } else {
-        confirmButton.disabled = true;
-        if (input.value.trim().length > 0) {
-            errorDiv.classList.remove('hidden');
-        } else {
-            errorDiv.classList.add('hidden');
-        }
-    }
+    if (input.value.trim() === expectedName) { confirmButton.disabled = false; errorDiv.classList.add('hidden'); }
+    else { confirmButton.disabled = true; if (input.value.trim().length > 0) errorDiv.classList.remove('hidden'); else errorDiv.classList.add('hidden'); }
 }
 
 function confirmDeleteUser() {
-    console.log('confirmDeleteUser called');
-    console.log('userToDelete:', userToDelete);
-    
-    if (!userToDelete) {
-        alert('Error: No user selected for deletion');
-        return;
-    }
-    
+    if (!userToDelete) { alert('Error: No user selected for deletion'); return; }
     const expectedName = userToDelete.name || `${userToDelete.first_name || ''} ${userToDelete.last_name || ''}`.trim();
-    const inputValue = document.getElementById('deleteConfirmationInput').value.trim();
-    
-    console.log('Expected name:', expectedName);
-    console.log('Input value:', inputValue);
-    console.log('Names match:', inputValue === expectedName);
-    
-    if (inputValue !== expectedName) {
-        console.log('Names do not match, showing error');
-        document.getElementById('confirmationError').classList.remove('hidden');
-        return;
-    }
-    
-    console.log('Names match, proceeding with deletion');
-    
-    // Show loading state on the delete button
+    if (document.getElementById('deleteConfirmationInput').value.trim() !== expectedName) { document.getElementById('confirmationError').classList.remove('hidden'); return; }
     const deleteButton = document.getElementById('confirmDeleteButton');
-    const originalButtonText = deleteButton.innerHTML;
     deleteButton.disabled = true;
-    deleteButton.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Deleting...';
-    
-    // Call the actual delete function
-    deleteUserWithCallback(userToDelete.userID, () => {
-        // Reset button state if delete fails
-        deleteButton.disabled = false;
-        deleteButton.innerHTML = originalButtonText;
-    });
+    deleteButton.innerHTML = 'Deleting...';
+    deleteUserWithCallback(userToDelete.userID, () => { deleteButton.disabled = false; deleteButton.innerHTML = 'Delete'; });
 }
 
 function deleteUserWithCallback(userId, onError) {
-    console.log('Attempting to delete user with ID:', userId);
-    
-    // Get CSRF token
-    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                 document.querySelector('input[name="_token"]')?.value;
-    
-    console.log('CSRF token found:', token ? 'Yes' : 'No');
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value;
+    fetch(`/principal/users/${userId}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' } })
+    .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.json(); })
+    .then(data => { closeDeleteModal(); if (data.success) { alert(data.message || 'User deleted successfully!'); location.reload(); } else { alert(data.message || 'Error deleting user.'); if (onError) onError(); } })
+    .catch(error => { closeDeleteModal(); alert('An error occurred: ' + error.message); if (onError) onError(); });
+}
 
-    // Send DELETE request to backend
-    fetch(`/principal/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': token,
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        return response.json();
-    })
-    .then(data => {
-        console.log('Response data:', data);
-        
-        // Close the modal
-        closeDeleteModal();
-        
-        if (data.success) {
-            // Show success message
-            alert(data.message || 'User deleted successfully!');
-            // Reload the page to show updated list
-            location.reload();
-        } else {
-            // Show error message
-            alert(data.message || 'Error deleting user. Please try again.');
-            if (onError) onError();
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-        
-        // Close the modal
-        closeDeleteModal();
-        
-        alert('An error occurred while deleting the user: ' + error.message);
-        if (onError) onError();
+document.addEventListener('DOMContentLoaded', function() { document.getElementById('deleteConfirmationInput').addEventListener('input', validateDeleteConfirmation); });
+
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    document.querySelectorAll('.user-checkbox').forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
+    updateSelectedUsers();
+}
+
+function updateSelectedUsers() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const allCheckboxes = document.querySelectorAll('.user-checkbox');
+    const printBtn = document.getElementById('printSelectedBtn');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    selectedUsers = [];
+    checkboxes.forEach(checkbox => { try { selectedUsers.push(JSON.parse(checkbox.dataset.user)); } catch (e) {} });
+    document.getElementById('selectAllCheckbox').checked = checkboxes.length === allCheckboxes.length && allCheckboxes.length > 0;
+    document.getElementById('selectAllCheckbox').indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+    if (selectedUsers.length > 0) { printBtn.classList.remove('hidden'); selectedCountSpan.textContent = selectedUsers.length; } else { printBtn.classList.add('hidden'); }
+}
+
+function openCredentialsModal(user) {
+    currentCredentialUser = user;
+    const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown User';
+    const initials = userName.split(' ').map(name => name.charAt(0).toUpperCase()).join('').substring(0, 2);
+    document.getElementById('credentialsUserName').textContent = userName;
+    document.getElementById('credentialsUserRole').textContent = (user.user_type || 'user').charAt(0).toUpperCase() + (user.user_type || 'user').slice(1);
+    document.getElementById('credentialsUserInitials').textContent = initials;
+    document.getElementById('credentialsEmail').value = user.email || 'N/A';
+    document.getElementById('credentialsPassword').value = user.plain_password || 'N/A';
+    document.getElementById('credentialsModal').classList.remove('hidden');
+}
+
+function closeCredentialsModal() { document.getElementById('credentialsModal').classList.add('hidden'); currentCredentialUser = null; }
+
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.select();
+    document.execCommand('copy');
+    const originalValue = element.value;
+    element.value = 'Copied!';
+    setTimeout(() => element.value = originalValue, 1000);
+}
+
+function printSingleCredential() { if (!currentCredentialUser) return; selectedUsers = [currentCredentialUser]; openPrintPreview(); }
+function printSelectedUsers() { if (selectedUsers.length === 0) { alert('Please select at least one user to print.'); return; } openPrintPreview(); }
+
+function openPrintPreview() {
+    const content = document.getElementById('printPreviewContent');
+    let html = `<div class="text-center mb-6"><h2 class="text-xl font-bold text-gray-900">J. Cruz Sr. Elementary School</h2><p class="text-sm text-gray-600">PTA Management System - User Credentials</p><p class="text-xs text-gray-500">Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div><div class="border-t border-b border-gray-200 py-4"><table class="w-full"><thead><tr class="border-b"><th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">#</th><th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">Name</th><th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">Role</th><th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">Email</th><th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">Password</th></tr></thead><tbody>`;
+    selectedUsers.forEach((user, index) => {
+        const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown';
+        const role = (user.user_type || 'user').charAt(0).toUpperCase() + (user.user_type || 'user').slice(1);
+        html += `<tr class="border-b border-gray-100 ${index % 2 === 0 ? 'bg-gray-50' : ''}"><td class="py-2 px-3 text-sm text-gray-600">${index + 1}</td><td class="py-2 px-3 text-sm text-gray-900 font-medium">${userName}</td><td class="py-2 px-3 text-sm text-gray-600">${role}</td><td class="py-2 px-3 text-sm text-gray-600">${user.email || 'N/A'}</td><td class="py-2 px-3 text-sm text-gray-600 font-mono">${user.plain_password || 'N/A'}</td></tr>`;
     });
+    html += `</tbody></table></div><div class="mt-4 text-xs text-gray-500 text-center"><p>Total Users: ${selectedUsers.length}</p><p class="mt-1">⚠️ This document contains sensitive information. Handle with care.</p></div>`;
+    content.innerHTML = html;
+    document.getElementById('printPreviewModal').classList.remove('hidden');
 }
 
-// Add event listener for real-time validation
-document.getElementById('deleteConfirmationInput').addEventListener('input', validateDeleteConfirmation);
+function closePrintPreviewModal() { document.getElementById('printPreviewModal').classList.add('hidden'); }
 
-// Delete User Function (kept for backward compatibility)
-function deleteUser(userId) {
-    deleteUserWithCallback(userId, null);
+function executePrint() {
+    const content = document.getElementById('printPreviewContent').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>User Credentials - Print</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#333}table{width:100%;border-collapse:collapse}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #ddd}th{background-color:#f5f5f5;font-weight:600}tr:nth-child(even){background-color:#fafafa}.text-center{text-align:center}.font-bold{font-weight:bold}.text-xl{font-size:1.25rem}.text-sm{font-size:0.875rem}.text-xs{font-size:0.75rem}.mb-6{margin-bottom:1.5rem}.mt-4{margin-top:1rem}.mt-1{margin-top:0.25rem}.py-4{padding-top:1rem;padding-bottom:1rem}.border-t{border-top:1px solid #e5e7eb}.border-b{border-bottom:1px solid #e5e7eb}.font-mono{font-family:monospace}.font-medium{font-weight:500}@media print{body{padding:0}}</style></head><body>${content}</body></html>`);
+    printWindow.document.close();
+    printWindow.onload = function() { printWindow.print(); printWindow.onafterprint = function() { printWindow.close(); }; };
 }
 
-// Form submission handler
-document.getElementById('editUserForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    if (!currentEditingUserId) {
-        alert('Error: No user selected for editing');
-        return;
-    }
-    
-    // Get form data
-    const formData = new FormData(this);
-    formData.append('userID', currentEditingUserId);
-    
-    // Convert FormData to regular object for display
-    const formDataObj = Object.fromEntries(formData);
-    
-    // Here you would typically send the data to your backend
-    console.log('Form data for user ID', currentEditingUserId, ':', formDataObj);
-    
-    // Example of how you would implement the actual update:
-    // fetch(`/principal/users/${currentEditingUserId}`, {
-    //     method: 'PUT',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-    //     },
-    //     body: JSON.stringify(formDataObj)
-    // })
-    // .then(response => response.json())
-    // .then(data => {
-    //     if (data.success) {
-    //         closeEditModal();
-    //         location.reload(); // Reload to show updated data
-    //     } else {
-    //         alert('Error updating user: ' + data.message);
-    //     }
-    // })
-    // .catch(error => {
-    //     console.error('Error:', error);
-    //     alert('An error occurred while updating the user');
-    // });
-    
-    // Close the modal for now
-    closeEditModal();
-});
-
-// Close modals when clicking outside
 window.addEventListener('click', function(event) {
-    const editModal = document.getElementById('editUserModal');
-    const viewModal = document.getElementById('viewUserModal');
-    const deleteModal = document.getElementById('deleteUserModal');
-    
-    if (event.target === editModal) {
-        closeEditModal();
-    }
-    if (event.target === viewModal) {
-        closeViewModal();
-    }
-    if (event.target === deleteModal) {
-        closeDeleteModal();
-    }
+    if (event.target === document.getElementById('editUserModal')) closeEditModal();
+    if (event.target === document.getElementById('viewUserModal')) closeViewModal();
+    if (event.target === document.getElementById('deleteUserModal')) closeDeleteModal();
+    if (event.target === document.getElementById('credentialsModal')) closeCredentialsModal();
+    if (event.target === document.getElementById('printPreviewModal')) closePrintPreviewModal();
 });
 </script>
 @endsection

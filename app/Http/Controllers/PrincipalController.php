@@ -54,6 +54,7 @@ class PrincipalController extends Controller
         $user = User::create([
             'username' => $username,
             'password_hash' => Hash::make($request->password),
+            'plain_password' => $request->password,
             'user_type' => $request->role,
             'email' => $request->email,
             'phone' => $request->phone,
@@ -102,14 +103,23 @@ class PrincipalController extends Controller
     {
         $query = User::query();
 
-        // Apply search filter
+        // Apply search filter - searches across name, email, phone, and address (for parents)
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
+                // Search in users table
                 $q->where('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%");
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  // Search in parent profile for address fields
+                  ->orWhereHas('parentProfile', function($pq) use ($search) {
+                      $pq->where('street_address', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%")
+                        ->orWhere('barangay', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                  });
             });
         }
 
@@ -170,6 +180,7 @@ class PrincipalController extends Controller
         $user = User::create([
             'username' => $username,
             'password_hash' => Hash::make($request->password),
+            'plain_password' => $request->password,
             'user_type' => $request->role,
             'email' => $request->email,
             'phone' => $request->phone,
@@ -241,6 +252,7 @@ class PrincipalController extends Controller
             // Update password if provided
             if ($request->filled('password')) {
                 $user->password_hash = Hash::make($request->password);
+                $user->plain_password = $request->password;
                 $passwordChanged = true;
             }
 
@@ -437,6 +449,7 @@ class PrincipalController extends Controller
             // Update password if provided
             if ($request->filled('password')) {
                 $user->password_hash = Hash::make($request->password);
+                $user->plain_password = $request->password;
                 $passwordChanged = true;
             }
 
