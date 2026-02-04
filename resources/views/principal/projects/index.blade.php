@@ -184,6 +184,17 @@
         </div>
     </div>
 
+    @php
+        $shouldOpenCreateProjectModal = old('project_name')
+            || old('start_date')
+            || old('target_completion_date')
+            || old('target_budget')
+            || old('title')
+            || old('venue')
+            || old('objective')
+            || old('time');
+    @endphp
+
     <!-- Create Project Modal -->
     <div id="createProjectModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4">
@@ -191,8 +202,18 @@
                 <h2 class="text-lg font-semibold text-gray-900">Create Project</h2>
                 <button type="button" id="closeCreateProjectModal" class="text-gray-500 hover:text-gray-700">✕</button>
             </div>
-            <form method="POST" action="{{ route('principal.projects.store') }}" enctype="multipart/form-data" class="p-6 space-y-4">
+            <form id="create-project-modal-form" method="POST" action="{{ route('principal.projects.store') }}" enctype="multipart/form-data" class="p-6 space-y-4" novalidate>
                 @csrf
+                <div id="create-project-modal-errors" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-lg p-4" role="alert" aria-live="polite">
+                    <p class="font-semibold">Please fix the errors below.</p>
+                    <ul class="mt-2 list-disc list-inside text-sm">
+                        @if ($errors->any() && $shouldOpenCreateProjectModal)
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        @endif
+                    </ul>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Add Photo</label>
@@ -216,7 +237,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Total Budget</label>
-                        <input type="number" step="0.01" name="target_budget" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        <input type="number" step="0.01" min="0" name="target_budget" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Title</label>
@@ -233,7 +254,7 @@
                 </div>
                 <div class="flex items-center justify-end gap-3 pt-2">
                     <button type="button" id="cancelCreateProjectModal" class="px-4 py-2 text-gray-700 border rounded-md">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Save Project</button>
+                    <button id="create-project-modal-submit" type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed">Save Project</button>
                 </div>
             </form>
         </div>
@@ -265,5 +286,105 @@
             closeModal();
         }
     });
+
+    const modalForm = document.getElementById('create-project-modal-form');
+    const modalSubmit = document.getElementById('create-project-modal-submit');
+    const modalErrorBox = document.getElementById('create-project-modal-errors');
+    const modalErrorList = modalErrorBox ? modalErrorBox.querySelector('ul') : null;
+    const modalBudgetField = modalForm?.querySelector('[name="target_budget"]');
+    const modalStartDateField = modalForm?.querySelector('[name="start_date"]');
+    const modalCompletionField = modalForm?.querySelector('[name="target_completion_date"]');
+    const modalRequiredFields = modalForm ? Array.from(modalForm.querySelectorAll('[required]')) : [];
+    let modalFormSubmitted = false;
+
+    const buildModalErrors = () => {
+        const messages = [];
+
+        modalRequiredFields.forEach((field) => {
+            if (!field.value || (field.type === 'text' && !field.value.trim())) {
+                const label = field.closest('div')?.querySelector('label')?.textContent?.trim();
+                if (label) {
+                    messages.push(`${label} is required.`);
+                }
+            }
+        });
+
+        if (modalBudgetField && modalBudgetField.value !== '') {
+            const budgetValue = Number(modalBudgetField.value);
+            if (Number.isNaN(budgetValue) || budgetValue < 0) {
+                messages.push('Total Budget must be 0 or more.');
+            }
+        }
+
+        if (modalStartDateField && modalCompletionField && modalStartDateField.value && modalCompletionField.value) {
+            if (modalCompletionField.value < modalStartDateField.value) {
+                messages.push('End Date must be on or after Start Date.');
+            }
+        }
+
+        return messages;
+    };
+
+    const renderModalErrors = (messages) => {
+        if (!modalErrorBox || !modalErrorList) return;
+        modalErrorList.innerHTML = '';
+
+        if (messages.length === 0) {
+            modalErrorBox.classList.add('hidden');
+            return;
+        }
+
+        messages.forEach((message) => {
+            const item = document.createElement('li');
+            item.textContent = message;
+            modalErrorList.appendChild(item);
+        });
+
+        modalErrorBox.classList.remove('hidden');
+    };
+
+    const syncModalCompletionMin = () => {
+        if (modalStartDateField && modalCompletionField) {
+            modalCompletionField.min = modalStartDateField.value || '';
+        }
+    };
+
+    const validateModalForm = (showErrors = false) => {
+        syncModalCompletionMin();
+        const messages = buildModalErrors();
+        
+        if (showErrors || modalFormSubmitted) {
+            renderModalErrors(messages);
+            if (modalSubmit) {
+                modalSubmit.disabled = messages.length > 0;
+            }
+        }
+
+        return messages.length === 0;
+    };
+
+    if (modalForm) {
+        modalForm.addEventListener('input', () => validateModalForm(false));
+        modalForm.addEventListener('change', () => validateModalForm(false));
+        modalForm.addEventListener('submit', (event) => {
+            modalFormSubmitted = true;
+            if (!validateModalForm(true)) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+
+        syncModalCompletionMin();
+    }
+
+    const shouldOpenCreateProjectModal = @json($shouldOpenCreateProjectModal);
+
+    if (shouldOpenCreateProjectModal) {
+        modalFormSubmitted = true;
+        if (modalErrorBox) {
+            modalErrorBox.classList.remove('hidden');
+        }
+        openModal();
+    }
 </script>
 @endsection
