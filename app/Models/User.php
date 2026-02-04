@@ -102,11 +102,11 @@ class User extends Authenticatable
     {
         $firstName = $this->first_name ?? '';
         $lastName = $this->last_name ?? '';
-        
+
         if (empty($firstName) && empty($lastName)) {
             return $this->username ?? 'Unknown User';
         }
-        
+
         return trim($firstName . ' ' . $lastName);
     }
 
@@ -180,12 +180,12 @@ class User extends Authenticatable
         $updateData = [
             'failed_login_attempts' => $this->failed_login_attempts + 1
         ];
-        
+
         // Lock account after 5 failed attempts for 30 minutes
         if ($this->failed_login_attempts >= 4) { // >= 4 because we're incrementing
             $updateData['account_locked_until'] = now()->addMinutes(30);
         }
-        
+
         $this->update($updateData);
         $this->refresh(); // Refresh the model to get updated values
     }
@@ -198,7 +198,7 @@ class User extends Authenticatable
         if ($this->account_locked_until && $this->account_locked_until->isFuture()) {
             return true;
         }
-        
+
         // Reset lock if time has passed
         if ($this->account_locked_until && $this->account_locked_until->isPast()) {
             $this->update([
@@ -207,7 +207,7 @@ class User extends Authenticatable
             ]);
             $this->refresh();
         }
-        
+
         return false;
     }
 
@@ -216,7 +216,7 @@ class User extends Authenticatable
      */
     public function parentProfile()
     {
-        return $this->hasOne(Parent::class, 'userID', 'userID');
+        return $this->hasOne(ParentProfile::class, 'userID', 'userID');
     }
 
     /**
