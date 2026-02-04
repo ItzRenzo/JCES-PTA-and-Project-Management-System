@@ -9,29 +9,54 @@
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route('administrator.users') }}" class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search users..." 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+        <form method="GET" action="{{ route('administrator.users') }}" class="space-y-4">
+            <!-- Main Search Bar -->
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Search by name, phone, email, or address..."
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                </div>
+                <select name="role" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    <option value="">All Roles</option>
+                    <option value="parent" {{ request('role') == 'parent' ? 'selected' : '' }}>Parent</option>
+                    <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
+                    <option value="administrator" {{ request('role') == 'administrator' ? 'selected' : '' }}>Administrator</option>
+                    <option value="principal" {{ request('role') == 'principal' ? 'selected' : '' }}>Principal</option>
+                </select>
+                <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                    <option value="">All Status</option>
+                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Search
+                </button>
+                @if(request('search') || request('role') || request('status'))
+                <a href="{{ route('administrator.users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2 transition-colors duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Clear
+                </a>
+                @endif
             </div>
-            <select name="role" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
-                <option value="">All Roles</option>
-                <option value="parent" {{ request('role') == 'parent' ? 'selected' : '' }}>Parent</option>
-                <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
-                <option value="administrator" {{ request('role') == 'administrator' ? 'selected' : '' }}>Administrator</option>
-                <option value="principal" {{ request('role') == 'principal' ? 'selected' : '' }}>Principal</option>
-            </select>
-            <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
-                <option value="">All Status</option>
-                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-            </select>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors duration-200">
+
+            <!-- Search Hints -->
+            <div class="text-xs text-gray-500 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Filter
-            </button>
+                <span>Tip: Search parents by name, phone number, email, street address, city, or barangay</span>
+            </div>
         </form>
     </div>
 
@@ -92,16 +117,16 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center gap-2">
-                                <button onclick="openEditModal({{ json_encode($user) }})" 
-                                        class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-200" 
+                                <button onclick="openEditModal({{ json_encode($user) }})"
+                                        class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-200"
                                         title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
 
-                                <button onclick="openViewModal({{ json_encode($user) }})" 
-                                        class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-200" 
+                                <button onclick="openViewModal({{ json_encode($user) }})"
+                                        class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-200"
                                         title="View">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -109,8 +134,8 @@
                                     </svg>
                                 </button>
 
-                                <button onclick="openDeleteModal({{ json_encode($user) }})" 
-                                        class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-200" 
+                                <button onclick="openDeleteModal({{ json_encode($user) }})"
+                                        class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-200"
                                         title="Delete">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -177,25 +202,25 @@
                     <!-- Common Fields -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                        <input type="text" id="editFullName" name="full_name" 
+                        <input type="text" id="editFullName" name="full_name"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" id="editEmail" name="email" 
+                        <input type="email" id="editEmail" name="email"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                        <input type="text" id="editPhone" name="phone" 
+                        <input type="text" id="editPhone" name="phone"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                        <select id="editRole" name="role" 
+                        <select id="editRole" name="role"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="parent">Parent</option>
                             <option value="teacher">Teacher</option>
@@ -206,7 +231,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                        <select id="editStatus" name="status" 
+                        <select id="editStatus" name="status"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
@@ -225,19 +250,19 @@
                     <div id="teacherFields" class="hidden space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                            <input type="text" id="editSubject" name="subject" 
+                            <input type="text" id="editSubject" name="subject"
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                            <input type="text" id="editDepartment" name="department" 
+                            <input type="text" id="editDepartment" name="department"
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">New Password (optional)</label>
-                        <input type="password" id="editPassword" name="password" 
+                        <input type="password" id="editPassword" name="password"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                placeholder="Leave blank to keep current">
                     </div>
@@ -245,11 +270,11 @@
 
                 <!-- Modal Footer -->
                 <div class="flex items-center justify-end gap-3 pt-6 border-t mt-6">
-                    <button type="button" onclick="closeEditModal()" 
+                    <button type="button" onclick="closeEditModal()"
                             class="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200">
                         Cancel
                     </button>
-                    <button type="submit" 
+                    <button type="submit"
                             class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">
                         Save Changes
                     </button>
@@ -368,12 +393,12 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         To confirm, type "<span id="confirmationUserName" class="font-semibold text-red-600"></span>" in the box below:
                     </label>
-                    <input type="text" id="deleteConfirmationInput" 
+                    <input type="text" id="deleteConfirmationInput"
                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-red-500"
                            placeholder="Type the user name here">
                     <div id="confirmationError" class="text-red-600 text-xs mt-1 hidden">
@@ -412,10 +437,10 @@ let currentEditingUserId = null;
 
 function openEditModal(user) {
     currentEditingUserId = user.userID;
-    
+
     // Set the hidden user ID field
     document.getElementById('editUserId').value = user.userID;
-    
+
     // Populate the common form fields - combine first_name and last_name
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
     document.getElementById('editFullName').value = fullName;
@@ -423,13 +448,13 @@ function openEditModal(user) {
     document.getElementById('editPhone').value = user.phone || '';
     document.getElementById('editRole').value = user.user_type || '';
     document.getElementById('editStatus').value = user.is_active ? '1' : '0';
-    
+
     // Clear password field
     document.getElementById('editPassword').value = '';
-    
+
     // Show/hide role-specific fields
     showRoleSpecificFields(user.user_type || '', 'edit');
-    
+
     // Show the modal
     document.getElementById('editUserModal').classList.remove('hidden');
 }
@@ -442,16 +467,16 @@ function closeEditModal() {
 // Form submission function
 function submitEditForm(event) {
     event.preventDefault();
-    
+
     const formData = new FormData();
     const userId = document.getElementById('editUserId').value;
-    
+
     // Get form values
     const fullName = document.getElementById('editFullName').value.trim();
     const nameParts = fullName.split(' ');
     const firstName = nameParts[0] || '';
     const lastName = nameParts.slice(1).join(' ') || '';
-    
+
     formData.append('_token', document.querySelector('input[name="_token"]').value);
     formData.append('_method', 'PUT');
     formData.append('first_name', firstName);
@@ -460,18 +485,18 @@ function submitEditForm(event) {
     formData.append('phone', document.getElementById('editPhone').value);
     formData.append('user_type', document.getElementById('editRole').value);
     formData.append('is_active', document.getElementById('editStatus').value);
-    
+
     const password = document.getElementById('editPassword').value;
     if (password) {
         formData.append('password', password);
     }
-    
+
     // Show loading state
     const submitBtn = event.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Updating...';
     submitBtn.disabled = true;
-    
+
     // Submit the form
     fetch(`/administrator/users/${userId}`, {
         method: 'POST',
@@ -501,7 +526,7 @@ function submitEditForm(event) {
     .catch(error => {
         console.error('Error:', error);
         let errorMessage = 'Error updating user. Please try again.';
-        
+
         if (error.errors) {
             // Show validation errors
             const errors = Object.values(error.errors).flat();
@@ -509,7 +534,7 @@ function submitEditForm(event) {
         } else if (error.message) {
             errorMessage = error.message;
         }
-        
+
         alert(errorMessage);
     })
     .finally(() => {
@@ -529,10 +554,10 @@ function openViewModal(user) {
     document.getElementById('viewRole').textContent = (user.user_type || '').charAt(0).toUpperCase() + (user.user_type || '').slice(1);
     document.getElementById('viewStatus').textContent = user.is_active ? 'Active' : 'Inactive';
     document.getElementById('viewCreatedDate').textContent = user.created_date ? new Date(user.created_date).toLocaleDateString() : 'N/A';
-    
+
     // Show/hide role-specific fields
     showRoleSpecificFields(user.user_type || '', 'view');
-    
+
     // Show the modal
     document.getElementById('viewUserModal').classList.remove('hidden');
 }
@@ -544,16 +569,16 @@ function closeViewModal() {
 // Role-specific fields management
 function showRoleSpecificFields(role, mode) {
     const prefix = mode === 'edit' ? 'edit' : 'view';
-    
+
     // Hide all role-specific sections
     const roleFields = ['parentFields', 'teacherFields'];
     const viewRoleFields = ['viewParentInfo', 'viewTeacherInfo'];
-    
+
     if (mode === 'edit') {
         roleFields.forEach(field => {
             document.getElementById(field).classList.add('hidden');
         });
-        
+
         // Show relevant fields based on role
         if (role === 'parent') {
             document.getElementById('parentFields').classList.remove('hidden');
@@ -565,7 +590,7 @@ function showRoleSpecificFields(role, mode) {
         viewRoleFields.forEach(field => {
             document.getElementById(field).classList.add('hidden');
         });
-        
+
         // Show relevant fields based on role
         if (role === 'parent') {
             document.getElementById('viewParentInfo').classList.remove('hidden');
@@ -582,28 +607,28 @@ let userToDelete = null;
 function openDeleteModal(user) {
     console.log('openDeleteModal called with user:', user);
     userToDelete = user;
-    
+
     // Get the user's display name (combining first_name and last_name or using name field)
     const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown User';
     console.log('Determined user name:', userName);
-    
+
     // Generate user initials
     const initials = userName.split(' ').map(name => name.charAt(0).toUpperCase()).join('').substring(0, 2);
-    
+
     // Populate modal content
     document.getElementById('deleteUserName').textContent = userName;
     document.getElementById('deleteUserEmail').textContent = user.email || 'No email';
     document.getElementById('deleteUserInitials').textContent = initials;
     document.getElementById('confirmationUserName').textContent = userName;
-    
+
     // Reset confirmation input and button state
     document.getElementById('deleteConfirmationInput').value = '';
     document.getElementById('confirmDeleteButton').disabled = true;
     document.getElementById('confirmationError').classList.add('hidden');
-    
+
     // Show the modal
     document.getElementById('deleteUserModal').classList.remove('hidden');
-    
+
     // Focus on the input field
     setTimeout(() => {
         document.getElementById('deleteConfirmationInput').focus();
@@ -620,7 +645,7 @@ function validateDeleteConfirmation() {
     const confirmButton = document.getElementById('confirmDeleteButton');
     const errorDiv = document.getElementById('confirmationError');
     const expectedName = userToDelete ? (userToDelete.name || `${userToDelete.first_name || ''} ${userToDelete.last_name || ''}`.trim()) : '';
-    
+
     if (input.value.trim() === expectedName) {
         confirmButton.disabled = false;
         errorDiv.classList.add('hidden');
@@ -637,33 +662,33 @@ function validateDeleteConfirmation() {
 function confirmDeleteUser() {
     console.log('confirmDeleteUser called');
     console.log('userToDelete:', userToDelete);
-    
+
     if (!userToDelete) {
         alert('Error: No user selected for deletion');
         return;
     }
-    
+
     const expectedName = userToDelete.name || `${userToDelete.first_name || ''} ${userToDelete.last_name || ''}`.trim();
     const inputValue = document.getElementById('deleteConfirmationInput').value.trim();
-    
+
     console.log('Expected name:', expectedName);
     console.log('Input value:', inputValue);
     console.log('Names match:', inputValue === expectedName);
-    
+
     if (inputValue !== expectedName) {
         console.log('Names do not match, showing error');
         document.getElementById('confirmationError').classList.remove('hidden');
         return;
     }
-    
+
     console.log('Names match, proceeding with deletion');
-    
+
     // Show loading state on the delete button
     const deleteButton = document.getElementById('confirmDeleteButton');
     const originalButtonText = deleteButton.innerHTML;
     deleteButton.disabled = true;
     deleteButton.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Deleting...';
-    
+
     // Call the actual delete function
     deleteUserWithCallback(userToDelete.userID, () => {
         // Reset button state if delete fails
@@ -674,11 +699,11 @@ function confirmDeleteUser() {
 
 function deleteUserWithCallback(userId, onError) {
     console.log('Attempting to delete user with ID:', userId);
-    
+
     // Get CSRF token
-    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
                  document.querySelector('input[name="_token"]')?.value;
-    
+
     console.log('CSRF token found:', token ? 'Yes' : 'No');
 
     // Send DELETE request to backend (using administrator route)
@@ -693,19 +718,19 @@ function deleteUserWithCallback(userId, onError) {
     .then(response => {
         console.log('Response status:', response.status);
         console.log('Response ok:', response.ok);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         return response.json();
     })
     .then(data => {
         console.log('Response data:', data);
-        
+
         // Close the modal
         closeDeleteModal();
-        
+
         if (data.success) {
             // Show success message
             alert(data.message || 'User deleted successfully!');
@@ -719,10 +744,10 @@ function deleteUserWithCallback(userId, onError) {
     })
     .catch(error => {
         console.error('Fetch error:', error);
-        
+
         // Close the modal
         closeDeleteModal();
-        
+
         alert('An error occurred while deleting the user: ' + error.message);
         if (onError) onError();
     });
@@ -744,7 +769,7 @@ window.addEventListener('click', function(event) {
     const editModal = document.getElementById('editUserModal');
     const viewModal = document.getElementById('viewUserModal');
     const deleteModal = document.getElementById('deleteUserModal');
-    
+
     if (event.target === editModal) {
         closeEditModal();
     }

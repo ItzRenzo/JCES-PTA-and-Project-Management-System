@@ -17,12 +17,17 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $user = $request->user();
-        
+
         // Determine which profile view to show based on user role
         switch ($user->user_type) {
             case 'parent':
+                $students = [];
+                if ($user->parentProfile) {
+                    $students = $user->parentProfile->students()->get();
+                }
                 return view('profile.parent-profile', [
                     'user' => $user,
+                    'students' => $students,
                 ]);
             case 'administrator':
                 return view('profile.admin-profile', [

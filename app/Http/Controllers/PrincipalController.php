@@ -45,7 +45,7 @@ class PrincipalController extends Controller
         $baseUsername = strtolower($request->first_name . $request->last_name);
         $username = $baseUsername;
         $counter = 1;
-        
+
         while (User::where('username', $username)->exists()) {
             $username = $baseUsername . $counter;
             $counter++;
@@ -86,7 +86,7 @@ class PrincipalController extends Controller
     /**
      * Administrator methods (same functionality, different layout)
      */
-    
+
     /**
      * Display the administrator dashboard.
      */
@@ -161,7 +161,7 @@ class PrincipalController extends Controller
         $baseUsername = strtolower($request->first_name . $request->last_name);
         $username = $baseUsername;
         $counter = 1;
-        
+
         while (User::where('username', $username)->exists()) {
             $username = $baseUsername . $counter;
             $counter++;
@@ -295,7 +295,7 @@ class PrincipalController extends Controller
         try {
             // Find user by userID (our custom primary key)
             $user = User::where('userID', $id)->firstOrFail();
-            
+
             // Prevent deletion of the currently logged-in user
             if ($user->userID === Auth::user()->userID) {
                 return response()->json([
@@ -354,14 +354,23 @@ class PrincipalController extends Controller
     {
         $query = User::query();
 
-        // Apply search filter
+        // Apply search filter - searches across name, email, phone, and address (for parents)
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
+                // Search in users table
                 $q->where('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%");
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  // Search in parent profile for address fields
+                  ->orWhereHas('parentProfile', function($pq) use ($search) {
+                      $pq->where('street_address', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%")
+                        ->orWhere('barangay', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                  });
             });
         }
 
@@ -483,7 +492,7 @@ class PrincipalController extends Controller
         try {
             // Find user by userID (our custom primary key)
             $user = User::where('userID', $id)->firstOrFail();
-            
+
             // Prevent deletion of the currently logged-in user
             if ($user->userID === Auth::user()->userID) {
                 return response()->json([
