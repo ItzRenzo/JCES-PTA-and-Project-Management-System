@@ -91,7 +91,7 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Project</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Status</th>
-                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600" colspan="2">Receipt</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -162,15 +162,46 @@
                                     {{ $statusLabel }}
                                 </span>
                             </td>
-                            <td class="px-6 py-3 text-sm text-gray-500">{{ optional($contribution->contribution_date)->format('m-d-Y') }}</td>
                             <td class="px-6 py-3 text-right">
-                                @if($contribution->receipt_number)
-                                    <a href="{{ route('administrator.payments.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
-                                        Print
-                                    </a>
-                                @else
-                                    <span class="text-gray-400 text-sm">N/A</span>
-                                @endif
+                                <div class="flex items-center justify-end gap-2">
+                                    @php
+                                        // Check if receipt image exists
+                                        $receiptImageExists = false;
+                                        $receiptImagePath = '';
+                                        foreach(['jpg', 'jpeg', 'png', 'gif'] as $ext) {
+                                            if(file_exists(public_path('images/receipt_img/' . $contribution->contributionID . '.' . $ext))) {
+                                                $receiptImageExists = true;
+                                                $receiptImagePath = asset('images/receipt_img/' . $contribution->contributionID . '.' . $ext) . '?t=' . time();
+                                                break;
+                                            }
+                                        }
+                                    @endphp
+                                    @if($receiptImageExists)
+                                        <button type="button"
+                                                onclick="showVerifyModal('{{ addslashes($receiptImagePath) }}', '{{ $contribution->contributionID }}', '{{ $status }}')"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 text-xs font-semibold rounded-lg transition-colors border border-blue-200"
+                                                title="Verify Payment">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Verify
+                                        </button>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-400 text-xs rounded-lg">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            No Image
+                                        </span>
+                                    @endif
+                                    @if($contribution->receipt_number)
+                                        <a href="{{ route('administrator.payments.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                                            Print
+                                        </a>
+                                    @else
+                                        <span class="text-gray-400 text-sm">N/A</span>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -198,9 +229,16 @@
                                         {{ $statusLabel }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-3 text-sm text-gray-500">{{ \Carbon\Carbon::parse($payment['date'])->format('m-d-Y') }}</td>
                                 <td class="px-6 py-3 text-right">
-                                    <a href="#" class="text-green-600 hover:text-green-700 text-sm font-medium">Print</a>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-400 text-xs rounded-lg">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            No Image
+                                        </span>
+                                        <a href="#" class="text-green-600 hover:text-green-700 text-sm font-medium">Print</a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -669,6 +707,185 @@
                 selectAll.indeterminate = checked > 0 && checked < total;
             }
         });
+    });
+
+    // Verify Payment Modal Functions
+    function showVerifyModal(imagePath, contributionId, currentStatus) {
+        console.log('Verify Modal - Image Path:', imagePath);
+        console.log('Verify Modal - Contribution ID:', contributionId);
+
+        // Remove existing modal if any
+        const existingModal = document.getElementById('verifyPaymentModal');
+        if (existingModal) existingModal.remove();
+
+        const isPaid = currentStatus === 'completed';
+        const isPending = currentStatus === 'pending';
+        const isUnpaid = currentStatus === 'refunded';
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'verifyPaymentModal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+        modal.innerHTML = `
+            <div class="fixed inset-0 bg-black/50" onclick="closeVerifyModal()"></div>
+            <div class="bg-white rounded-lg max-w-3xl w-full relative z-10 overflow-hidden shadow-2xl">
+                <!-- Header -->
+                <div class="bg-white px-5 py-3 border-b border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-base font-semibold text-gray-900">Payment Verification</h3>
+                        <span class="text-xs text-gray-400">Ref #${contributionId}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${isPaid ? 'bg-green-100 text-green-700' : (isPending ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}">
+                            <span class="w-1.5 h-1.5 rounded-full ${isPaid ? 'bg-green-500' : (isPending ? 'bg-amber-500' : 'bg-red-500')}"></span>
+                            ${isPaid ? 'Paid' : (isPending ? 'Pending' : 'Unpaid')}
+                        </span>
+                        <button onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Content - Side by Side -->
+                <div class="flex">
+                    <!-- Left: Receipt Image -->
+                    <div class="w-1/2 p-4 bg-gray-50 border-r border-gray-200">
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Receipt Image</label>
+                        <div class="bg-white rounded-lg border border-gray-200 p-2 flex items-center justify-center" style="height: 280px; overflow: auto;">
+                            <img id="receiptImagePreview" alt="Payment Receipt" class="max-w-full max-h-full object-contain rounded" style="display: block;">
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <a href="${imagePath}" download="receipt_${contributionId}" class="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Download
+                            </a>
+                            <a href="${imagePath}" target="_blank" class="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 font-medium">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                                Open Full
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right: Verification Actions -->
+                    <div class="w-1/2 p-4 bg-white">
+                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Update Status</label>
+
+                        <div class="space-y-2">
+                            <!-- Approve Button -->
+                            <button onclick="updatePaymentStatus(${contributionId}, 'completed')"
+                                    class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isPaid ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-500 hover:bg-green-50'}"
+                                    ${isPaid ? 'disabled' : ''}>
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isPaid ? 'bg-green-500' : 'bg-gray-100'}">
+                                    <svg class="w-5 h-5 ${isPaid ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <span class="block text-sm font-semibold ${isPaid ? 'text-green-700' : 'text-gray-700'}">Approve Payment</span>
+                                    <span class="block text-xs ${isPaid ? 'text-green-600' : 'text-gray-500'}">Mark as Paid</span>
+                                </div>
+                                ${isPaid ? '<svg class="w-5 h-5 text-green-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
+                            </button>
+
+                            <!-- Hold Button -->
+                            <button onclick="updatePaymentStatus(${contributionId}, 'pending')"
+                                    class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isPending ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-500 hover:bg-amber-50'}"
+                                    ${isPending ? 'disabled' : ''}>
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isPending ? 'bg-amber-500' : 'bg-gray-100'}">
+                                    <svg class="w-5 h-5 ${isPending ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <span class="block text-sm font-semibold ${isPending ? 'text-amber-700' : 'text-gray-700'}">Hold for Review</span>
+                                    <span class="block text-xs ${isPending ? 'text-amber-600' : 'text-gray-500'}">Mark as Pending</span>
+                                </div>
+                                ${isPending ? '<svg class="w-5 h-5 text-amber-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
+                            </button>
+
+                            <!-- Reject Button -->
+                            <button onclick="updatePaymentStatus(${contributionId}, 'refunded')"
+                                    class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isUnpaid ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-500 hover:bg-red-50'}"
+                                    ${isUnpaid ? 'disabled' : ''}>
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isUnpaid ? 'bg-red-500' : 'bg-gray-100'}">
+                                    <svg class="w-5 h-5 ${isUnpaid ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </div>
+                                <div class="text-left">
+                                    <span class="block text-sm font-semibold ${isUnpaid ? 'text-red-700' : 'text-gray-700'}">Reject Payment</span>
+                                    <span class="block text-xs ${isUnpaid ? 'text-red-600' : 'text-gray-500'}">Mark as Unpaid</span>
+                                </div>
+                                ${isUnpaid ? '<svg class="w-5 h-5 text-red-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
+                            </button>
+                        </div>
+
+                        <!-- Close Button -->
+                        <button onclick="closeVerifyModal()" class="w-full mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-lg transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
+
+        // Set image source after modal is in DOM
+        const imgElement = document.getElementById('receiptImagePreview');
+        if (imgElement) {
+            imgElement.src = imagePath;
+        }
+    }
+
+    function closeVerifyModal() {
+        const modal = document.getElementById('verifyPaymentModal');
+        if (modal) modal.remove();
+        document.body.style.overflow = '';
+    }
+
+    function updatePaymentStatus(contributionId, status) {
+        // Create form and submit
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/administrator/payments/${contributionId}`;
+
+        // Add CSRF token
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '{{ csrf_token() }}';
+        form.appendChild(csrfToken);
+
+        // Add method spoofing for PUT
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'PUT';
+        form.appendChild(methodInput);
+
+        // Add status
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'payment_status';
+        statusInput.value = status;
+        form.appendChild(statusInput);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeVerifyModal();
+        }
     });
 </script>
 @endsection

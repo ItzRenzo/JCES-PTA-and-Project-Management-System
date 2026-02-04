@@ -202,6 +202,76 @@
     </div>
 </div>
 
+<!-- Receipt Image Upload Modal -->
+<div id="receiptUploadModal" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeReceiptUploadModal()"></div>
+
+    <!-- Modal Content -->
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md relative z-10" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 0, 0, 0.15);">
+            <!-- Close Button -->
+            <button onclick="closeReceiptUploadModal()" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full flex items-center justify-center transition-all z-10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+
+            <div class="p-8">
+                <!-- Header -->
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-900 mb-2">Upload Payment Receipt</h2>
+                    <p class="text-sm text-gray-600">Please upload a screenshot or photo of your payment receipt from <span id="paymentModeLabel" class="font-semibold text-green-600">GCash</span></p>
+                </div>
+
+                <!-- Upload Area -->
+                <form id="receiptUploadForm" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="payment_method" id="formPaymentMethod" value="gcash">
+                    <input type="hidden" name="name" id="formPayerName">
+                    <input type="hidden" name="contact" id="formPayerContact">
+                    <input type="hidden" name="address" id="formPayerAddress">
+                    <div id="projectInputs"></div>
+
+                    <div class="mb-6">
+                        <label for="receiptImageInput" class="block cursor-pointer">
+                            <div id="uploadArea" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-500 hover:bg-green-50 transition-all">
+                                <div id="uploadPlaceholder">
+                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                    </svg>
+                                    <p class="text-sm font-medium text-gray-700 mb-1">Click to upload receipt image</p>
+                                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                                </div>
+                                <div id="uploadPreview" class="hidden">
+                                    <img id="previewImage" src="" alt="Receipt Preview" class="max-h-48 mx-auto rounded-lg mb-2">
+                                    <p id="fileName" class="text-sm text-gray-600"></p>
+                                </div>
+                            </div>
+                        </label>
+                        <input type="file" id="receiptImageInput" name="receipt_image" accept="image/*" class="hidden" onchange="previewReceiptImage(this)">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="button" onclick="submitPaymentWithReceipt()" id="submitPaymentBtn"
+                            class="w-full px-6 py-4 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-base font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3"
+                            disabled>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span id="submitBtnText">Submit Payment</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     function updateTotal() {
         const checkboxes = document.querySelectorAll('.payment-checkbox:checked:not(:disabled)');
@@ -370,8 +440,97 @@
             return;
         }
 
-        // Show success modal
-        showSuccessModal(total, paymentMode);
+        // Prepare form data for receipt upload modal
+        document.getElementById('formPaymentMethod').value = paymentMode;
+        document.getElementById('formPayerName').value = name;
+        document.getElementById('formPayerContact').value = contact;
+        document.getElementById('formPayerAddress').value = address;
+        document.getElementById('paymentModeLabel').textContent = paymentMode.toUpperCase();
+
+        // Add project IDs and amounts to form
+        const projectInputsContainer = document.getElementById('projectInputs');
+        projectInputsContainer.innerHTML = '';
+
+        const checkboxes = document.querySelectorAll('.payment-checkbox:checked:not(:disabled)');
+        checkboxes.forEach((checkbox, index) => {
+            const projectId = checkbox.getAttribute('data-project-id');
+            const amount = checkbox.value;
+
+            projectInputsContainer.innerHTML += `
+                <input type="hidden" name="project_ids[]" value="${projectId}">
+                <input type="hidden" name="amounts[]" value="${amount}">
+            `;
+        });
+
+        // Reset upload area
+        document.getElementById('uploadPlaceholder').classList.remove('hidden');
+        document.getElementById('uploadPreview').classList.add('hidden');
+        document.getElementById('receiptImageInput').value = '';
+        document.getElementById('submitPaymentBtn').disabled = true;
+
+        // Show receipt upload modal
+        document.getElementById('receiptUploadModal').classList.remove('hidden');
+    }
+
+    function closeReceiptUploadModal() {
+        document.getElementById('receiptUploadModal').classList.add('hidden');
+    }
+
+    function previewReceiptImage(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('uploadPlaceholder').classList.add('hidden');
+                document.getElementById('uploadPreview').classList.remove('hidden');
+                document.getElementById('submitPaymentBtn').disabled = false;
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function submitPaymentWithReceipt() {
+        const form = document.getElementById('receiptUploadForm');
+        const formData = new FormData(form);
+        const submitBtn = document.getElementById('submitPaymentBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+
+        // Disable button and show loading
+        submitBtn.disabled = true;
+        submitBtnText.textContent = 'Submitting...';
+
+        fetch('{{ route("parent.payments.submit") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close receipt upload modal
+                closeReceiptUploadModal();
+
+                // Show success modal
+                const total = document.getElementById('receiptTotal').textContent;
+                showSuccessModal(total, selectedPaymentMode);
+            } else {
+                alert(data.message || 'Failed to submit payment. Please try again.');
+                submitBtn.disabled = false;
+                submitBtnText.textContent = 'Submit Payment';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+            submitBtn.disabled = false;
+            submitBtnText.textContent = 'Submit Payment';
+        });
     }
 
     // Store receipt data for later use
@@ -522,11 +681,10 @@
         if (receiptModal) receiptModal.remove();
 
         closePaymentModal();
+        closeReceiptUploadModal();
 
-        // Reset checkboxes
-        document.querySelectorAll('.payment-checkbox').forEach(cb => cb.checked = false);
-        updateTotal();
-        currentReceiptData = null;
+        // Refresh the page to show updated payment status
+        window.location.reload();
     }
 
     function exportReceipt() {

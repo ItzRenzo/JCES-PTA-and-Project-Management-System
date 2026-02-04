@@ -201,6 +201,35 @@ Route::delete('/administrator/users/{id}', [PrincipalController::class, 'adminDe
     ->middleware(['auth', 'verified'])
     ->name('administrator.users.delete');
 
+// Administrator Student Management routes
+Route::get('/administrator/students', [PrincipalController::class, 'adminStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students');
+
+Route::post('/administrator/students', [PrincipalController::class, 'adminStoreStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.store');
+
+Route::put('/administrator/students/{id}', [PrincipalController::class, 'adminUpdateStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.update');
+
+Route::delete('/administrator/students/{id}', [PrincipalController::class, 'adminDeleteStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.delete');
+
+Route::post('/administrator/students/{id}/transfer', [PrincipalController::class, 'adminTransferStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.transfer');
+
+Route::post('/administrator/students/bulk-transfer', [PrincipalController::class, 'adminBulkTransferStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.bulk-transfer');
+
+Route::get('/administrator/parents-list', [PrincipalController::class, 'adminGetParentsList'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.parents-list');
+
 // Administrator Reports routes
 Route::get('/administrator/reports', [ReportsController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -368,6 +397,10 @@ Route::put('/teacher/users/{id}', [TeacherController::class, 'updateUser'])
 Route::get('/parent/payments', [ParentContributionController::class, 'paymentIndex'])
     ->middleware(['auth', 'verified'])
     ->name('parent.payments');
+
+Route::post('/parent/payments/submit', [ParentContributionController::class, 'submitPayment'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.payments.submit');
 
 // Logout route that redirects to login
 Route::get('/sign-out', function () {
