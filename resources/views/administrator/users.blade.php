@@ -48,6 +48,13 @@
                     Clear
                 </a>
                 @endif
+                <button type="button" id="printSelectedBtn" onclick="printSelectedUsers()"
+                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 transition-colors duration-200 hidden">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print Selected (<span id="selectedCount">0</span>)
+                </button>
             </div>
 
             <!-- Search Hints -->
@@ -67,7 +74,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="w-12 px-4 py-3 text-left">
-                            <input type="checkbox" class="rounded border-gray-300">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
                         </th>
                         <th class="w-2/5 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                         <th class="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
@@ -78,9 +85,10 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($users as $user)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50" data-user-id="{{ $user->userID }}">
                         <td class="px-4 py-4">
-                            <input type="checkbox" class="rounded border-gray-300">
+                            <input type="checkbox" class="user-checkbox rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                   data-user='{{ json_encode($user) }}' onchange="updateSelectedUsers()">
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center">
@@ -117,6 +125,14 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center gap-2">
+                                <button onclick="openCredentialsModal({{ json_encode($user) }})"
+                                        class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition-colors duration-200"
+                                        title="Show Credentials">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                    </svg>
+                                </button>
+
                                 <button onclick="openEditModal({{ json_encode($user) }})"
                                         class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-200"
                                         title="Edit">
@@ -423,7 +439,141 @@
 </div>
 
 
+<!-- User Credentials Modal -->
+<div id="credentialsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-full px-4 py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">User Credentials</h3>
+                </div>
+                <button onclick="closeCredentialsModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="mt-6" id="credentialsContent">
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div class="flex items-center mb-4">
+                        <div id="credentialsUserAvatar" class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span id="credentialsUserInitials" class="text-purple-600 font-semibold text-lg"></span>
+                        </div>
+                        <div class="ml-3">
+                            <div id="credentialsUserName" class="text-base font-medium text-gray-900"></div>
+                            <div id="credentialsUserRole" class="text-sm text-gray-500"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
+                            <div class="flex items-center">
+                                <input type="text" id="credentialsEmail" readonly
+                                       class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-l text-sm text-gray-900">
+                                <button onclick="copyToClipboard('credentialsEmail')"
+                                        class="px-3 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r hover:bg-gray-200 transition-colors"
+                                        title="Copy">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Password</label>
+                            <div class="flex items-center">
+                                <input type="text" id="credentialsPassword" readonly
+                                       class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-l text-sm text-gray-900">
+                                <button onclick="copyToClipboard('credentialsPassword')"
+                                        class="px-3 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r hover:bg-gray-200 transition-colors"
+                                        title="Copy">
+                                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t">
+                <button type="button" onclick="closeCredentialsModal()"
+                        class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">
+                    Close
+                </button>
+                <button type="button" onclick="printSingleCredential()"
+                        class="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors duration-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Selected Users Modal -->
+<div id="printPreviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-full px-4 py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Print User Credentials</h3>
+                </div>
+                <button onclick="closePrintPreviewModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Print Preview Content -->
+            <div id="printPreviewContent" class="mt-6">
+                <!-- Will be populated dynamically -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t mt-4">
+                <button type="button" onclick="closePrintPreviewModal()"
+                        class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button type="button" onclick="executePrint()"
+                        class="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors duration-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+// Selected users tracking
+let selectedUsers = [];
+let currentCredentialUser = null;
+
 function openAddUserModal() {
     // For now, this is a placeholder function
     // You can implement a modal or redirect to a create user page
@@ -764,11 +914,232 @@ function deleteUser(userId) {
     deleteUserWithCallback(userId, null);
 }
 
+// Checkbox Selection Functions
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+
+    updateSelectedUsers();
+}
+
+function updateSelectedUsers() {
+    const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const allCheckboxes = document.querySelectorAll('.user-checkbox');
+    const printBtn = document.getElementById('printSelectedBtn');
+    const selectedCountSpan = document.getElementById('selectedCount');
+
+    selectedUsers = [];
+
+    checkboxes.forEach(checkbox => {
+        try {
+            const userData = JSON.parse(checkbox.dataset.user);
+            selectedUsers.push(userData);
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+        }
+    });
+
+    // Update select all checkbox state
+    if (allCheckboxes.length > 0) {
+        selectAllCheckbox.checked = checkboxes.length === allCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+    }
+
+    // Show/hide print button
+    if (selectedUsers.length > 0) {
+        printBtn.classList.remove('hidden');
+        selectedCountSpan.textContent = selectedUsers.length;
+    } else {
+        printBtn.classList.add('hidden');
+    }
+}
+
+// Credentials Modal Functions
+function openCredentialsModal(user) {
+    currentCredentialUser = user;
+
+    const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown User';
+    const initials = userName.split(' ').map(name => name.charAt(0).toUpperCase()).join('').substring(0, 2);
+    const role = (user.user_type || 'user').charAt(0).toUpperCase() + (user.user_type || 'user').slice(1);
+
+    document.getElementById('credentialsUserName').textContent = userName;
+    document.getElementById('credentialsUserRole').textContent = role;
+    document.getElementById('credentialsUserInitials').textContent = initials;
+    document.getElementById('credentialsEmail').value = user.email || 'N/A';
+    document.getElementById('credentialsPassword').value = user.plain_password || 'N/A';
+
+    document.getElementById('credentialsModal').classList.remove('hidden');
+}
+
+function closeCredentialsModal() {
+    document.getElementById('credentialsModal').classList.add('hidden');
+    currentCredentialUser = null;
+}
+
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    element.select();
+    document.execCommand('copy');
+
+    // Show brief feedback
+    const originalValue = element.value;
+    element.value = 'Copied!';
+    setTimeout(() => {
+        element.value = originalValue;
+    }, 1000);
+}
+
+// Print Functions
+function printSingleCredential() {
+    if (!currentCredentialUser) return;
+
+    selectedUsers = [currentCredentialUser];
+    openPrintPreview();
+}
+
+function printSelectedUsers() {
+    if (selectedUsers.length === 0) {
+        alert('Please select at least one user to print.');
+        return;
+    }
+
+    openPrintPreview();
+}
+
+function openPrintPreview() {
+    const content = document.getElementById('printPreviewContent');
+
+    let html = `
+        <div class="text-center mb-6">
+            <h2 class="text-xl font-bold text-gray-900">J. Cruz Sr. Elementary School</h2>
+            <p class="text-sm text-gray-600">PTA Management System - User Credentials</p>
+            <p class="text-xs text-gray-500">Generated on: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        </div>
+        <div class="border-t border-b border-gray-200 py-4">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b">
+                        <th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">#</th>
+                        <th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">Name</th>
+                        <th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">Role</th>
+                        <th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">Email</th>
+                        <th class="text-left py-2 px-3 text-sm font-semibold text-gray-700">Password</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    selectedUsers.forEach((user, index) => {
+        const userName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown';
+        const role = (user.user_type || 'user').charAt(0).toUpperCase() + (user.user_type || 'user').slice(1);
+        const password = user.plain_password || 'N/A';
+
+        html += `
+            <tr class="border-b border-gray-100 ${index % 2 === 0 ? 'bg-gray-50' : ''}">
+                <td class="py-2 px-3 text-sm text-gray-600">${index + 1}</td>
+                <td class="py-2 px-3 text-sm text-gray-900 font-medium">${userName}</td>
+                <td class="py-2 px-3 text-sm text-gray-600">${role}</td>
+                <td class="py-2 px-3 text-sm text-gray-600">${user.email || 'N/A'}</td>
+                <td class="py-2 px-3 text-sm text-gray-600 font-mono">${password}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 text-xs text-gray-500 text-center">
+            <p>Total Users: ${selectedUsers.length}</p>
+            <p class="mt-1">⚠️ This document contains sensitive information. Handle with care.</p>
+        </div>
+    `;
+
+    content.innerHTML = html;
+    document.getElementById('printPreviewModal').classList.remove('hidden');
+}
+
+function closePrintPreviewModal() {
+    document.getElementById('printPreviewModal').classList.add('hidden');
+}
+
+function executePrint() {
+    const content = document.getElementById('printPreviewContent').innerHTML;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>User Credentials - Print</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 20px;
+                    color: #333;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                th, td {
+                    padding: 8px 12px;
+                    text-align: left;
+                    border-bottom: 1px solid #ddd;
+                }
+                th {
+                    background-color: #f5f5f5;
+                    font-weight: 600;
+                }
+                tr:nth-child(even) {
+                    background-color: #fafafa;
+                }
+                .text-center { text-align: center; }
+                .font-bold { font-weight: bold; }
+                .text-xl { font-size: 1.25rem; }
+                .text-sm { font-size: 0.875rem; }
+                .text-xs { font-size: 0.75rem; }
+                .mb-6 { margin-bottom: 1.5rem; }
+                .mt-4 { margin-top: 1rem; }
+                .mt-1 { margin-top: 0.25rem; }
+                .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+                .border-t { border-top: 1px solid #e5e7eb; }
+                .border-b { border-bottom: 1px solid #e5e7eb; }
+                .font-mono { font-family: monospace; }
+                .font-medium { font-weight: 500; }
+                @media print {
+                    body { padding: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            ${content}
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+
+    // Wait for content to load then print
+    printWindow.onload = function() {
+        printWindow.print();
+        printWindow.onafterprint = function() {
+            printWindow.close();
+        };
+    };
+}
+
 // Close modals when clicking outside
 window.addEventListener('click', function(event) {
     const editModal = document.getElementById('editUserModal');
     const viewModal = document.getElementById('viewUserModal');
     const deleteModal = document.getElementById('deleteUserModal');
+    const credentialsModal = document.getElementById('credentialsModal');
+    const printPreviewModal = document.getElementById('printPreviewModal');
 
     if (event.target === editModal) {
         closeEditModal();
@@ -778,6 +1149,12 @@ window.addEventListener('click', function(event) {
     }
     if (event.target === deleteModal) {
         closeDeleteModal();
+    }
+    if (event.target === credentialsModal) {
+        closeCredentialsModal();
+    }
+    if (event.target === printPreviewModal) {
+        closePrintPreviewModal();
     }
 });
 </script>

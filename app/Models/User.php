@@ -49,6 +49,7 @@ class User extends Authenticatable
         'username',
         'email',
         'password_hash',
+        'plain_password',
         'user_type',
         'first_name',
         'last_name',
