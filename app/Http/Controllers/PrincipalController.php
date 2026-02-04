@@ -143,9 +143,65 @@ class PrincipalController extends Controller
         // Order by created_date (newest first)
         $query->orderBy('created_date', 'desc');
 
-        $users = $query->paginate(10);
+        // Get per page value for users (default 10)
+        $usersPerPage = $request->input('users_per_page', 10);
+        $usersPerPage = in_array($usersPerPage, [10, 25, 50, 100]) ? $usersPerPage : 10;
 
-        return view('principal.users', compact('users'));
+        $users = $query->paginate($usersPerPage);
+
+        // Students listing mirrors administrator experience
+        $studentQuery = Student::with(['parents.user']);
+
+        if ($request->has('student_search') && $request->student_search) {
+            $search = $request->student_search;
+            $studentQuery->where(function($q) use ($search) {
+                $q->where('student_name', 'like', "%{$search}%")
+                  ->orWhere('grade_level', 'like', "%{$search}%")
+                  ->orWhere('section', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('grade_level') && $request->grade_level) {
+            $studentQuery->where('grade_level', $request->grade_level);
+        }
+
+        if ($request->has('academic_year') && $request->academic_year) {
+            $studentQuery->where('academic_year', $request->academic_year);
+        }
+
+        if ($request->has('enrollment_status') && $request->enrollment_status) {
+            $studentQuery->where('enrollment_status', $request->enrollment_status);
+        }
+
+        $studentQuery->orderBy('created_date', 'desc');
+
+        $studentsPerPage = $request->input('students_per_page', 10);
+        $studentsPerPage = in_array($studentsPerPage, [10, 25, 50, 100]) ? $studentsPerPage : 10;
+
+        $students = $studentQuery->paginate($studentsPerPage, ['*'], 'student_page');
+
+        $academicYears = Student::distinct()->pluck('academic_year')->filter()->sort()->reverse()->values();
+
+        $parentsList = ParentProfile::with('user')->get()->map(function($parent) {
+            $name = $parent->first_name . ' ' . $parent->last_name;
+            if ($parent->user) {
+                $name = $parent->user->first_name . ' ' . $parent->user->last_name;
+            }
+            return [
+                'id' => $parent->parentID,
+                'name' => $name,
+                'email' => $parent->email,
+            ];
+        })->sortBy('name')->values();
+
+        return view('administrator.users', [
+            'users' => $users,
+            'students' => $students,
+            'academicYears' => $academicYears,
+            'parentsList' => $parentsList,
+            'routePrefix' => 'principal',
+            'layout' => 'layouts.pr-sidebar'
+        ]);
     }
 
     /**

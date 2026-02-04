@@ -1,4 +1,6 @@
-@extends('layouts.ad-sidebar')
+@extends($layout ?? 'layouts.ad-sidebar')
+
+@php($routePrefix = $routePrefix ?? 'administrator')
 
 @section('title', 'Users')
 
@@ -9,7 +11,7 @@
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route('administrator.users') }}" class="space-y-4">
+        <form method="GET" action="{{ route($routePrefix . '.users') }}" class="space-y-4">
             <!-- Main Search Bar -->
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative">
@@ -41,7 +43,7 @@
                     Search
                 </button>
                 @if(request('search') || request('role') || request('status'))
-                <a href="{{ route('administrator.users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2 transition-colors duration-200">
+                <a href="{{ route($routePrefix . '.users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2 transition-colors duration-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -238,7 +240,7 @@
 
         <!-- Student Filters -->
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <form method="GET" action="{{ route('administrator.users') }}" class="flex flex-wrap gap-3 items-end">
+            <form method="GET" action="{{ route($routePrefix . '.users') }}" class="flex flex-wrap gap-3 items-end">
                 <!-- Preserve user filters -->
                 <input type="hidden" name="search" value="{{ request('search') }}">
                 <input type="hidden" name="role" value="{{ request('role') }}">
@@ -294,7 +296,7 @@
                 </button>
 
                 @if(request('student_search') || request('grade_level') || request('academic_year') || request('enrollment_status'))
-                <a href="{{ route('administrator.users', ['search' => request('search'), 'role' => request('role'), 'status' => request('status')]) }}"
+                <a href="{{ route($routePrefix . '.users', ['search' => request('search'), 'role' => request('role'), 'status' => request('status')]) }}"
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -1447,6 +1449,8 @@
 </div>
 
 <script>
+const routePrefix = "{{ $routePrefix }}";
+
 // Selected users tracking
 let selectedUsers = [];
 let currentCredentialUser = null;
@@ -1455,7 +1459,7 @@ function openAddUserModal() {
     // For now, this is a placeholder function
     // You can implement a modal or redirect to a create user page
     alert('Add User functionality will be implemented here');
-    // Example: window.location.href = '/administrator/users/create';
+    // Example: window.location.href = `/${routePrefix}/users/create`;
     // Or open a modal dialog
 }
 
@@ -1525,7 +1529,7 @@ function submitEditForm(event) {
     submitBtn.disabled = true;
 
     // Submit the form
-    fetch(`/administrator/users/${userId}`, {
+    fetch(`/${routePrefix}/users/${userId}`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -1733,8 +1737,8 @@ function deleteUserWithCallback(userId, onError) {
 
     console.log('CSRF token found:', token ? 'Yes' : 'No');
 
-    // Send DELETE request to backend (using administrator route)
-    fetch(`/administrator/users/${userId}`, {
+    // Send DELETE request to backend (using dynamic route prefix)
+    fetch(`/${routePrefix}/users/${userId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -2139,7 +2143,7 @@ function submitAddStudentForm(event) {
     submitBtn.textContent = 'Adding...';
     submitBtn.disabled = true;
 
-    fetch('/administrator/students', {
+    fetch(`/${routePrefix}/students`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -2207,7 +2211,7 @@ function submitEditStudentForm(event) {
     submitBtn.textContent = 'Saving...';
     submitBtn.disabled = true;
 
-    fetch(`/administrator/students/${currentEditingStudent.studentID}`, {
+    fetch(`/${routePrefix}/students/${currentEditingStudent.studentID}`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -2343,7 +2347,7 @@ function submitTransferStudentForm(event) {
     submitBtn.textContent = 'Transferring...';
     submitBtn.disabled = true;
 
-    fetch(`/administrator/students/${currentTransferStudent.studentID}/transfer`, {
+    fetch(`/${routePrefix}/students/${currentTransferStudent.studentID}/transfer`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -2407,7 +2411,7 @@ function submitBulkTransferForm(event) {
     submitBtn.textContent = 'Transferring...';
     submitBtn.disabled = true;
 
-    fetch('/administrator/students/bulk-transfer', {
+    fetch(`/${routePrefix}/students/bulk-transfer`, {
         method: 'POST',
         body: JSON.stringify({
             student_ids: selectedStudents,
@@ -2485,7 +2489,7 @@ function submitLinkParentForm(event) {
     submitBtn.textContent = 'Linking...';
     submitBtn.disabled = true;
 
-    fetch(`/administrator/students/${currentLinkParentStudent.studentID}`, {
+    fetch(`/${routePrefix}/students/${currentLinkParentStudent.studentID}`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -2539,7 +2543,7 @@ function confirmDeleteStudent() {
     deleteBtn.textContent = 'Deleting...';
     deleteBtn.disabled = true;
 
-    fetch(`/administrator/students/${studentToDelete.studentID}`, {
+    fetch(`/${routePrefix}/students/${studentToDelete.studentID}`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': token,

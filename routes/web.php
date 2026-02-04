@@ -66,6 +66,35 @@ Route::delete('/principal/users/{id}', [PrincipalController::class, 'deleteUser'
     ->middleware(['auth', 'verified'])
     ->name('principal.users.delete');
 
+// Principal Student Management routes (reuse administrator handlers)
+Route::get('/principal/students', [PrincipalController::class, 'adminStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students');
+
+Route::post('/principal/students', [PrincipalController::class, 'adminStoreStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.store');
+
+Route::put('/principal/students/{id}', [PrincipalController::class, 'adminUpdateStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.update');
+
+Route::delete('/principal/students/{id}', [PrincipalController::class, 'adminDeleteStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.delete');
+
+Route::post('/principal/students/{id}/transfer', [PrincipalController::class, 'adminTransferStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.transfer');
+
+Route::post('/principal/students/bulk-transfer', [PrincipalController::class, 'adminBulkTransferStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.bulk-transfer');
+
+Route::get('/principal/parents-list', [PrincipalController::class, 'adminGetParentsList'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.parents-list');
+
 // Principal Reports routes
 Route::get('/principal/reports', [ReportsController::class, 'index'])
     ->middleware(['auth', 'verified'])
