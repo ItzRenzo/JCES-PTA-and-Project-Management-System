@@ -169,7 +169,9 @@ class ProjectController extends Controller
             'updated_date' => now(),
         ]);
 
-        return redirect()->route($this->resolveProjectsRoute('show'), $project->projectID);
+        return redirect()
+            ->route($this->resolveProjectsRoute('show'), $project->projectID)
+            ->with('success', 'Project created successfully.');
     }
 
     public function show(int $projectID)

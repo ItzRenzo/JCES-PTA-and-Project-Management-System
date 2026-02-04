@@ -433,9 +433,11 @@
             
             <div class="form-section">
                 <div class="form-container">
+                    @include('components.flash-messages')
                     {{ $slot }}
                 </div>
             </div>
         </div>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </body>
 </html>

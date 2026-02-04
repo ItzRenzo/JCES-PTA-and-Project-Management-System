@@ -137,6 +137,7 @@
 
             <!-- Page Content -->
             <main class="p-8">
+                @include('components.flash-messages')
                 @yield('content')
             </main>
         </div>
