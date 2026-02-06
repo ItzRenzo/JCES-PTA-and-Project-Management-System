@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Student;
 use App\Models\ParentProfile;
 use App\Models\SecurityAuditLog;
+use App\Models\Schedule;
+use App\Models\Announcement;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +21,26 @@ class PrincipalController extends Controller
      */
     public function index()
     {
-        return view('principal.dashboard');
+        $user = Auth::user();
+
+        // Get recent announcements (prioritize important, then 3 most recent)
+        $recentAnnouncements = Announcement::with('creator')
+            ->active()
+            ->published()
+            ->orderByRaw("CASE WHEN category = 'important' THEN 0 ELSE 1 END")
+            ->orderBy('published_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        // Get upcoming schedules (exclusive to user role)
+        $upcomingSchedules = Schedule::active()
+            ->upcoming()
+            ->forRole($user->user_type)
+            ->orderBy('scheduled_date', 'asc')
+            ->limit(3)
+            ->get();
+
+        return view('principal.dashboard', compact('recentAnnouncements', 'upcomingSchedules'));
     }
 
     /**
@@ -96,7 +117,53 @@ class PrincipalController extends Controller
      */
     public function adminIndex()
     {
-        return view('administrator.dashboard');
+        $user = Auth::user();
+
+        // Get recent announcements (visible to everyone or matching user role)
+        $recentAnnouncements = Announcement::with('creator')
+            ->active()
+            ->published()
+            ->orderByRaw("CASE WHEN category = 'important' THEN 0 ELSE 1 END")
+            ->orderBy('published_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        // Get upcoming schedules (exclusive to user role)
+        $upcomingSchedules = Schedule::active()
+            ->upcoming()
+            ->forRole($user->user_type)
+            ->orderBy('scheduled_date', 'asc')
+            ->limit(3)
+            ->get();
+
+        // Dashboard statistics
+        $stats = [
+            'proposedProjects' => \App\Models\Project::where('project_status', 'created')
+                ->whereMonth('created_date', now()->month)
+                ->whereYear('created_date', now()->year)
+                ->count(),
+            'activeParents' => User::where('user_type', 'parent')
+                ->where('account_status', 'active')
+                ->count(),
+            'newParentsThisMonth' => User::where('user_type', 'parent')
+                ->where('account_status', 'active')
+                ->whereMonth('registration_date', now()->month)
+                ->whereYear('registration_date', now()->year)
+                ->count(),
+            'upcomingEvents' => Schedule::active()
+                ->upcoming()
+                ->whereMonth('scheduled_date', now()->month)
+                ->whereYear('scheduled_date', now()->year)
+                ->count(),
+            'activeProjects' => \App\Models\Project::whereIn('project_status', ['active', 'in_progress'])
+                ->count(),
+            'completedProjectsThisMonth' => \App\Models\Project::where('project_status', 'completed')
+                ->whereMonth('actual_completion_date', now()->month)
+                ->whereYear('actual_completion_date', now()->year)
+                ->count(),
+        ];
+
+        return view('administrator.dashboard', compact('recentAnnouncements', 'upcomingSchedules', 'stats'));
     }
 
     /**

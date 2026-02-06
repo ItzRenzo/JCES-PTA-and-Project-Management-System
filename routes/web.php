@@ -9,6 +9,7 @@ use App\Http\Controllers\ProjectUpdateController;
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\ParentProjectController;
 use App\Http\Controllers\ParentContributionController;
+use App\Http\Controllers\AnnouncementController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -218,9 +219,17 @@ Route::get('/administrator/users', [PrincipalController::class, 'adminUsers'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.users');
 
-Route::get('/administrator/announcements', function () {
-    return view('administrator.announcements.index');
-})->middleware(['auth', 'verified'])->name('administrator.announcements');
+Route::get('/administrator/announcements', [AnnouncementController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.announcements');
+
+Route::post('/administrator/announcements', [AnnouncementController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.announcements.store');
+
+Route::post('/administrator/schedules', [\App\Http\Controllers\ScheduleController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.schedules.store');
 
 Route::put('/administrator/users/{id}', [PrincipalController::class, 'adminUpdateUser'])
     ->middleware(['auth', 'verified'])

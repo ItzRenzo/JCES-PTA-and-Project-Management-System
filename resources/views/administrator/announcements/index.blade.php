@@ -21,41 +21,82 @@
         </div>
     </div>
 
+    <!-- Combined Announcements and Schedules -->
     <div class="space-y-5">
-        <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-green-500">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">Parent-Teacher Conference Schedule</h2>
-                <span class="text-sm text-gray-400">2 days ago</span>
+        <!-- Upcoming Schedules -->
+        @foreach($upcomingSchedules ?? [] as $schedule)
+            <div class="bg-white rounded-xl p-6 shadow-sm border-l-4
+                @if($schedule->priority === 'high') border-red-500
+                @elseif($schedule->priority === 'medium') border-purple-500
+                @else border-blue-500
+                @endif">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ $schedule->title }}</h2>
+                    <span class="text-sm text-gray-400">{{ $schedule->formatted_date }}</span>
+                </div>
+                <p class="text-gray-600 mt-2">{{ $schedule->description }}</p>
+                <div class="flex items-center gap-2 mt-4">
+                    <span class="px-3 py-1 text-xs rounded-full font-medium
+                        @if($schedule->priority === 'high') bg-red-100 text-red-700
+                        @elseif($schedule->priority === 'medium') bg-purple-100 text-purple-700
+                        @else bg-blue-100 text-blue-700
+                        @endif">
+                        {{ ucfirst($schedule->priority) }} Priority
+                    </span>
+                    @if($schedule->time_range)
+                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                            {{ $schedule->time_range }}
+                        </span>
+                    @endif
+                    <span class="px-3 py-1 text-xs rounded-full bg-indigo-100 text-indigo-700">
+                        Schedule
+                    </span>
+                </div>
             </div>
-            <p class="text-gray-600 mt-2">The annual parent-teacher conference will be held on March 15-17, 2024. Please schedule your appointments through the school portal.</p>
-            <div class="flex items-center gap-2 mt-4">
-                <span class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">Important</span>
-                <span class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">Event</span>
-            </div>
-        </div>
+        @endforeach
 
-        <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-orange-400">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">School Closure Notice</h2>
-                <span class="text-sm text-gray-400">1 week ago</span>
+        <!-- Public Announcements -->
+        @forelse($announcements ?? [] as $announcement)
+            <div class="bg-white rounded-xl p-6 shadow-sm border-l-4
+                @if($announcement->category === 'important') border-red-500
+                @elseif($announcement->category === 'notice') border-orange-500
+                @elseif($announcement->category === 'update') border-blue-500
+                @elseif($announcement->category === 'event') border-green-500
+                @else border-gray-300
+                @endif">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ $announcement->title }}</h2>
+                    <span class="text-sm text-gray-400">{{ $announcement->time_ago }}</span>
+                </div>
+                <p class="text-gray-600 mt-2">{{ $announcement->content }}</p>
+                <div class="flex items-center gap-2 mt-4">
+                    <span class="px-3 py-1 text-xs rounded-full font-medium
+                        @if($announcement->category === 'important') bg-red-100 text-red-700
+                        @elseif($announcement->category === 'notice') bg-orange-100 text-orange-700
+                        @elseif($announcement->category === 'update') bg-blue-100 text-blue-700
+                        @elseif($announcement->category === 'event') bg-green-100 text-green-700
+                        @endif">
+                        {{ ucfirst($announcement->category) }}
+                    </span>
+                    <span class="px-3 py-1 text-xs rounded-full
+                        @if($announcement->audience === 'parents') bg-purple-100 text-purple-700
+                        @elseif($announcement->audience === 'teachers') bg-indigo-100 text-indigo-700
+                        @elseif($announcement->audience === 'staff') bg-teal-100 text-teal-700
+                        @else bg-gray-100 text-gray-700
+                        @endif">
+                        {{ ucfirst($announcement->audience) }}
+                    </span>
+                </div>
             </div>
-            <p class="text-gray-600 mt-2">The school will be closed on March 8, 2024 due to a scheduled maintenance. Classes will resume on March 11, 2024.</p>
-            <div class="flex items-center gap-2 mt-4">
-                <span class="px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">Notice</span>
+        @empty
+            <div class="bg-white rounded-xl p-8 shadow-sm text-center">
+                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">No Announcements</h3>
+                <p class="text-gray-600">There are no announcements to display at this time.</p>
             </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-blue-500">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">New Learning Management System</h2>
-                <span class="text-sm text-gray-400">2 weeks ago</span>
-            </div>
-            <p class="text-gray-600 mt-2">We are excited to announce the launch of our new learning management system. Training sessions for parents will begin next week.</p>
-            <div class="flex items-center gap-2 mt-4">
-                <span class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">Update</span>
-                <span class="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded-full">Technology</span>
-            </div>
-        </div>
+        @endforelse
     </div>
 </div>
 
@@ -76,8 +117,12 @@
 
     announcementFilterMenu.querySelectorAll('[data-filter]').forEach((item) => {
         item.addEventListener('click', () => {
-            announcementFilterLabel.textContent = item.dataset.filter;
+            const filter = item.dataset.filter;
+            announcementFilterLabel.textContent = filter;
             announcementFilterMenu.classList.add('hidden');
+
+            // Redirect with filter parameter
+            window.location.href = '{{ route("administrator.announcements") }}?filter=' + encodeURIComponent(filter);
         });
     });
 </script>
