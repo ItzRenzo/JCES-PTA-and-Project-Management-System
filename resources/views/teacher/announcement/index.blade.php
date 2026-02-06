@@ -1,4 +1,4 @@
-@extends('layouts.ad-sidebar')
+@extends('layouts.te-sidebar')
 
 @section('title', 'Announcements')
 
@@ -13,7 +13,7 @@
                     <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.94a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                 </svg>
             </button>
-            <div id="announcementFilterMenu" class="absolute right-0 mt-2 w-44 bg-green-600 text-white rounded-lg shadow-lg hidden">
+            <div id="announcementFilterMenu" class="absolute right-0 mt-2 w-44 bg-green-600 text-white rounded-lg shadow-lg hidden z-10">
                 <button class="w-full text-left px-4 py-2 text-sm hover:bg-green-700" data-filter="Today">Today</button>
                 <button class="w-full text-left px-4 py-2 text-sm hover:bg-green-700" data-filter="This Week">This Week</button>
                 <button class="w-full text-left px-4 py-2 text-sm hover:bg-green-700" data-filter="This Month">This Month</button>
@@ -81,7 +81,8 @@
                     <span class="px-3 py-1 text-xs rounded-full
                         @if($announcement->audience === 'parents') bg-purple-100 text-purple-700
                         @elseif($announcement->audience === 'teachers') bg-indigo-100 text-indigo-700
-                        @elseif($announcement->audience === 'staff') bg-teal-100 text-teal-700
+                        @elseif($announcement->audience === 'administrator') bg-teal-100 text-teal-700
+                        @elseif($announcement->audience === 'principal') bg-pink-100 text-pink-700
                         @else bg-gray-100 text-gray-700
                         @endif">
                         {{ ucfirst($announcement->audience) }}
@@ -122,7 +123,7 @@
             announcementFilterMenu.classList.add('hidden');
 
             // Redirect with filter parameter
-            window.location.href = '{{ route("administrator.announcements") }}?filter=' + encodeURIComponent(filter);
+            window.location.href = '{{ route("teacher.announcements") }}?filter=' + encodeURIComponent(filter);
         });
     });
 </script>

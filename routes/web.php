@@ -9,6 +9,7 @@ use App\Http\Controllers\ProjectUpdateController;
 use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\ParentProjectController;
 use App\Http\Controllers\ParentContributionController;
+use App\Http\Controllers\AnnouncementController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,12 +24,20 @@ Route::get('/dashboard', function () {
         'administrator' => redirect()->route('administrator.dashboard'),
         'principal' => redirect()->route('principal.dashboard'),
         'teacher' => redirect()->route('teacher.dashboard'),
-        'parent' => view('parent.dashboard'),
+        'parent' => redirect()->route('parent.dashboard'),
         default => view('dashboard'),
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Parent routes
+Route::get('/parent', [\App\Http\Controllers\ParentController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.dashboard');
+
+Route::get('/parent/announcements', [\App\Http\Controllers\ParentController::class, 'announcements'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.announcements');
+
 Route::get('/parent/projects', [ParentProjectController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('parent.projects.index');
@@ -65,6 +74,35 @@ Route::put('/principal/users/{id}', [PrincipalController::class, 'updateUser'])
 Route::delete('/principal/users/{id}', [PrincipalController::class, 'deleteUser'])
     ->middleware(['auth', 'verified'])
     ->name('principal.users.delete');
+
+// Principal Student Management routes (reuse administrator handlers)
+Route::get('/principal/students', [PrincipalController::class, 'adminStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students');
+
+Route::post('/principal/students', [PrincipalController::class, 'adminStoreStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.store');
+
+Route::put('/principal/students/{id}', [PrincipalController::class, 'adminUpdateStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.update');
+
+Route::delete('/principal/students/{id}', [PrincipalController::class, 'adminDeleteStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.delete');
+
+Route::post('/principal/students/{id}/transfer', [PrincipalController::class, 'adminTransferStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.transfer');
+
+Route::post('/principal/students/bulk-transfer', [PrincipalController::class, 'adminBulkTransferStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.bulk-transfer');
+
+Route::get('/principal/parents-list', [PrincipalController::class, 'adminGetParentsList'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.parents-list');
 
 // Principal Reports routes
 Route::get('/principal/reports', [ReportsController::class, 'index'])
@@ -160,6 +198,14 @@ Route::get('/principal/contributions', [ContributionController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('principal.contributions.index');
 
+Route::get('/principal/contributions/parent-bills/{parentId}', [ContributionController::class, 'getParentBills'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.contributions.parent-bills');
+
+Route::post('/principal/contributions/submit-manual', [ContributionController::class, 'submitManualPayment'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.contributions.submit-manual');
+
 Route::post('/principal/contributions', [ContributionController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('principal.contributions.store');
@@ -189,9 +235,17 @@ Route::get('/administrator/users', [PrincipalController::class, 'adminUsers'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.users');
 
-Route::get('/administrator/announcements', function () {
-    return view('administrator.announcements.index');
-})->middleware(['auth', 'verified'])->name('administrator.announcements');
+Route::get('/administrator/announcements', [AnnouncementController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.announcements');
+
+Route::post('/administrator/announcements', [AnnouncementController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.announcements.store');
+
+Route::post('/administrator/schedules', [\App\Http\Controllers\ScheduleController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.schedules.store');
 
 Route::put('/administrator/users/{id}', [PrincipalController::class, 'adminUpdateUser'])
     ->middleware(['auth', 'verified'])
@@ -200,6 +254,35 @@ Route::put('/administrator/users/{id}', [PrincipalController::class, 'adminUpdat
 Route::delete('/administrator/users/{id}', [PrincipalController::class, 'adminDeleteUser'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.users.delete');
+
+// Administrator Student Management routes
+Route::get('/administrator/students', [PrincipalController::class, 'adminStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students');
+
+Route::post('/administrator/students', [PrincipalController::class, 'adminStoreStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.store');
+
+Route::put('/administrator/students/{id}', [PrincipalController::class, 'adminUpdateStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.update');
+
+Route::delete('/administrator/students/{id}', [PrincipalController::class, 'adminDeleteStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.delete');
+
+Route::post('/administrator/students/{id}/transfer', [PrincipalController::class, 'adminTransferStudent'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.transfer');
+
+Route::post('/administrator/students/bulk-transfer', [PrincipalController::class, 'adminBulkTransferStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.bulk-transfer');
+
+Route::get('/administrator/parents-list', [PrincipalController::class, 'adminGetParentsList'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.parents-list');
 
 // Administrator Reports routes
 Route::get('/administrator/reports', [ReportsController::class, 'index'])
@@ -308,6 +391,10 @@ Route::get('/teacher', [TeacherController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.dashboard');
 
+Route::get('/teacher/announcements', [TeacherController::class, 'announcements'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.announcements');
+
 Route::get('/teacher/projects', [ProjectController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.projects.index');
@@ -344,6 +431,26 @@ Route::delete('/teacher/projects/{projectID}/updates/{updateID}', [ProjectUpdate
     ->middleware(['auth', 'verified'])
     ->name('teacher.projects.updates.destroy');
 
+Route::get('/teacher/payments', [TeacherController::class, 'payments'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.index');
+
+Route::get('/teacher/payments/parent-bills/{parentId}', [TeacherController::class, 'getParentBills'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.parent-bills');
+
+Route::post('/teacher/payments/submit-manual', [TeacherController::class, 'submitManualPayment'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.submit-manual');
+
+Route::post('/teacher/payments', [ContributionController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.store');
+
+Route::put('/teacher/payments/{contributionID}', [ContributionController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.update');
+
 Route::get('/teacher/payments/{contributionID}/receipt', [ContributionController::class, 'receipt'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.payments.receipt');
@@ -368,6 +475,10 @@ Route::put('/teacher/users/{id}', [TeacherController::class, 'updateUser'])
 Route::get('/parent/payments', [ParentContributionController::class, 'paymentIndex'])
     ->middleware(['auth', 'verified'])
     ->name('parent.payments');
+
+Route::post('/parent/payments/submit', [ParentContributionController::class, 'submitPayment'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.payments.submit');
 
 // Logout route that redirects to login
 Route::get('/sign-out', function () {

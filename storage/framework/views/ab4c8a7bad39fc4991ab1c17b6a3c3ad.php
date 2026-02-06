@@ -1,17 +1,15 @@
-@extends($layout ?? 'layouts.ad-sidebar')
+<?php ($routePrefix = $routePrefix ?? 'administrator'); ?>
 
-@php($routePrefix = $routePrefix ?? 'administrator')
+<?php $__env->startSection('title', 'Users'); ?>
 
-@section('title', 'Users')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="space-y-6">
     <!-- Hidden CSRF Token for JavaScript -->
-    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="_token" value="<?php echo e(csrf_token()); ?>">
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route($routePrefix . '.users') }}" class="space-y-4">
+        <form method="GET" action="<?php echo e(route($routePrefix . '.users')); ?>" class="space-y-4">
             <!-- Main Search Bar -->
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative">
@@ -20,21 +18,21 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
-                    <input type="text" name="search" value="{{ request('search') }}"
+                    <input type="text" name="search" value="<?php echo e(request('search')); ?>"
                            placeholder="Search by name, phone, email, or address..."
                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                 </div>
                 <select name="role" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                     <option value="">All Roles</option>
-                    <option value="parent" {{ request('role') == 'parent' ? 'selected' : '' }}>Parent</option>
-                    <option value="teacher" {{ request('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
-                    <option value="administrator" {{ request('role') == 'administrator' ? 'selected' : '' }}>Administrator</option>
-                    <option value="principal" {{ request('role') == 'principal' ? 'selected' : '' }}>Principal</option>
+                    <option value="parent" <?php echo e(request('role') == 'parent' ? 'selected' : ''); ?>>Parent</option>
+                    <option value="teacher" <?php echo e(request('role') == 'teacher' ? 'selected' : ''); ?>>Teacher</option>
+                    <option value="administrator" <?php echo e(request('role') == 'administrator' ? 'selected' : ''); ?>>Administrator</option>
+                    <option value="principal" <?php echo e(request('role') == 'principal' ? 'selected' : ''); ?>>Principal</option>
                 </select>
                 <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
                     <option value="">All Status</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    <option value="active" <?php echo e(request('status') == 'active' ? 'selected' : ''); ?>>Active</option>
+                    <option value="inactive" <?php echo e(request('status') == 'inactive' ? 'selected' : ''); ?>>Inactive</option>
                 </select>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors duration-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,14 +40,14 @@
                     </svg>
                     Search
                 </button>
-                @if(request('search') || request('role') || request('status'))
-                <a href="{{ route($routePrefix . '.users') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2 transition-colors duration-200">
+                <?php if(request('search') || request('role') || request('status')): ?>
+                <a href="<?php echo e(route($routePrefix . '.users')); ?>" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 flex items-center gap-2 transition-colors duration-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                     Clear
                 </a>
-                @endif
+                <?php endif; ?>
                 <button type="button" id="printSelectedBtn" onclick="printSelectedUsers()"
                         class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2 transition-colors duration-200 hidden">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,48 +84,52 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($users as $user)
-                    <tr class="hover:bg-gray-50" data-user-id="{{ $user->userID }}">
+                    <?php $__empty_1 = true; $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <tr class="hover:bg-gray-50" data-user-id="<?php echo e($user->userID); ?>">
                         <td class="px-4 py-4">
                             <input type="checkbox" class="user-checkbox rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                   data-user='{{ json_encode($user) }}' onchange="updateSelectedUsers()">
+                                   data-user='<?php echo e(json_encode($user)); ?>' onchange="updateSelectedUsers()">
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
                                     <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
                                         <span class="text-sm font-medium text-green-800">
-                                            {{ strtoupper(substr($user->first_name, 0, 1)) }}{{ strtoupper(substr($user->last_name, 0, 1)) }}
+                                            <?php echo e(strtoupper(substr($user->first_name, 0, 1))); ?><?php echo e(strtoupper(substr($user->last_name, 0, 1))); ?>
+
                                         </span>
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $user->email }}</div>
+                                    <div class="text-sm font-medium text-gray-900"><?php echo e($user->name); ?></div>
+                                    <div class="text-sm text-gray-500"><?php echo e($user->email); ?></div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                @if($user->user_type == 'principal') bg-purple-100 text-purple-800
-                                @elseif($user->user_type == 'administrator') bg-blue-100 text-blue-800
-                                @elseif($user->user_type == 'teacher') bg-green-100 text-green-800
-                                @else bg-gray-100 text-gray-800
-                                @endif">
-                                {{ ucfirst($user->user_type) }}
+                                <?php if($user->user_type == 'principal'): ?> bg-purple-100 text-purple-800
+                                <?php elseif($user->user_type == 'administrator'): ?> bg-blue-100 text-blue-800
+                                <?php elseif($user->user_type == 'teacher'): ?> bg-green-100 text-green-800
+                                <?php else: ?> bg-gray-100 text-gray-800
+                                <?php endif; ?>">
+                                <?php echo e(ucfirst($user->user_type)); ?>
+
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $user->is_active ? 'Active' : 'Inactive' }}
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <?php echo e($user->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'); ?>">
+                                <?php echo e($user->is_active ? 'Active' : 'Inactive'); ?>
+
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $user->created_date ? \Carbon\Carbon::parse($user->created_date)->format('M d, Y') : 'N/A' }}
+                            <?php echo e($user->created_date ? \Carbon\Carbon::parse($user->created_date)->format('M d, Y') : 'N/A'); ?>
+
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center gap-2">
-                                <button onclick="openCredentialsModal({{ json_encode($user) }})"
+                                <button onclick="openCredentialsModal(<?php echo e(json_encode($user)); ?>)"
                                         class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition-colors duration-200"
                                         title="Show Credentials">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +137,7 @@
                                     </svg>
                                 </button>
 
-                                <button onclick="openEditModal({{ json_encode($user) }})"
+                                <button onclick="openEditModal(<?php echo e(json_encode($user)); ?>)"
                                         class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-200"
                                         title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,7 +145,7 @@
                                     </svg>
                                 </button>
 
-                                <button onclick="openViewModal({{ json_encode($user) }})"
+                                <button onclick="openViewModal(<?php echo e(json_encode($user)); ?>)"
                                         class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-200"
                                         title="View">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,7 +154,7 @@
                                     </svg>
                                 </button>
 
-                                <button onclick="openDeleteModal({{ json_encode($user) }})"
+                                <button onclick="openDeleteModal(<?php echo e(json_encode($user)); ?>)"
                                         class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-200"
                                         title="Delete">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,13 +164,13 @@
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                             No users found.
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -176,30 +178,31 @@
         <!-- Pagination -->
         <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
             <div class="flex-1 flex justify-between sm:hidden">
-                <a href="{{ $users->appends(request()->query())->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 {{ !$users->previousPageUrl() ? 'opacity-50 pointer-events-none' : '' }}">
+                <a href="<?php echo e($users->appends(request()->query())->previousPageUrl()); ?>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 <?php echo e(!$users->previousPageUrl() ? 'opacity-50 pointer-events-none' : ''); ?>">
                     Previous
                 </a>
-                <a href="{{ $users->appends(request()->query())->nextPageUrl() }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 {{ !$users->nextPageUrl() ? 'opacity-50 pointer-events-none' : '' }}">
+                <a href="<?php echo e($users->appends(request()->query())->nextPageUrl()); ?>" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 <?php echo e(!$users->nextPageUrl() ? 'opacity-50 pointer-events-none' : ''); ?>">
                     Next
                 </a>
             </div>
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div class="flex items-center gap-4">
                     <p class="text-sm text-gray-700">
-                        Showing <span class="font-medium">{{ $users->firstItem() ?? 0 }}</span> to <span class="font-medium">{{ $users->lastItem() ?? 0 }}</span> of <span class="font-medium">{{ $users->total() }}</span> results
+                        Showing <span class="font-medium"><?php echo e($users->firstItem() ?? 0); ?></span> to <span class="font-medium"><?php echo e($users->lastItem() ?? 0); ?></span> of <span class="font-medium"><?php echo e($users->total()); ?></span> results
                     </p>
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-gray-600">Per page:</label>
                         <select onchange="changeUsersPerPage(this.value)" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-green-500">
-                            <option value="10" {{ request('users_per_page', 10) == 10 ? 'selected' : '' }}>10</option>
-                            <option value="25" {{ request('users_per_page') == 25 ? 'selected' : '' }}>25</option>
-                            <option value="50" {{ request('users_per_page') == 50 ? 'selected' : '' }}>50</option>
-                            <option value="100" {{ request('users_per_page') == 100 ? 'selected' : '' }}>100</option>
+                            <option value="10" <?php echo e(request('users_per_page', 10) == 10 ? 'selected' : ''); ?>>10</option>
+                            <option value="25" <?php echo e(request('users_per_page') == 25 ? 'selected' : ''); ?>>25</option>
+                            <option value="50" <?php echo e(request('users_per_page') == 50 ? 'selected' : ''); ?>>50</option>
+                            <option value="100" <?php echo e(request('users_per_page') == 100 ? 'selected' : ''); ?>>100</option>
                         </select>
                     </div>
                 </div>
                 <div>
-                    {{ $users->appends(request()->query())->links() }}
+                    <?php echo e($users->appends(request()->query())->links()); ?>
+
                 </div>
             </div>
         </div>
@@ -240,15 +243,15 @@
 
         <!-- Student Filters -->
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <form method="GET" action="{{ route($routePrefix . '.users') }}" class="flex flex-wrap gap-3 items-end">
+            <form method="GET" action="<?php echo e(route($routePrefix . '.users')); ?>" class="flex flex-wrap gap-3 items-end">
                 <!-- Preserve user filters -->
-                <input type="hidden" name="search" value="{{ request('search') }}">
-                <input type="hidden" name="role" value="{{ request('role') }}">
-                <input type="hidden" name="status" value="{{ request('status') }}">
+                <input type="hidden" name="search" value="<?php echo e(request('search')); ?>">
+                <input type="hidden" name="role" value="<?php echo e(request('role')); ?>">
+                <input type="hidden" name="status" value="<?php echo e(request('status')); ?>">
 
                 <div class="flex-1 min-w-[200px]">
                     <label class="block text-xs font-medium text-gray-600 mb-1">Search Student</label>
-                    <input type="text" name="student_search" value="{{ request('student_search') }}"
+                    <input type="text" name="student_search" value="<?php echo e(request('student_search')); ?>"
                            placeholder="Search by name, grade, section..."
                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
@@ -257,13 +260,13 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">Grade Level</label>
                     <select name="grade_level" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">All Grades</option>
-                        <option value="Kinder" {{ request('grade_level') == 'Kinder' ? 'selected' : '' }}>Kinder</option>
-                        <option value="Grade 1" {{ request('grade_level') == 'Grade 1' ? 'selected' : '' }}>Grade 1</option>
-                        <option value="Grade 2" {{ request('grade_level') == 'Grade 2' ? 'selected' : '' }}>Grade 2</option>
-                        <option value="Grade 3" {{ request('grade_level') == 'Grade 3' ? 'selected' : '' }}>Grade 3</option>
-                        <option value="Grade 4" {{ request('grade_level') == 'Grade 4' ? 'selected' : '' }}>Grade 4</option>
-                        <option value="Grade 5" {{ request('grade_level') == 'Grade 5' ? 'selected' : '' }}>Grade 5</option>
-                        <option value="Grade 6" {{ request('grade_level') == 'Grade 6' ? 'selected' : '' }}>Grade 6</option>
+                        <option value="Kinder" <?php echo e(request('grade_level') == 'Kinder' ? 'selected' : ''); ?>>Kinder</option>
+                        <option value="Grade 1" <?php echo e(request('grade_level') == 'Grade 1' ? 'selected' : ''); ?>>Grade 1</option>
+                        <option value="Grade 2" <?php echo e(request('grade_level') == 'Grade 2' ? 'selected' : ''); ?>>Grade 2</option>
+                        <option value="Grade 3" <?php echo e(request('grade_level') == 'Grade 3' ? 'selected' : ''); ?>>Grade 3</option>
+                        <option value="Grade 4" <?php echo e(request('grade_level') == 'Grade 4' ? 'selected' : ''); ?>>Grade 4</option>
+                        <option value="Grade 5" <?php echo e(request('grade_level') == 'Grade 5' ? 'selected' : ''); ?>>Grade 5</option>
+                        <option value="Grade 6" <?php echo e(request('grade_level') == 'Grade 6' ? 'selected' : ''); ?>>Grade 6</option>
                     </select>
                 </div>
 
@@ -271,9 +274,9 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">Academic Year</label>
                     <select name="academic_year" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">All Years</option>
-                        @foreach($academicYears as $year)
-                        <option value="{{ $year }}" {{ request('academic_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                        @endforeach
+                        <?php $__currentLoopData = $academicYears; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $year): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($year); ?>" <?php echo e(request('academic_year') == $year ? 'selected' : ''); ?>><?php echo e($year); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </div>
 
@@ -281,10 +284,10 @@
                     <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
                     <select name="enrollment_status" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">All Status</option>
-                        <option value="active" {{ request('enrollment_status') == 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="transferred" {{ request('enrollment_status') == 'transferred' ? 'selected' : '' }}>Transferred</option>
-                        <option value="graduated" {{ request('enrollment_status') == 'graduated' ? 'selected' : '' }}>Graduated</option>
-                        <option value="dropped" {{ request('enrollment_status') == 'dropped' ? 'selected' : '' }}>Dropped</option>
+                        <option value="active" <?php echo e(request('enrollment_status') == 'active' ? 'selected' : ''); ?>>Active</option>
+                        <option value="transferred" <?php echo e(request('enrollment_status') == 'transferred' ? 'selected' : ''); ?>>Transferred</option>
+                        <option value="graduated" <?php echo e(request('enrollment_status') == 'graduated' ? 'selected' : ''); ?>>Graduated</option>
+                        <option value="dropped" <?php echo e(request('enrollment_status') == 'dropped' ? 'selected' : ''); ?>>Dropped</option>
                     </select>
                 </div>
 
@@ -295,15 +298,15 @@
                     Filter
                 </button>
 
-                @if(request('student_search') || request('grade_level') || request('academic_year') || request('enrollment_status'))
-                <a href="{{ route($routePrefix . '.users', ['search' => request('search'), 'role' => request('role'), 'status' => request('status')]) }}"
+                <?php if(request('student_search') || request('grade_level') || request('academic_year') || request('enrollment_status')): ?>
+                <a href="<?php echo e(route($routePrefix . '.users', ['search' => request('search'), 'role' => request('role'), 'status' => request('status')])); ?>"
                    class="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                     Clear
                 </a>
-                @endif
+                <?php endif; ?>
             </form>
         </div>
 
@@ -324,69 +327,74 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($students as $student)
-                    <tr class="hover:bg-gray-50" data-student-id="{{ $student->studentID }}">
+                    <?php $__empty_1 = true; $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <tr class="hover:bg-gray-50" data-student-id="<?php echo e($student->studentID); ?>">
                         <td class="px-4 py-4">
                             <input type="checkbox" class="student-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                   data-student-id="{{ $student->studentID }}" onchange="updateSelectedStudents()">
+                                   data-student-id="<?php echo e($student->studentID); ?>" onchange="updateSelectedStudents()">
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
-                                    <div class="h-10 w-10 rounded-full {{ $student->gender == 'male' ? 'bg-blue-100' : 'bg-pink-100' }} flex items-center justify-center">
-                                        <span class="text-sm font-medium {{ $student->gender == 'male' ? 'text-blue-800' : 'text-pink-800' }}">
-                                            {{ strtoupper(substr($student->student_name, 0, 2)) }}
+                                    <div class="h-10 w-10 rounded-full <?php echo e($student->gender == 'male' ? 'bg-blue-100' : 'bg-pink-100'); ?> flex items-center justify-center">
+                                        <span class="text-sm font-medium <?php echo e($student->gender == 'male' ? 'text-blue-800' : 'text-pink-800'); ?>">
+                                            <?php echo e(strtoupper(substr($student->student_name, 0, 2))); ?>
+
                                         </span>
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $student->student_name }}</div>
+                                    <div class="text-sm font-medium text-gray-900"><?php echo e($student->student_name); ?></div>
                                     <div class="text-xs text-gray-500">
-                                        {{ ucfirst($student->gender) }}
-                                        @if($student->birth_date)
-                                            • {{ \Carbon\Carbon::parse($student->birth_date)->age }} yrs old
-                                        @endif
+                                        <?php echo e(ucfirst($student->gender)); ?>
+
+                                        <?php if($student->birth_date): ?>
+                                            • <?php echo e(\Carbon\Carbon::parse($student->birth_date)->age); ?> yrs old
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $student->grade_level }}</div>
-                            <div class="text-xs text-gray-500">{{ $student->section ?? 'No Section' }}</div>
+                            <div class="text-sm font-medium text-gray-900"><?php echo e($student->grade_level); ?></div>
+                            <div class="text-xs text-gray-500"><?php echo e($student->section ?? 'No Section'); ?></div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                {{ $student->academic_year }}
+                                <?php echo e($student->academic_year); ?>
+
                             </span>
                         </td>
                         <td class="px-6 py-4">
-                            @if($student->parents->count() > 0)
-                                @foreach($student->parents->take(2) as $parent)
+                            <?php if($student->parents->count() > 0): ?>
+                                <?php $__currentLoopData = $student->parents->take(2); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $parent): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="text-sm text-gray-900">
-                                    {{ $parent->user ? ($parent->user->first_name . ' ' . $parent->user->last_name) : ($parent->first_name . ' ' . $parent->last_name) }}
-                                    <span class="text-xs text-gray-500">({{ ucfirst($parent->pivot->relationship_type) }})</span>
+                                    <?php echo e($parent->user ? ($parent->user->first_name . ' ' . $parent->user->last_name) : ($parent->first_name . ' ' . $parent->last_name)); ?>
+
+                                    <span class="text-xs text-gray-500">(<?php echo e(ucfirst($parent->pivot->relationship_type)); ?>)</span>
                                 </div>
-                                @endforeach
-                                @if($student->parents->count() > 2)
-                                <div class="text-xs text-gray-400">+{{ $student->parents->count() - 2 }} more</div>
-                                @endif
-                            @else
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php if($student->parents->count() > 2): ?>
+                                <div class="text-xs text-gray-400">+<?php echo e($student->parents->count() - 2); ?> more</div>
+                                <?php endif; ?>
+                            <?php else: ?>
                                 <span class="text-xs text-gray-400 italic">No parent linked</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                @if($student->enrollment_status == 'active') bg-green-100 text-green-800
-                                @elseif($student->enrollment_status == 'transferred') bg-yellow-100 text-yellow-800
-                                @elseif($student->enrollment_status == 'graduated') bg-blue-100 text-blue-800
-                                @else bg-red-100 text-red-800
-                                @endif">
-                                {{ ucfirst($student->enrollment_status) }}
+                                <?php if($student->enrollment_status == 'active'): ?> bg-green-100 text-green-800
+                                <?php elseif($student->enrollment_status == 'transferred'): ?> bg-yellow-100 text-yellow-800
+                                <?php elseif($student->enrollment_status == 'graduated'): ?> bg-blue-100 text-blue-800
+                                <?php else: ?> bg-red-100 text-red-800
+                                <?php endif; ?>">
+                                <?php echo e(ucfirst($student->enrollment_status)); ?>
+
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center gap-1">
-                                <button onclick="openTransferStudentModal({{ json_encode($student) }})"
+                                <button onclick="openTransferStudentModal(<?php echo e(json_encode($student)); ?>)"
                                         class="text-amber-600 hover:text-amber-900 p-1 rounded hover:bg-amber-50 transition-colors duration-200"
                                         title="Transfer Academic Year">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,7 +402,7 @@
                                     </svg>
                                 </button>
 
-                                <button onclick="openEditStudentModal({{ json_encode($student) }})"
+                                <button onclick="openEditStudentModal(<?php echo e(json_encode($student)); ?>)"
                                         class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors duration-200"
                                         title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -402,7 +410,7 @@
                                     </svg>
                                 </button>
 
-                                <button onclick="openViewStudentModal({{ json_encode($student) }})"
+                                <button onclick="openViewStudentModal(<?php echo e(json_encode($student)); ?>)"
                                         class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors duration-200"
                                         title="View">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -411,7 +419,7 @@
                                     </svg>
                                 </button>
 
-                                <button onclick="openLinkParentModal({{ json_encode($student) }})"
+                                <button onclick="openLinkParentModal(<?php echo e(json_encode($student)); ?>)"
                                         class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition-colors duration-200"
                                         title="Link Parent">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -419,7 +427,7 @@
                                     </svg>
                                 </button>
 
-                                <button onclick="openDeleteStudentModal({{ json_encode($student) }})"
+                                <button onclick="openDeleteStudentModal(<?php echo e(json_encode($student)); ?>)"
                                         class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-200"
                                         title="Delete">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,7 +437,7 @@
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="7" class="px-6 py-8 text-center">
                             <div class="flex flex-col items-center">
@@ -443,7 +451,7 @@
                             </div>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -451,30 +459,31 @@
         <!-- Student Pagination -->
         <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
             <div class="flex-1 flex justify-between sm:hidden">
-                <a href="{{ $students->appends(request()->query())->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 {{ !$students->previousPageUrl() ? 'opacity-50 pointer-events-none' : '' }}">
+                <a href="<?php echo e($students->appends(request()->query())->previousPageUrl()); ?>" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 <?php echo e(!$students->previousPageUrl() ? 'opacity-50 pointer-events-none' : ''); ?>">
                     Previous
                 </a>
-                <a href="{{ $students->appends(request()->query())->nextPageUrl() }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 {{ !$students->nextPageUrl() ? 'opacity-50 pointer-events-none' : '' }}">
+                <a href="<?php echo e($students->appends(request()->query())->nextPageUrl()); ?>" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 <?php echo e(!$students->nextPageUrl() ? 'opacity-50 pointer-events-none' : ''); ?>">
                     Next
                 </a>
             </div>
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div class="flex items-center gap-4">
                     <p class="text-sm text-gray-700">
-                        Showing <span class="font-medium">{{ $students->firstItem() ?? 0 }}</span> to <span class="font-medium">{{ $students->lastItem() ?? 0 }}</span> of <span class="font-medium">{{ $students->total() }}</span> students
+                        Showing <span class="font-medium"><?php echo e($students->firstItem() ?? 0); ?></span> to <span class="font-medium"><?php echo e($students->lastItem() ?? 0); ?></span> of <span class="font-medium"><?php echo e($students->total()); ?></span> students
                     </p>
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-gray-600">Per page:</label>
                         <select onchange="changeStudentsPerPage(this.value)" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500">
-                            <option value="10" {{ request('students_per_page', 10) == 10 ? 'selected' : '' }}>10</option>
-                            <option value="25" {{ request('students_per_page') == 25 ? 'selected' : '' }}>25</option>
-                            <option value="50" {{ request('students_per_page') == 50 ? 'selected' : '' }}>50</option>
-                            <option value="100" {{ request('students_per_page') == 100 ? 'selected' : '' }}>100</option>
+                            <option value="10" <?php echo e(request('students_per_page', 10) == 10 ? 'selected' : ''); ?>>10</option>
+                            <option value="25" <?php echo e(request('students_per_page') == 25 ? 'selected' : ''); ?>>25</option>
+                            <option value="50" <?php echo e(request('students_per_page') == 50 ? 'selected' : ''); ?>>50</option>
+                            <option value="100" <?php echo e(request('students_per_page') == 100 ? 'selected' : ''); ?>>100</option>
                         </select>
                     </div>
                 </div>
                 <div>
-                    {{ $students->appends(request()->query())->links() }}
+                    <?php echo e($students->appends(request()->query())->links()); ?>
+
                 </div>
             </div>
         </div>
@@ -495,7 +504,7 @@
             </div>
 
             <form id="addStudentForm" class="mt-6" onsubmit="submitAddStudentForm(event)">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
@@ -532,13 +541,13 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Academic Year *</label>
                             <input type="text" name="academic_year" required
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                                   placeholder="e.g., 2025-2026" value="{{ date('Y') }}-{{ date('Y') + 1 }}">
+                                   placeholder="e.g., 2025-2026" value="<?php echo e(date('Y')); ?>-<?php echo e(date('Y') + 1); ?>">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Date *</label>
                             <input type="date" name="enrollment_date" required
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                                   value="{{ date('Y-m-d') }}">
+                                   value="<?php echo e(date('Y-m-d')); ?>">
                         </div>
                     </div>
 
@@ -644,8 +653,8 @@
             </div>
 
             <form id="editStudentForm" class="mt-6" onsubmit="submitEditStudentForm(event)">
-                @csrf
-                @method('PUT')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 <input type="hidden" id="editStudentId" name="student_id" value="">
                 <div class="space-y-4">
                     <div>
@@ -817,7 +826,7 @@
             </div>
 
             <form id="transferStudentForm" class="mt-6" onsubmit="submitTransferStudentForm(event)">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <input type="hidden" id="transferStudentId" name="student_id" value="">
 
                 <div class="bg-gray-50 rounded-lg p-3 mb-4">
@@ -901,7 +910,7 @@
             </div>
 
             <form id="bulkTransferForm" class="mt-6" onsubmit="submitBulkTransferForm(event)">
-                @csrf
+                <?php echo csrf_field(); ?>
 
                 <div class="bg-blue-50 rounded-lg p-3 mb-4">
                     <div class="text-sm text-blue-600">
@@ -914,7 +923,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">New Academic Year *</label>
                         <input type="text" id="bulkTransferAcademicYear" name="new_academic_year" required
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
-                               placeholder="e.g., 2026-2027" value="{{ date('Y') + 1 }}-{{ date('Y') + 2 }}">
+                               placeholder="e.g., 2026-2027" value="<?php echo e(date('Y') + 1); ?>-<?php echo e(date('Y') + 2); ?>">
                     </div>
 
                     <div class="flex items-center">
@@ -967,7 +976,7 @@
             </div>
 
             <form id="linkParentForm" class="mt-6" onsubmit="submitLinkParentForm(event)">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <input type="hidden" id="linkParentStudentId" name="student_id" value="">
 
                 <div class="bg-gray-50 rounded-lg p-3 mb-4">
@@ -1090,8 +1099,8 @@
 
             <!-- Modal Body -->
             <form id="editUserForm" class="mt-6" onsubmit="submitEditForm(event)">
-                @csrf
-                @method('PUT')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 <input type="hidden" id="editUserId" name="user_id" value="">
                 <div class="space-y-4">
                     <!-- Common Fields -->
@@ -1449,7 +1458,7 @@
 </div>
 
 <script>
-const routePrefix = "{{ $routePrefix }}";
+const routePrefix = "<?php echo e($routePrefix); ?>";
 
 // Selected users tracking
 let selectedUsers = [];
@@ -2574,7 +2583,7 @@ function confirmDeleteStudent() {
 // ==================== SEARCHABLE PARENT DROPDOWN FUNCTIONS ====================
 
 // Parent data from the server (sorted alphabetically)
-const parentsList = @json($parentsList);
+const parentsList = <?php echo json_encode($parentsList, 15, 512) ?>;
 
 // Initialize searchable dropdowns when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -2717,4 +2726,6 @@ function clearLinkParent() {
     document.getElementById('linkParentSearch').value = '';
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make($layout ?? 'layouts.ad-sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\J. Cruz Sr. Elementary School Project\JCES-PTA-and-Project-Management-System\resources\views/administrator/users.blade.php ENDPATH**/ ?>

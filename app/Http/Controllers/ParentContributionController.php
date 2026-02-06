@@ -237,4 +237,97 @@ class ParentContributionController extends Controller
             'parentProfile' => $parentProfile,
         ]);
     }
+
+    /**
+     * Submit payment with receipt image upload.
+     */
+    public function submitPayment(Request $request)
+    {
+        $parentProfile = Auth::user()->parentProfile;
+
+        if (!$parentProfile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parent profile not found.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'project_ids' => ['required', 'array'],
+            'project_ids.*' => ['exists:projects,projectID'],
+            'amounts' => ['required', 'array'],
+            'payment_method' => ['required', 'in:gcash,maya'],
+            'name' => ['required', 'string'],
+            'contact' => ['required', 'string'],
+            'address' => ['required', 'string'],
+            'receipt_image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:5120'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $contributions = [];
+
+            foreach ($validated['project_ids'] as $index => $projectId) {
+                // Generate receipt number
+                $year = date('Y');
+                $lastReceipt = ProjectContribution::where('receipt_number', 'like', "RCT-{$year}-%")
+                    ->orderBy('receipt_number', 'desc')
+                    ->first();
+
+                if ($lastReceipt) {
+                    $lastNumber = intval(substr($lastReceipt->receipt_number, -5));
+                    $newNumber = $lastNumber + 1;
+                } else {
+                    $newNumber = 1;
+                }
+
+                $receiptNumber = sprintf("RCT-%s-%05d", $year, $newNumber);
+
+                // Create contribution with pending status
+                $contribution = ProjectContribution::create([
+                    'projectID' => $projectId,
+                    'parentID' => $parentProfile->parentID,
+                    'contribution_amount' => $validated['amounts'][$index],
+                    'payment_method' => $validated['payment_method'] === 'gcash' ? 'bank_transfer' : 'bank_transfer',
+                    'payment_status' => 'pending',
+                    'contribution_date' => now(),
+                    'receipt_number' => $receiptNumber,
+                    'notes' => "Paid via " . strtoupper($validated['payment_method']) . ". Contact: {$validated['contact']}, Address: {$validated['address']}",
+                    'processed_by' => null,
+                ]);
+
+                $contributions[] = $contribution;
+            }
+
+            // Handle receipt image upload - save with receipt ID as filename
+            if ($request->hasFile('receipt_image')) {
+                $image = $request->file('receipt_image');
+                $extension = $image->getClientOriginalExtension();
+
+                // Use the first contribution's ID as the filename
+                $firstContribution = $contributions[0];
+                $filename = $firstContribution->contributionID . '.' . $extension;
+
+                // Move the image to public/images/receipt_img
+                $image->move(public_path('images/receipt_img'), $filename);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment submitted successfully. It will be reviewed by the administrator.',
+                'receipt_number' => $contributions[0]->receipt_number ?? null,
+                'contribution_id' => $contributions[0]->contributionID ?? null,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit payment. Please try again. ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

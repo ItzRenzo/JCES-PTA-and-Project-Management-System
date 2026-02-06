@@ -6,30 +6,36 @@
 
     <!-- Top Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <!-- Current Grade Card -->
+        <!-- My Children Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase">Current Grade</span>
+                <span class="text-xs font-medium text-gray-500 uppercase">My Children</span>
                 <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                 </svg>
             </div>
-            <div class="text-3xl font-bold text-gray-900">Grade 4</div>
-            <div class="text-sm text-gray-500 mt-1">Section: Mabini</div>
+            <div class="text-3xl font-bold text-gray-900">{{ $stats['childrenCount'] ?? 0 }}</div>
+            <div class="text-sm text-gray-500 mt-1">
+                @if(($stats['childrenCount'] ?? 0) === 1)
+                    {{ $children->first()->grade_level ?? 'N/A' }} - {{ $children->first()->section ?? 'N/A' }}
+                @elseif(($stats['childrenCount'] ?? 0) > 1)
+                    {{ $children->pluck('grade_level')->unique()->implode(', ') }}
+                @else
+                    No children enrolled
+                @endif
+            </div>
         </div>
 
-        <!-- Attendance Rate Card -->
+        <!-- Active Projects Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase">Attendance Rate</span>
-                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
+                <span class="text-xs font-medium text-gray-500 uppercase">Active Projects</span>
+                <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
             </div>
-            <div class="text-3xl font-bold text-gray-900">96%</div>
-            <div class="text-sm text-green-600 mt-1">Excellent attendance</div>
+            <div class="text-3xl font-bold text-gray-900">{{ $stats['activeProjects'] ?? 0 }}</div>
+            <div class="text-sm text-gray-500 mt-1">Ongoing school projects</div>
         </div>
 
         <!-- Outstanding Balance Card -->
@@ -52,94 +58,77 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
             </div>
-            <div class="text-3xl font-bold text-gray-900">3</div>
+            <div class="text-3xl font-bold text-gray-900">{{ $stats['upcomingEvents'] ?? 0 }}</div>
             <div class="text-sm text-gray-500 mt-1">This month</div>
         </div>
     </div>
 
     <!-- Two Column Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Upcoming Projects -->
+        <!-- Active/Ongoing Projects -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-base font-bold text-gray-900 mb-4">Upcoming Projects</h3>
-            <div class="space-y-5">
-                <!-- Project 1 -->
-                <div class="flex">
-                    <div class="flex-shrink-0 w-14 pt-1">
-                        <div class="text-xs font-semibold text-gray-500">MAR 20</div>
+            <h3 class="text-base font-bold text-gray-900 mb-4">Active Projects</h3>
+            <div class="space-y-3">
+                @forelse($upcomingProjects ?? [] as $project)
+                    <div class="bg-white rounded-xl p-4 shadow-sm border-l-4
+                        @if($project->project_status === 'active') border-green-500
+                        @elseif($project->project_status === 'in_progress') border-blue-500
+                        @else border-gray-500
+                        @endif">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold text-gray-900">{{ $project->project_name }}</h3>
+                            <span class="text-xs text-gray-400">{{ $project->start_date ? $project->start_date->format('M d') : 'TBA' }}</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2">{{ Str::limit($project->description, 80) }}</p>
+                        <div class="flex items-center gap-2 mt-3">
+                            <span class="px-2 py-1 text-xs rounded-full font-medium
+                                @if($project->project_status === 'active') bg-green-100 text-green-700
+                                @elseif($project->project_status === 'in_progress') bg-blue-100 text-blue-700
+                                @else bg-gray-100 text-gray-700
+                                @endif">
+                                {{ ucfirst(str_replace('_', ' ', $project->project_status)) }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="flex-1 border-l-4 border-red-400 pl-4">
-                        <div class="font-semibold text-gray-900 text-sm">Fun Run for a Cause</div>
-                        <div class="text-sm text-gray-600 mt-0.5">*Tabbo Para sa Kinabukasan* Fun Run</div>
-                        <div class="text-xs text-gray-500 mt-1">5:30 AM - 8:00 AM</div>
-                    </div>
-                </div>
-
-                <!-- Project 2 -->
-                <div class="flex">
-                    <div class="flex-shrink-0 w-14 pt-1">
-                        <div class="text-xs font-semibold text-gray-500">MAR 18</div>
-                    </div>
-                    <div class="flex-1 border-l-4 border-purple-400 pl-4">
-                        <div class="font-semibold text-gray-900 text-sm">Fundraising Projects</div>
-                        <div class="text-sm text-gray-600 mt-0.5">PTA School Fair 2025</div>
-                        <div class="text-xs text-gray-500 mt-1">8:00 AM - 5:00 PM</div>
-                    </div>
-                </div>
-
-                <!-- Project 3 -->
-                <div class="flex">
-                    <div class="flex-shrink-0 w-14 pt-1">
-                        <div class="text-xs font-semibold text-gray-500">MAR 22</div>
-                    </div>
-                    <div class="flex-1 border-l-4 border-blue-400 pl-4">
-                        <div class="font-semibold text-gray-900 text-sm">Community and Parent Involvement</div>
-                        <div class="text-sm text-gray-600 mt-0.5">Parenting seminars and workshops</div>
-                        <div class="text-xs text-gray-500 mt-1">8:00 AM - 4:00 PM</div>
-                    </div>
-                </div>
+                @empty
+                    <div class="text-sm text-gray-500 text-center py-4">No active projects at the moment</div>
+                @endforelse
             </div>
         </div>
 
         <!-- Upcoming Schedule -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-base font-bold text-gray-900 mb-4">Upcoming Schedule</h3>
-            <div class="space-y-5">
-                <!-- Schedule 1 -->
-                <div class="flex">
-                    <div class="flex-shrink-0 w-14 pt-1">
-                        <div class="text-xs font-semibold text-gray-500">MAR 15</div>
+            <div class="space-y-3">
+                @forelse($upcomingSchedules ?? [] as $schedule)
+                    <div class="bg-white rounded-xl p-4 shadow-sm border-l-4
+                        @if($schedule->priority === 'high') border-red-500
+                        @elseif($schedule->priority === 'medium') border-purple-500
+                        @else border-blue-500
+                        @endif">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold text-gray-900">{{ $schedule->title }}</h3>
+                            <span class="text-xs text-gray-400">{{ $schedule->formatted_date }}</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2">{{ Str::limit($schedule->description, 80) }}</p>
+                        <div class="flex items-center gap-2 mt-3">
+                            <span class="px-2 py-1 text-xs rounded-full font-medium
+                                @if($schedule->priority === 'high') bg-red-100 text-red-700
+                                @elseif($schedule->priority === 'medium') bg-purple-100 text-purple-700
+                                @else bg-blue-100 text-blue-700
+                                @endif">
+                                {{ ucfirst($schedule->priority) }} Priority
+                            </span>
+                            @if($schedule->time_range)
+                                <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                                    {{ $schedule->time_range }}
+                                </span>
+                            @endif
+                        </div>
                     </div>
-                    <div class="flex-1 border-l-4 border-red-400 pl-4">
-                        <div class="font-semibold text-gray-900 text-sm">Parent-Teacher Conference</div>
-                        <div class="text-sm text-gray-600 mt-0.5">Meeting with Ms. Rodriguez</div>
-                        <div class="text-xs text-gray-500 mt-1">2:00 PM - 2:30 PM</div>
-                    </div>
-                </div>
-
-                <!-- Schedule 2 -->
-                <div class="flex">
-                    <div class="flex-shrink-0 w-14 pt-1">
-                        <div class="text-xs font-semibold text-gray-500">MAR 18</div>
-                    </div>
-                    <div class="flex-1 border-l-4 border-purple-400 pl-4">
-                        <div class="font-semibold text-gray-900 text-sm">Science Fair</div>
-                        <div class="text-sm text-gray-600 mt-0.5">Sofia's project presentation</div>
-                        <div class="text-xs text-gray-500 mt-1">9:00 AM - 12:00 PM</div>
-                    </div>
-                </div>
-
-                <!-- Schedule 3 -->
-                <div class="flex">
-                    <div class="flex-shrink-0 w-14 pt-1">
-                        <div class="text-xs font-semibold text-gray-500">MAR 22</div>
-                    </div>
-                    <div class="flex-1 border-l-4 border-blue-400 pl-4">
-                        <div class="font-semibold text-gray-900 text-sm">Field Trip</div>
-                        <div class="text-sm text-gray-600 mt-0.5">National Museum Visit</div>
-                        <div class="text-xs text-gray-500 mt-1">8:00 AM - 4:00 PM</div>
-                    </div>
-                </div>
+                @empty
+                    <div class="text-sm text-gray-500 text-center py-4">No upcoming schedules</div>
+                @endforelse
             </div>
         </div>
     </div>
@@ -149,15 +138,15 @@
         <h3 class="text-base font-bold text-gray-900 mb-4">About US</h3>
         <div class="flex flex-col md:flex-row gap-6">
             <div class="flex-shrink-0">
-                <img src="http://127.0.0.1:8000/images/logos/jces-logo.png" 
-                     alt="School Photo" 
+                <img src="http://127.0.0.1:8000/images/logos/jces-logo.png"
+                     alt="School Photo"
                      class="rounded-lg w-full md:w-52 h-28 object-cover">
             </div>
             <div class="flex-1">
                 <p class="text-sm text-gray-700 leading-relaxed">
-                    J. Cruz Sr. Elementary School, founded in 1975 on land donated by Juan Cruz Sr. in Panacan, 
-                    Relocation, Davao City, has grown from modest beginnings into a key educational institution. For 
-                    nearly five decades, it has served both local and neighboring communities, fostering strong ties 
+                    J. Cruz Sr. Elementary School, founded in 1975 on land donated by Juan Cruz Sr. in Panacan,
+                    Relocation, Davao City, has grown from modest beginnings into a key educational institution. For
+                    nearly five decades, it has served both local and neighboring communities, fostering strong ties
                     through active PTA involvement and continuous school improvement projects.
                 </p>
             </div>
