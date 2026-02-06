@@ -1,8 +1,6 @@
-@extends('layouts.ad-sidebar')
+<?php $__env->startSection('title', 'Payments'); ?>
 
-@section('title', 'Payments')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="space-y-6" x-data="paymentsManager()">
     <div class="bg-white rounded-lg shadow">
         <form method="GET" id="filterForm" class="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -18,7 +16,7 @@
                     id="searchInput"
                     x-model="searchQuery"
                     @input.debounce.300ms="filterTable()"
-                    value="{{ request('search') }}"
+                    value="<?php echo e(request('search')); ?>"
                     placeholder="Search parent or project"
                     class="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-gray-200 focus:ring-2 focus:ring-green-200 focus:border-green-400 outline-none transition-all"
                 />
@@ -28,9 +26,9 @@
                 <div class="relative">
                     <select name="status" id="statusFilter" x-model="statusFilter" @change="filterTable()" class="appearance-none px-4 py-2 pr-8 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700 focus:ring-2 focus:ring-green-300 focus:ring-offset-1 focus:outline-none cursor-pointer min-w-[110px] transition-colors">
                         <option value="">Status</option>
-                        <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Paid</option>
-                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Unpaid</option>
+                        <option value="completed" <?php echo e(request('status') === 'completed' ? 'selected' : ''); ?>>Paid</option>
+                        <option value="pending" <?php echo e(request('status') === 'pending' ? 'selected' : ''); ?>>Pending</option>
+                        <option value="failed" <?php echo e(request('status') === 'failed' ? 'selected' : ''); ?>>Unpaid</option>
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,10 +40,10 @@
                 <div class="relative">
                     <select name="date_range" id="dateRangeFilter" x-model="dateRangeFilter" @change="filterTable()" class="appearance-none px-4 py-2 pr-8 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700 focus:ring-2 focus:ring-green-300 focus:ring-offset-1 focus:outline-none cursor-pointer min-w-[120px] transition-colors">
                         <option value="">Date Range</option>
-                        <option value="today" {{ request('date_range') === 'today' ? 'selected' : '' }}>Today</option>
-                        <option value="this_week" {{ request('date_range') === 'this_week' ? 'selected' : '' }}>This Week</option>
-                        <option value="this_month" {{ request('date_range') === 'this_month' ? 'selected' : '' }}>This Month</option>
-                        <option value="this_year" {{ request('date_range') === 'this_year' ? 'selected' : '' }}>This Year</option>
+                        <option value="today" <?php echo e(request('date_range') === 'today' ? 'selected' : ''); ?>>Today</option>
+                        <option value="this_week" <?php echo e(request('date_range') === 'this_week' ? 'selected' : ''); ?>>This Week</option>
+                        <option value="this_month" <?php echo e(request('date_range') === 'this_month' ? 'selected' : ''); ?>>This Month</option>
+                        <option value="this_year" <?php echo e(request('date_range') === 'this_year' ? 'selected' : ''); ?>>This Year</option>
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,9 +55,9 @@
                 <div class="relative">
                     <select name="school_year" id="schoolYearFilter" x-model="schoolYearFilter" @change="filterTable()" class="appearance-none px-4 py-2 pr-8 text-sm font-medium bg-green-600 text-white rounded-md hover:bg-green-700 focus:ring-2 focus:ring-green-300 focus:ring-offset-1 focus:outline-none cursor-pointer min-w-[130px] transition-colors">
                         <option value="">All Years</option>
-                        @foreach($schoolYears as $sy)
-                            <option value="{{ $sy }}" {{ request('school_year') === $sy ? 'selected' : '' }}>S.Y {{ $sy }}</option>
-                        @endforeach
+                        <?php $__currentLoopData = $schoolYears; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sy): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($sy); ?>" <?php echo e(request('school_year') === $sy ? 'selected' : ''); ?>>S.Y <?php echo e($sy); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +95,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @php
+                    <?php
                         // Sample data for demonstration (30 entries)
                         $samplePayments = [
                             ['name' => 'Anna Garcia', 'phone' => '09456789012', 'address' => 'Davao City', 'project' => 'Fun Run for a Cause', 'required' => 500, 'paid' => 500, 'date' => '2026-01-27 01:59:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340233'],
@@ -131,10 +129,10 @@
                             ['name' => 'Lorenzo Abella', 'phone' => '09190123456', 'address' => 'La Union', 'project' => 'Fun Run for a Cause', 'required' => 500, 'paid' => 500, 'date' => '2026-01-13 13:15:00', 'status' => 'completed', 'method' => 'Bank Transfer', 'txn' => 'TXN9450340261'],
                             ['name' => 'Beatriz Borja', 'phone' => '09291234567', 'address' => 'Ilocos Norte', 'project' => 'Fundraising Projects', 'required' => 300, 'paid' => 300, 'date' => '2026-01-13 10:45:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340262'],
                         ];
-                    @endphp
+                    ?>
 
-                    @forelse ($contributions as $index => $contribution)
-                        @php
+                    <?php $__empty_1 = true; $__currentLoopData = $contributions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $contribution): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
                             $status = $contribution->payment_status;
                             $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Unpaid');
                             $statusClass = $status === 'completed' ? 'bg-green-100 text-green-800' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
@@ -143,42 +141,44 @@
                             $sample = $samplePayments[$sampleIndex];
                             $parentName = $contribution->parent ? $contribution->parent->first_name . ' ' . $contribution->parent->last_name : 'Unknown Parent';
                             $projectName = $contribution->project?->project_name ?? 'Unknown Project';
-                        @endphp
+                        ?>
                         <tr class="hover:bg-gray-50 transition-colors"
-                            data-parent="{{ $parentName }}"
-                            data-project="{{ $projectName }}"
-                            data-status="{{ $status }}"
-                            data-date="{{ optional($contribution->contribution_date)->format('Y-m-d') }}">
+                            data-parent="<?php echo e($parentName); ?>"
+                            data-project="<?php echo e($projectName); ?>"
+                            data-status="<?php echo e($status); ?>"
+                            data-date="<?php echo e(optional($contribution->contribution_date)->format('Y-m-d')); ?>">
                             <td class="px-4 py-3">
-                                <input type="checkbox" name="selected[]" value="{{ $contribution->contributionID }}" class="row-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
+                                <input type="checkbox" name="selected[]" value="<?php echo e($contribution->contributionID); ?>" class="row-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
                                 <span class="ml-2 text-sm text-green-600 hover:text-green-700 font-medium cursor-pointer">
-                                    {{ $parentName }}
+                                    <?php echo e($parentName); ?>
+
                                 </span>
                             </td>
-                            <td class="px-3 py-3 text-sm text-gray-500">₱{{ number_format($requiredPayment, 2) }}</td>
-                            <td class="px-3 py-3 text-sm font-medium text-gray-900">₱{{ number_format($contribution->contribution_amount, 2) }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-700">{{ $projectName }}</td>
+                            <td class="px-3 py-3 text-sm text-gray-500">₱<?php echo e(number_format($requiredPayment, 2)); ?></td>
+                            <td class="px-3 py-3 text-sm font-medium text-gray-900">₱<?php echo e(number_format($contribution->contribution_amount, 2)); ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo e($projectName); ?></td>
                             <td class="px-4 py-3 text-sm text-gray-600">
-                                @if($contribution->processedBy)
+                                <?php if($contribution->processedBy): ?>
                                     <div class="flex items-center gap-1">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                         </svg>
-                                        <span>{{ $contribution->processedBy->first_name }} {{ $contribution->processedBy->last_name }}</span>
+                                        <span><?php echo e($contribution->processedBy->first_name); ?> <?php echo e($contribution->processedBy->last_name); ?></span>
                                     </div>
-                                @else
+                                <?php else: ?>
                                     <span class="text-gray-400">—</span>
-                                @endif
+                                <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700">{{ optional($contribution->contribution_date)->format('m-d-Y') }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo e(optional($contribution->contribution_date)->format('m-d-Y')); ?></td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full {{ $status === 'completed' ? 'bg-green-100 text-green-700' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
-                                    {{ $statusLabel }}
+                                <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full <?php echo e($status === 'completed' ? 'bg-green-100 text-green-700' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700')); ?>">
+                                    <?php echo e($statusLabel); ?>
+
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    @php
+                                    <?php
                                         // Check if receipt image exists
                                         $receiptImageExists = false;
                                         $receiptImagePath = '';
@@ -189,10 +189,10 @@
                                                 break;
                                             }
                                         }
-                                    @endphp
-                                    @if($receiptImageExists)
+                                    ?>
+                                    <?php if($receiptImageExists): ?>
                                         <button type="button"
-                                                onclick="showVerifyModal('{{ addslashes($receiptImagePath) }}', '{{ $contribution->contributionID }}', '{{ $status }}')"
+                                                onclick="showVerifyModal('<?php echo e(addslashes($receiptImagePath)); ?>', '<?php echo e($contribution->contributionID); ?>', '<?php echo e($status); ?>')"
                                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 text-xs font-semibold rounded-lg transition-colors border border-blue-200"
                                                 title="Verify Payment">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,48 +200,49 @@
                                             </svg>
                                             Verify
                                         </button>
-                                    @else
+                                    <?php else: ?>
                                         <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-400 text-xs rounded-lg">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
                                             No Image
                                         </span>
-                                    @endif
-                                    @if($contribution->receipt_number)
-                                        <a href="{{ route('administrator.payments.receipt', $contribution->contributionID) }}" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                                    <?php endif; ?>
+                                    <?php if($contribution->receipt_number): ?>
+                                        <a href="<?php echo e(route('administrator.payments.receipt', $contribution->contributionID)); ?>" target="_blank" class="text-green-600 hover:text-green-700 text-sm font-medium">
                                             Print
                                         </a>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-gray-400 text-sm">N/A</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <!-- Show sample data when no contributions exist -->
-                        @foreach($samplePayments as $index => $payment)
-                            @php
+                        <?php $__currentLoopData = $samplePayments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $status = $payment['status'];
                                 $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Unpaid');
-                            @endphp
+                            ?>
                             <tr class="hover:bg-gray-50 transition-colors"
-                                data-parent="{{ $payment['name'] }}"
-                                data-project="{{ $payment['project'] }}"
-                                data-status="{{ $status }}"
-                                data-date="{{ \Carbon\Carbon::parse($payment['date'])->format('Y-m-d') }}">
+                                data-parent="<?php echo e($payment['name']); ?>"
+                                data-project="<?php echo e($payment['project']); ?>"
+                                data-status="<?php echo e($status); ?>"
+                                data-date="<?php echo e(\Carbon\Carbon::parse($payment['date'])->format('Y-m-d')); ?>">
                                 <td class="px-6 py-3">
-                                    <input type="checkbox" name="selected[]" value="{{ $index + 1 }}" class="row-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
-                                    <span class="ml-2 text-sm text-green-600 hover:text-green-700 font-medium cursor-pointer">{{ $payment['name'] }}</span>
+                                    <input type="checkbox" name="selected[]" value="<?php echo e($index + 1); ?>" class="row-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
+                                    <span class="ml-2 text-sm text-green-600 hover:text-green-700 font-medium cursor-pointer"><?php echo e($payment['name']); ?></span>
                                 </td>
-                                <td class="px-6 py-3 text-sm text-gray-500">₱{{ number_format($payment['required'], 2) }}</td>
-                                <td class="px-6 py-3 text-sm font-medium text-gray-900">₱{{ number_format($payment['paid'], 2) }}</td>
-                                <td class="px-6 py-3 text-sm text-gray-700">{{ $payment['project'] }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-500">₱<?php echo e(number_format($payment['required'], 2)); ?></td>
+                                <td class="px-6 py-3 text-sm font-medium text-gray-900">₱<?php echo e(number_format($payment['paid'], 2)); ?></td>
+                                <td class="px-6 py-3 text-sm text-gray-700"><?php echo e($payment['project']); ?></td>
                                 <td class="px-6 py-3 text-sm text-gray-400">—</td>
-                                <td class="px-6 py-3 text-sm text-gray-700">{{ \Carbon\Carbon::parse($payment['date'])->format('m-d-Y') }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-700"><?php echo e(\Carbon\Carbon::parse($payment['date'])->format('m-d-Y')); ?></td>
                                 <td class="px-6 py-3">
-                                    <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full {{ $status === 'completed' ? 'bg-green-100 text-green-700' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">
-                                        {{ $statusLabel }}
+                                    <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full <?php echo e($status === 'completed' ? 'bg-green-100 text-green-700' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700')); ?>">
+                                        <?php echo e($statusLabel); ?>
+
                                     </span>
                                 </td>
                                 <td class="px-6 py-3 text-right">
@@ -256,8 +257,8 @@
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
-                    @endforelse
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -266,44 +267,44 @@
         <div class="px-6 py-4 border-t border-gray-200">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div id="resultsCount" class="text-sm text-gray-600">
-                    @if($contributions->count() > 0)
-                        Showing <span class="font-medium text-green-600">{{ $contributions->firstItem() ?? 0 }}</span> to <span class="font-medium text-green-600">{{ $contributions->lastItem() ?? 0 }}</span> of <span class="font-medium text-green-600">{{ $contributions->total() }}</span> results
-                    @else
+                    <?php if($contributions->count() > 0): ?>
+                        Showing <span class="font-medium text-green-600"><?php echo e($contributions->firstItem() ?? 0); ?></span> to <span class="font-medium text-green-600"><?php echo e($contributions->lastItem() ?? 0); ?></span> of <span class="font-medium text-green-600"><?php echo e($contributions->total()); ?></span> results
+                    <?php else: ?>
                         Showing <span class="font-medium text-green-600">1</span> to <span class="font-medium text-green-600">30</span> of <span class="font-medium text-green-600">30</span> results
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <div class="flex items-center gap-1">
-                    @if($contributions->count() > 0)
-                        @if ($contributions->onFirstPage())
+                    <?php if($contributions->count() > 0): ?>
+                        <?php if($contributions->onFirstPage()): ?>
                             <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&lt;</span>
-                        @else
-                            <a href="{{ $contributions->previousPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&lt;</a>
-                        @endif
-                        @php
+                        <?php else: ?>
+                            <a href="<?php echo e($contributions->previousPageUrl()); ?>" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&lt;</a>
+                        <?php endif; ?>
+                        <?php
                             $currentPage = $contributions->currentPage();
                             $lastPage = $contributions->lastPage();
                             $start = max(1, $currentPage - 2);
                             $end = min($lastPage, $currentPage + 2);
-                        @endphp
-                        @for ($page = $start; $page <= $end; $page++)
-                            @if ($page == $currentPage)
-                                <span class="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-md">{{ $page }}</span>
-                            @else
-                                <a href="{{ $contributions->url($page) }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">{{ $page }}</a>
-                            @endif
-                        @endfor
-                        @if ($contributions->hasMorePages())
-                            <a href="{{ $contributions->nextPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&gt;</a>
-                        @else
+                        ?>
+                        <?php for($page = $start; $page <= $end; $page++): ?>
+                            <?php if($page == $currentPage): ?>
+                                <span class="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-md"><?php echo e($page); ?></span>
+                            <?php else: ?>
+                                <a href="<?php echo e($contributions->url($page)); ?>" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"><?php echo e($page); ?></a>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+                        <?php if($contributions->hasMorePages()): ?>
+                            <a href="<?php echo e($contributions->nextPageUrl()); ?>" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&gt;</a>
+                        <?php else: ?>
                             <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&gt;</span>
-                        @endif
-                    @else
+                        <?php endif; ?>
+                    <?php else: ?>
                         <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&lt;</span>
                         <span class="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-md">1</span>
                         <span class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md">2</span>
                         <span class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md">3</span>
                         <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&gt;</span>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -343,8 +344,8 @@
                 </button>
             </div>
             <form :action="'/administrator/payments/' + editContributionId" method="POST" class="px-6 py-5">
-                @csrf
-                @method('PUT')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 <div class="space-y-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Payment Status</label>
                     <div class="space-y-3">
@@ -568,10 +569,10 @@
             receiptData: { txn: '', date: '', method: '', name: '', phone: '', address: '', project: '', amount: 0 },
 
             // Filter states
-            searchQuery: '{{ request('search') }}',
-            statusFilter: '{{ request('status') }}',
-            dateRangeFilter: '{{ request('date_range') }}',
-            schoolYearFilter: '{{ request('school_year') }}',
+            searchQuery: '<?php echo e(request('search')); ?>',
+            statusFilter: '<?php echo e(request('status')); ?>',
+            dateRangeFilter: '<?php echo e(request('date_range')); ?>',
+            schoolYearFilter: '<?php echo e(request('school_year')); ?>',
 
             openEditModal(id, status) {
                 this.editContributionId = id;
@@ -875,7 +876,7 @@
         const csrfToken = document.createElement('input');
         csrfToken.type = 'hidden';
         csrfToken.name = '_token';
-        csrfToken.value = '{{ csrf_token() }}';
+        csrfToken.value = '<?php echo e(csrf_token()); ?>';
         form.appendChild(csrfToken);
 
         // Add method spoofing for PUT
@@ -903,4 +904,6 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.ad-sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\J. Cruz Sr. Elementary School Project\JCES-PTA-and-Project-Management-System\resources\views/administrator/payments/index.blade.php ENDPATH**/ ?>

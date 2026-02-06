@@ -24,12 +24,20 @@ Route::get('/dashboard', function () {
         'administrator' => redirect()->route('administrator.dashboard'),
         'principal' => redirect()->route('principal.dashboard'),
         'teacher' => redirect()->route('teacher.dashboard'),
-        'parent' => view('parent.dashboard'),
+        'parent' => redirect()->route('parent.dashboard'),
         default => view('dashboard'),
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Parent routes
+Route::get('/parent', [\App\Http\Controllers\ParentController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.dashboard');
+
+Route::get('/parent/announcements', [\App\Http\Controllers\ParentController::class, 'announcements'])
+    ->middleware(['auth', 'verified'])
+    ->name('parent.announcements');
+
 Route::get('/parent/projects', [ParentProjectController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('parent.projects.index');
@@ -189,6 +197,14 @@ Route::delete('/principal/projects/{projectID}/updates/{updateID}', [ProjectUpda
 Route::get('/principal/contributions', [ContributionController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('principal.contributions.index');
+
+Route::get('/principal/contributions/parent-bills/{parentId}', [ContributionController::class, 'getParentBills'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.contributions.parent-bills');
+
+Route::post('/principal/contributions/submit-manual', [ContributionController::class, 'submitManualPayment'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.contributions.submit-manual');
 
 Route::post('/principal/contributions', [ContributionController::class, 'store'])
     ->middleware(['auth', 'verified'])
@@ -375,6 +391,10 @@ Route::get('/teacher', [TeacherController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.dashboard');
 
+Route::get('/teacher/announcements', [TeacherController::class, 'announcements'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.announcements');
+
 Route::get('/teacher/projects', [ProjectController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.projects.index');
@@ -410,6 +430,26 @@ Route::post('/teacher/projects/{projectID}/updates', [ProjectUpdateController::c
 Route::delete('/teacher/projects/{projectID}/updates/{updateID}', [ProjectUpdateController::class, 'destroy'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.projects.updates.destroy');
+
+Route::get('/teacher/payments', [TeacherController::class, 'payments'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.index');
+
+Route::get('/teacher/payments/parent-bills/{parentId}', [TeacherController::class, 'getParentBills'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.parent-bills');
+
+Route::post('/teacher/payments/submit-manual', [TeacherController::class, 'submitManualPayment'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.submit-manual');
+
+Route::post('/teacher/payments', [ContributionController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.store');
+
+Route::put('/teacher/payments/{contributionID}', [ContributionController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.payments.update');
 
 Route::get('/teacher/payments/{contributionID}/receipt', [ContributionController::class, 'receipt'])
     ->middleware(['auth', 'verified'])
