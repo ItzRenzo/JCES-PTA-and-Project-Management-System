@@ -10,6 +10,7 @@ use App\Http\Controllers\ContributionController;
 use App\Http\Controllers\ParentProjectController;
 use App\Http\Controllers\ParentContributionController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\MilestoneController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -194,6 +195,18 @@ Route::delete('/principal/projects/{projectID}/updates/{updateID}', [ProjectUpda
     ->middleware(['auth', 'verified'])
     ->name('principal.projects.updates.destroy');
 
+Route::post('/principal/projects/{projectID}/milestones', [MilestoneController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.projects.milestones.store');
+
+Route::post('/principal/projects/{projectID}/milestones/{milestoneID}/toggle', [MilestoneController::class, 'toggle'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.projects.milestones.toggle');
+
+Route::delete('/principal/projects/{projectID}/milestones/{milestoneID}', [MilestoneController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.projects.milestones.destroy');
+
 Route::get('/principal/contributions', [ContributionController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('principal.contributions.index');
@@ -370,6 +383,18 @@ Route::delete('/administrator/projects/{projectID}/updates/{updateID}', [Project
     ->middleware(['auth', 'verified'])
     ->name('administrator.projects.updates.destroy');
 
+Route::post('/administrator/projects/{projectID}/milestones', [MilestoneController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.projects.milestones.store');
+
+Route::post('/administrator/projects/{projectID}/milestones/{milestoneID}/toggle', [MilestoneController::class, 'toggle'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.projects.milestones.toggle');
+
+Route::delete('/administrator/projects/{projectID}/milestones/{milestoneID}', [MilestoneController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.projects.milestones.destroy');
+
 Route::get('/administrator/payments', [ContributionController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.payments.index');
@@ -430,6 +455,18 @@ Route::post('/teacher/projects/{projectID}/updates', [ProjectUpdateController::c
 Route::delete('/teacher/projects/{projectID}/updates/{updateID}', [ProjectUpdateController::class, 'destroy'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.projects.updates.destroy');
+
+Route::post('/teacher/projects/{projectID}/milestones', [MilestoneController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.milestones.store');
+
+Route::post('/teacher/projects/{projectID}/milestones/{milestoneID}/toggle', [MilestoneController::class, 'toggle'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.milestones.toggle');
+
+Route::delete('/teacher/projects/{projectID}/milestones/{milestoneID}', [MilestoneController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.projects.milestones.destroy');
 
 Route::get('/teacher/payments', [TeacherController::class, 'payments'])
     ->middleware(['auth', 'verified'])

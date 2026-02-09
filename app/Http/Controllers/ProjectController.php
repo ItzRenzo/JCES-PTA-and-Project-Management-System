@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\Milestone;
 use App\Models\ProjectContribution;
 use App\Models\ProjectUpdate;
 use Illuminate\Http\Request;
@@ -176,7 +177,7 @@ class ProjectController extends Controller
 
     public function show(int $projectID)
     {
-        $project = Project::with(['contributions.parent'])
+        $project = Project::with(['contributions.parent', 'milestones'])
             ->where('projectID', $projectID)
             ->firstOrFail();
 
@@ -189,7 +190,26 @@ class ProjectController extends Controller
             ->orderBy('contribution_date', 'desc')
             ->paginate(10);
 
-        return view($this->resolveProjectsView('show'), compact('project', 'updates', 'contributions'));
+        $milestones = Milestone::where('projectID', $projectID)
+            ->orderBy('sort_order')
+            ->get();
+
+        // Calculate progress metrics
+        $latestProgress = $updates->first() ? (float) $updates->first()->progress_percentage : 0;
+        $fundProgress = $project->target_budget > 0
+            ? round(min(($project->current_amount / $project->target_budget) * 100, 100), 1)
+            : 0;
+        $totalMilestones = $milestones->count();
+        $completedMilestones = $milestones->where('is_completed', true)->count();
+        $milestoneProgress = $totalMilestones > 0
+            ? round(($completedMilestones / $totalMilestones) * 100, 1)
+            : 0;
+
+        return view($this->resolveProjectsView('show'), compact(
+            'project', 'updates', 'contributions', 'milestones',
+            'latestProgress', 'fundProgress', 'milestoneProgress',
+            'totalMilestones', 'completedMilestones'
+        ));
     }
 
     public function edit(int $projectID)

@@ -1,6 +1,6 @@
 @extends('layouts.parent-sidebar')
 
-@section('title', 'Home')
+@section('title', 'Dashboard')
 
 @section('content')
 

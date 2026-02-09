@@ -36,12 +36,12 @@
 
             <!-- Navigation Menu -->
             <nav class="flex-1 px-3 py-6 space-y-2">
-                <a href="{{ route('dashboard') }}"
-                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
+                <a href="{{ route('parent.dashboard') }}"
+                   class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('parent.dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                     </svg>
-                    <span class="sidebar-label" x-cloak>Home</span>
+                    <span class="sidebar-label" x-cloak>Dashboard</span>
                 </a>
 
                 <a href="{{ route('parent.announcements') }}"
@@ -104,7 +104,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
                     </button>
-                    <h1 class="text-2xl font-bold text-gray-900">@yield('title', 'Home')</h1>
+                    <h1 class="text-2xl font-bold text-gray-900">@yield('title', 'Dashboard')</h1>
                 </div>
             </header>
 

@@ -182,8 +182,17 @@ class ParentContributionController extends Controller
         $parentProfile = Auth::user()->parentProfile;
 
         if (!$parentProfile) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Parent profile not found. Please contact administrator.');
+            // Auto-create parent profile using User data if it doesn't exist
+            $user = Auth::user();
+            $parentProfile = ParentProfile::create([
+                'userID' => $user->userID,
+                'first_name' => $user->first_name ?? 'Parent',
+                'last_name' => $user->last_name ?? 'User',
+                'email' => $user->email ?? 'parent' . $user->userID . '@example.com',
+                'phone' => $user->phone ?? '0000000000',
+                'password_hash' => $user->password_hash,
+                'account_status' => 'active',
+            ]);
         }
 
         // Get total number of active parents for calculating per-parent payment
