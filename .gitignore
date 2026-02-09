@@ -30,3 +30,6 @@ DATABASE_STRUCTURE.md
 public\images\projects\*
 public/images/projects/*
 public/images/projects/**
+public\images\receipt_img\*
+public/images/receipt_img/*
+public/images/receipt_img/**
