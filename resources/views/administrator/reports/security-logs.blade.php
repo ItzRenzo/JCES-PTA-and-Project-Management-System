@@ -110,12 +110,46 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Action</label>
                 <select name="action" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
                     <option value="">All Actions</option>
-                    <option value="login" {{ request('action') == 'login' ? 'selected' : '' }}>Login</option>
-                    <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>Logout</option>
-                    <option value="failed_login" {{ request('action') == 'failed_login' ? 'selected' : '' }}>Failed Login</option>
-                    <option value="password_change" {{ request('action') == 'password_change' ? 'selected' : '' }}>Password Change</option>
-                    <option value="account_locked" {{ request('action') == 'account_locked' ? 'selected' : '' }}>Account Locked</option>
-                    <option value="permission_denied" {{ request('action') == 'permission_denied' ? 'selected' : '' }}>Permission Denied</option>
+                    <optgroup label="Authentication">
+                        <option value="login" {{ request('action') == 'login' ? 'selected' : '' }}>Login</option>
+                        <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>Logout</option>
+                        <option value="failed_login" {{ request('action') == 'failed_login' ? 'selected' : '' }}>Failed Login</option>
+                        <option value="password_change" {{ request('action') == 'password_change' ? 'selected' : '' }}>Password Change</option>
+                        <option value="account_locked" {{ request('action') == 'account_locked' ? 'selected' : '' }}>Account Locked</option>
+                        <option value="permission_denied" {{ request('action') == 'permission_denied' ? 'selected' : '' }}>Permission Denied</option>
+                    </optgroup>
+                    <optgroup label="Project Management">
+                        <option value="project_created" {{ request('action') == 'project_created' ? 'selected' : '' }}>Project Created</option>
+                        <option value="project_updated" {{ request('action') == 'project_updated' ? 'selected' : '' }}>Project Updated</option>
+                        <option value="project_deleted" {{ request('action') == 'project_deleted' ? 'selected' : '' }}>Project Deleted</option>
+                        <option value="project_status_changed" {{ request('action') == 'project_status_changed' ? 'selected' : '' }}>Project Status Changed</option>
+                    </optgroup>
+                    <optgroup label="Milestones">
+                        <option value="milestone_created" {{ request('action') == 'milestone_created' ? 'selected' : '' }}>Milestone Created</option>
+                        <option value="milestone_completed" {{ request('action') == 'milestone_completed' ? 'selected' : '' }}>Milestone Completed</option>
+                        <option value="milestone_deleted" {{ request('action') == 'milestone_deleted' ? 'selected' : '' }}>Milestone Deleted</option>
+                    </optgroup>
+                    <optgroup label="Announcements">
+                        <option value="announcement_created" {{ request('action') == 'announcement_created' ? 'selected' : '' }}>Announcement Created</option>
+                        <option value="announcement_updated" {{ request('action') == 'announcement_updated' ? 'selected' : '' }}>Announcement Updated</option>
+                        <option value="announcement_deleted" {{ request('action') == 'announcement_deleted' ? 'selected' : '' }}>Announcement Deleted</option>
+                    </optgroup>
+                    <optgroup label="User Management">
+                        <option value="user_created" {{ request('action') == 'user_created' ? 'selected' : '' }}>User Created</option>
+                        <option value="user_updated" {{ request('action') == 'user_updated' ? 'selected' : '' }}>User Updated</option>
+                        <option value="user_deleted" {{ request('action') == 'user_deleted' ? 'selected' : '' }}>User Deleted</option>
+                        <option value="user_status_changed" {{ request('action') == 'user_status_changed' ? 'selected' : '' }}>User Status Changed</option>
+                    </optgroup>
+                    <optgroup label="Contributions & Payments">
+                        <option value="contribution_submitted" {{ request('action') == 'contribution_submitted' ? 'selected' : '' }}>Contribution Submitted</option>
+                        <option value="contribution_approved" {{ request('action') == 'contribution_approved' ? 'selected' : '' }}>Contribution Approved</option>
+                        <option value="contribution_rejected" {{ request('action') == 'contribution_rejected' ? 'selected' : '' }}>Contribution Rejected</option>
+                    </optgroup>
+                    <optgroup label="Schedules">
+                        <option value="schedule_created" {{ request('action') == 'schedule_created' ? 'selected' : '' }}>Schedule Created</option>
+                        <option value="schedule_updated" {{ request('action') == 'schedule_updated' ? 'selected' : '' }}>Schedule Updated</option>
+                        <option value="schedule_deleted" {{ request('action') == 'schedule_deleted' ? 'selected' : '' }}>Schedule Deleted</option>
+                    </optgroup>
                 </select>
             </div>
 
@@ -187,6 +221,12 @@
                                 @elseif($log->action === 'password_change') bg-yellow-100 text-yellow-800
                                 @elseif($log->action === 'account_locked') bg-orange-100 text-orange-800
                                 @elseif($log->action === 'permission_denied') bg-purple-100 text-purple-800
+                                @elseif(str_contains($log->action, 'project')) bg-indigo-100 text-indigo-800
+                                @elseif(str_contains($log->action, 'milestone')) bg-purple-100 text-purple-800
+                                @elseif(str_contains($log->action, 'announcement')) bg-cyan-100 text-cyan-800
+                                @elseif(str_contains($log->action, 'user')) bg-teal-100 text-teal-800
+                                @elseif(str_contains($log->action, 'contribution')) bg-emerald-100 text-emerald-800
+                                @elseif(str_contains($log->action, 'schedule')) bg-pink-100 text-pink-800
                                 @else bg-gray-100 text-gray-800
                                 @endif">
                                 @if($log->action === 'login')
