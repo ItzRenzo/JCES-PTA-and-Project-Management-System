@@ -11,6 +11,9 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700&display=swap" rel="stylesheet" />
         
+        <!-- Scripts -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
         <style>
             * {
                 margin: 0;
@@ -433,11 +436,10 @@
             
             <div class="form-section">
                 <div class="form-container">
-                    @include('components.flash-messages')
+                    {{-- @include('components.flash-messages') --}}
                     {{ $slot }}
                 </div>
             </div>
         </div>
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     </body>
 </html>

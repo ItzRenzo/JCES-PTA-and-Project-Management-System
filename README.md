@@ -1,46 +1,39 @@
 # JCSES - Parent and Project Management System
 
-A  web-based management system for JCSES Elementary School's parent and project (PTA) management needs.
+A web-based management system for JCSES Elementary School's parent and project (PTA) management needs.
 
 ![Laravel](https://img.shields.io/badge/Laravel-12.0-red.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)
 
-## Quick Start
+## 🚀 Quick Start
 
-**First time setup? Follow these steps:**
+**New to this project? Set up your development environment in minutes!**
 
-1. **Install Prerequisites:**
-   - [PHP 8.2+](https://www.php.net/downloads)
-   - [Composer](https://getcomposer.org/download/)
-   - [Node.js LTS](https://nodejs.org/)
-   - [XAMPP](https://www.apachefriends.org/)
+### Automated Setup (Windows - Recommended)
 
-2. **Install Dependencies:**
-   ```powershell
-   composer install
-   npm install
+1. **Start XAMPP** and run MySQL
+2. **Create database** `jcses_pta_system` in phpMyAdmin
+3. **Run setup script:**
+   ```bash
+   setup.bat
    ```
 
-3. **Configure Environment:**
-   ```powershell
-   copy .env.example .env
-   php artisan key:generate
-   php artisan migrate
-   ```
+That's it! The script handles everything automatically.
 
-4. **Run Development Servers (2 terminals):**
-   ```powershell
-   # Terminal 1 - Vite (CSS/JS hot reload)
-   npm run dev
-   
-   # Terminal 2 - Laravel Server
-   php artisan serve
-   ```
+### One-Command Database Setup
+```bash
+php artisan db:setup --fresh --seed
+```
 
-5. **Visit:** http://127.0.0.1:8000
+### Manual Setup
+See [SETUP.md](SETUP.md) for detailed instructions.
 
-6. **Register your first account!**
+### Quick Reference
+- 📖 [Full Setup Guide](SETUP.md) - Complete setup documentation
+- ⚡ [Quick Reference](QUICK_REFERENCE.md) - Common commands & fixes  
+- 🔐 [Test Accounts](TEST_ACCOUNTS.md) - Login credentials
+- 🗄️ [Database Schema](DATABASE_STRUCTURE.md) - Database structure
 
 ---
 

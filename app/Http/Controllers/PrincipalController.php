@@ -143,12 +143,12 @@ class PrincipalController extends Controller
                 ->whereYear('created_date', now()->year)
                 ->count(),
             'activeParents' => User::where('user_type', 'parent')
-                ->where('account_status', 'active')
+                ->where('is_active', 1)
                 ->count(),
             'newParentsThisMonth' => User::where('user_type', 'parent')
-                ->where('account_status', 'active')
-                ->whereMonth('registration_date', now()->month)
-                ->whereYear('registration_date', now()->year)
+                ->where('is_active', 1)
+                ->whereMonth('created_date', now()->month)
+                ->whereYear('created_date', now()->year)
                 ->count(),
             'upcomingEvents' => Schedule::active()
                 ->upcoming()

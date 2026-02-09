@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             JcsesPtaSystemSeeder::class,
-            TestUserSeeder::class,
+            UserSeeder::class,
             PlaceholderDataSeeder::class,
         ]);
     }
