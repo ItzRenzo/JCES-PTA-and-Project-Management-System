@@ -88,6 +88,8 @@
                         <option value="teachers">Teachers</option>
                         <option value="administrator">Administrators</option>
                         <option value="principal">Principals</option>
+                        <option value="supporting_staff">Supporting Staff (Admin & Principal)</option>
+                        <option value="faculty">Faculty (Principal, Teachers & Admin)</option>
                     </select>
                     <p x-show="errors.audience" x-text="errors.audience" class="text-red-500 text-xs mt-1"></p>
                 </div>

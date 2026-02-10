@@ -24,9 +24,11 @@ class PrincipalController extends Controller
         $user = Auth::user();
 
         // Get recent announcements (prioritize important, then 3 most recent)
+        // Filter by principal audience (includes 'everyone', 'principal', 'supporting_staff', and 'faculty')
         $recentAnnouncements = Announcement::with('creator')
             ->active()
             ->published()
+            ->forAudience('principal')
             ->orderByRaw("CASE WHEN category = 'important' THEN 0 ELSE 1 END")
             ->orderBy('published_at', 'desc')
             ->limit(3)
@@ -35,12 +37,39 @@ class PrincipalController extends Controller
         // Get upcoming schedules (exclusive to user role)
         $upcomingSchedules = Schedule::active()
             ->upcoming()
-            ->forRole($user->user_type)
+            ->forRole('principal')
             ->orderBy('scheduled_date', 'asc')
             ->limit(3)
             ->get();
 
-        return view('principal.dashboard', compact('recentAnnouncements', 'upcomingSchedules'));
+        // Dashboard statistics
+        $stats = [
+            'proposedProjects' => \App\Models\Project::where('project_status', 'created')
+                ->whereMonth('created_date', now()->month)
+                ->whereYear('created_date', now()->year)
+                ->count(),
+            'activeParents' => User::where('user_type', 'parent')
+                ->where('is_active', 1)
+                ->count(),
+            'newParentsThisMonth' => User::where('user_type', 'parent')
+                ->where('is_active', 1)
+                ->whereMonth('created_date', now()->month)
+                ->whereYear('created_date', now()->year)
+                ->count(),
+            'upcomingEvents' => Schedule::active()
+                ->upcoming()
+                ->whereMonth('scheduled_date', now()->month)
+                ->whereYear('scheduled_date', now()->year)
+                ->count(),
+            'activeProjects' => \App\Models\Project::whereIn('project_status', ['active', 'in_progress'])
+                ->count(),
+            'completedProjectsThisMonth' => \App\Models\Project::where('project_status', 'completed')
+                ->whereMonth('actual_completion_date', now()->month)
+                ->whereYear('actual_completion_date', now()->year)
+                ->count(),
+        ];
+
+        return view('principal.dashboard', compact('recentAnnouncements', 'upcomingSchedules', 'stats'));
     }
 
     /**
@@ -119,10 +148,12 @@ class PrincipalController extends Controller
     {
         $user = Auth::user();
 
-        // Get recent announcements (visible to everyone or matching user role)
+        // Get recent announcements (visible to administrators)
+        // Filter by administrator audience (includes 'everyone', 'administrator', 'supporting_staff', and 'faculty')
         $recentAnnouncements = Announcement::with('creator')
             ->active()
             ->published()
+            ->forAudience('administrator')
             ->orderByRaw("CASE WHEN category = 'important' THEN 0 ELSE 1 END")
             ->orderBy('published_at', 'desc')
             ->limit(3)
@@ -131,7 +162,7 @@ class PrincipalController extends Controller
         // Get upcoming schedules (exclusive to user role)
         $upcomingSchedules = Schedule::active()
             ->upcoming()
-            ->forRole($user->user_type)
+            ->forRole('administrator')
             ->orderBy('scheduled_date', 'asc')
             ->limit(3)
             ->get();

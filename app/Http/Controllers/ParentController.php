@@ -49,16 +49,9 @@ class ParentController extends Controller
             ->limit(3)
             ->get();
 
-        // Get active/ongoing projects (not just upcoming)
-        $upcomingProjects = Project::whereIn('project_status', ['created', 'active', 'in_progress'])
-            ->orderBy('start_date', 'desc')
-            ->limit(3)
-            ->get();
-
         // Dashboard statistics
         $stats = [
             'childrenCount' => $children->count(),
-            'activeProjects' => Project::whereIn('project_status', ['active', 'in_progress'])->count(),
             'upcomingEvents' => Schedule::active()
                 ->upcoming()
                 ->forRole('parent')
@@ -67,7 +60,7 @@ class ParentController extends Controller
                 ->count(),
         ];
 
-        return view('parent.dashboard', compact('recentAnnouncements', 'upcomingSchedules', 'upcomingProjects', 'stats', 'children'));
+        return view('parent.dashboard', compact('recentAnnouncements', 'upcomingSchedules', 'stats', 'children'));
     }
 
     /**

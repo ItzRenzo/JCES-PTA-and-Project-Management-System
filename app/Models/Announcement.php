@@ -51,12 +51,33 @@ class Announcement extends Model
 
     /**
      * Scope to get announcements by audience
+     * Handles group audiences:
+     * - supporting_staff: administrator + principal
+     * - faculty: principal + teachers + administrator
      */
     public function scopeForAudience($query, $audience)
     {
-        return $query->where(function($q) use ($audience) {
-            $q->where('audience', $audience)
+        // Map singular role names to plural for database compatibility
+        $audienceMap = [
+            'parent' => 'parents',
+            'teacher' => 'teachers',
+        ];
+
+        $dbAudience = $audienceMap[$audience] ?? $audience;
+
+        return $query->where(function($q) use ($dbAudience, $audience) {
+            // Match both singular and plural forms for compatibility
+            $q->where('audience', $dbAudience)
+              ->orWhere('audience', $audience)
               ->orWhere('audience', 'everyone');
+
+            // Handle group audience memberships
+            if (in_array($audience, ['administrator', 'principal'])) {
+                $q->orWhere('audience', 'supporting_staff')
+                  ->orWhere('audience', 'faculty');
+            } elseif (in_array($audience, ['teacher', 'teachers'])) {
+                $q->orWhere('audience', 'faculty');
+            }
         });
     }
 

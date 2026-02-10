@@ -79,7 +79,7 @@ class AnnouncementController extends Controller
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
                 'category' => 'required|in:important,notice,update,event',
-                'audience' => 'required|in:everyone,parents,teachers,administrator,principal',
+                'audience' => 'required|in:everyone,parents,teachers,administrator,principal,supporting_staff,faculty',
                 'published_at' => 'nullable|date',
                 'expires_at' => 'nullable|date|after:published_at',
             ]);
@@ -146,7 +146,7 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category' => 'required|in:important,notice,update,event',
-            'audience' => 'required|in:everyone,parents,teachers,administrator,principal',
+            'audience' => 'required|in:everyone,parents,teachers,administrator,principal,supporting_staff,faculty',
             'published_at' => 'nullable|date',
             'expires_at' => 'nullable|date|after:published_at',
             'is_active' => 'boolean',
