@@ -21,7 +21,7 @@ class ScheduleController extends Controller
                 'start_time' => 'nullable|date_format:H:i',
                 'end_time' => 'nullable|date_format:H:i|after:start_time',
                 'priority' => 'required|in:high,medium,low',
-                'visibility' => 'required|in:everyone,administrator,principal,teacher,parent',
+                'visibility' => 'required|in:everyone,administrator,principal,teachers,parents,supporting_staff,faculty',
             ]);
 
             $schedule = Schedule::create([

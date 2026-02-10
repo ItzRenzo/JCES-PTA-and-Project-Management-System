@@ -81,10 +81,19 @@
                     <span class="px-3 py-1 text-xs rounded-full
                         @if($announcement->audience === 'parents') bg-purple-100 text-purple-700
                         @elseif($announcement->audience === 'teachers') bg-indigo-100 text-indigo-700
-                        @elseif($announcement->audience === 'staff') bg-teal-100 text-teal-700
+                        @elseif($announcement->audience === 'administrator') bg-teal-100 text-teal-700
+                        @elseif($announcement->audience === 'principal') bg-pink-100 text-pink-700
+                        @elseif($announcement->audience === 'supporting_staff') bg-cyan-100 text-cyan-700
+                        @elseif($announcement->audience === 'faculty') bg-emerald-100 text-emerald-700
                         @else bg-gray-100 text-gray-700
                         @endif">
-                        {{ ucfirst($announcement->audience) }}
+                        @if($announcement->audience === 'supporting_staff')
+                            Supporting Staff
+                        @elseif($announcement->audience === 'faculty')
+                            Faculty
+                        @else
+                            {{ ucfirst($announcement->audience) }}
+                        @endif
                     </span>
                 </div>
             </div>
