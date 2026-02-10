@@ -6,10 +6,12 @@ use App\Models\ParentProfile;
 use App\Models\PaymentTransaction;
 use App\Models\Project;
 use App\Models\ProjectContribution;
+use App\Mail\PaymentApproved;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ContributionController extends Controller
@@ -210,6 +212,7 @@ class ContributionController extends Controller
         ]);
 
         $contribution = ProjectContribution::where('contributionID', $contributionID)->firstOrFail();
+        $previousStatus = $contribution->payment_status;
         $contribution->payment_status = $validated['payment_status'];
 
         if ($validated['payment_status'] === 'completed' && empty($contribution->receipt_number)) {
@@ -222,6 +225,23 @@ class ContributionController extends Controller
         if ($transaction) {
             $transaction->transaction_status = $validated['payment_status'] === 'completed' ? 'completed' : $validated['payment_status'];
             $transaction->save();
+        }
+
+        if ($previousStatus !== 'completed' && $validated['payment_status'] === 'completed') {
+            $contribution->loadMissing(['parent.user', 'project']);
+            $recipientEmail = $contribution->parent?->email
+                ?? $contribution->parent?->user?->email;
+
+            if ($recipientEmail) {
+                try {
+                    Mail::to($recipientEmail)->send(new PaymentApproved($contribution));
+                } catch (\Throwable $exception) {
+                    Log::warning('Payment approval email failed to send.', [
+                        'contributionID' => $contribution->contributionID,
+                        'error' => $exception->getMessage(),
+                    ]);
+                }
+            }
         }
 
         return redirect()->back();
@@ -354,6 +374,25 @@ class ContributionController extends Controller
             }
 
             DB::commit();
+
+            foreach ($contributions as $contribution) {
+                $contribution->loadMissing(['parent.user', 'project']);
+                $recipientEmail = $contribution->parent?->email
+                    ?? $contribution->parent?->user?->email;
+
+                if (!$recipientEmail) {
+                    continue;
+                }
+
+                try {
+                    Mail::to($recipientEmail)->send(new PaymentApproved($contribution));
+                } catch (\Throwable $exception) {
+                    Log::warning('Manual payment email failed to send.', [
+                        'contributionID' => $contribution->contributionID,
+                        'error' => $exception->getMessage(),
+                    ]);
+                }
+            }
 
             return response()->json([
                 'success' => true,
