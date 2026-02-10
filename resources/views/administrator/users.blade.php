@@ -154,7 +154,7 @@
 
                                 <button onclick="openDeleteModal({{ json_encode($user) }})"
                                         class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-200"
-                                        title="Delete">
+                                        title="Archive">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -421,7 +421,7 @@
 
                                 <button onclick="openDeleteStudentModal({{ json_encode($student) }})"
                                         class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors duration-200"
-                                        title="Delete">
+                                        title="Archive">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -1044,7 +1044,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Delete Student</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">Archive Student</h3>
                 </div>
                 <button onclick="closeDeleteStudentModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1054,7 +1054,7 @@
             </div>
 
             <div class="mt-6">
-                <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this student? This will also remove all parent-student relationships. This action cannot be undone.</p>
+                <p class="text-sm text-gray-600 mb-4">Are you sure you want to archive this student? The student will be hidden from the list but will remain in the database.</p>
                 <div class="bg-gray-50 rounded-lg p-3">
                     <div id="deleteStudentInfo" class="font-medium text-gray-900"></div>
                 </div>
@@ -1067,7 +1067,7 @@
                 </button>
                 <button type="button" id="confirmDeleteStudentBtn" onclick="confirmDeleteStudent()"
                         class="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200">
-                    Delete Student
+                    Archive Student
                 </button>
             </div>
         </div>
@@ -1263,7 +1263,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Delete User</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">Archive User</h3>
                 </div>
                 <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1275,7 +1275,7 @@
             <!-- Modal Body -->
             <div class="mt-6">
                 <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-2">Are you sure you want to delete this user? This action cannot be undone.</p>
+                    <p class="text-sm text-gray-600 mb-2">Are you sure you want to archive this user? The user will be hidden from the list but will remain in the database.</p>
                     <div class="bg-gray-50 rounded-lg p-3 mb-4">
                         <div class="flex items-center">
                             <div id="deleteUserAvatar" class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1310,7 +1310,7 @@
                 </button>
                 <button type="button" id="confirmDeleteButton" onclick="confirmDeleteUser()" disabled
                         class="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200">
-                    Delete
+                    Archive
                 </button>
             </div>
         </div>
@@ -1718,7 +1718,7 @@ function confirmDeleteUser() {
     const deleteButton = document.getElementById('confirmDeleteButton');
     const originalButtonText = deleteButton.innerHTML;
     deleteButton.disabled = true;
-    deleteButton.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Deleting...';
+    deleteButton.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Archiving...';
 
     // Call the actual delete function
     deleteUserWithCallback(userToDelete.userID, () => {
@@ -1729,7 +1729,7 @@ function confirmDeleteUser() {
 }
 
 function deleteUserWithCallback(userId, onError) {
-    console.log('Attempting to delete user with ID:', userId);
+    console.log('Attempting to archive user with ID:', userId);
 
     // Get CSRF token
     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
@@ -1764,12 +1764,12 @@ function deleteUserWithCallback(userId, onError) {
 
         if (data.success) {
             // Show success message
-            alert(data.message || 'User deleted successfully!');
+            alert(data.message || 'User archived successfully!');
             // Reload the page to show updated list
             location.reload();
         } else {
             // Show error message
-            alert(data.message || 'Error deleting user. Please try again.');
+            alert(data.message || 'Error archiving user. Please try again.');
             if (onError) onError();
         }
     })
@@ -1779,7 +1779,7 @@ function deleteUserWithCallback(userId, onError) {
         // Close the modal
         closeDeleteModal();
 
-        alert('An error occurred while deleting the user: ' + error.message);
+        alert('An error occurred while archiving the user: ' + error.message);
         if (onError) onError();
     });
 }
@@ -2540,7 +2540,7 @@ function confirmDeleteStudent() {
     const token = document.querySelector('input[name="_token"]').value;
     const deleteBtn = document.getElementById('confirmDeleteStudentBtn');
     const originalText = deleteBtn.textContent;
-    deleteBtn.textContent = 'Deleting...';
+    deleteBtn.textContent = 'Archiving...';
     deleteBtn.disabled = true;
 
     fetch(`/${routePrefix}/students/${studentToDelete.studentID}`, {
@@ -2554,16 +2554,16 @@ function confirmDeleteStudent() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message || 'Student deleted successfully!');
+            alert(data.message || 'Student archived successfully!');
             closeDeleteStudentModal();
             location.reload();
         } else {
-            alert(data.message || 'Error deleting student.');
+            alert(data.message || 'Error archiving student.');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while deleting the student.');
+        alert('An error occurred while archiving the student.');
     })
     .finally(() => {
         deleteBtn.textContent = originalText;

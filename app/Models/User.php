@@ -56,6 +56,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'is_active',
+        'is_archived',
     ];
 
     /**
@@ -81,6 +82,7 @@ class User extends Authenticatable
             'password_changed_date' => 'datetime',
             'account_locked_until' => 'datetime',
             'is_active' => 'boolean',
+            'is_archived' => 'boolean',
         ];
     }
 
@@ -128,6 +130,14 @@ class User extends Authenticatable
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope a query to exclude archived users.
+     */
+    public function scopeNotArchived($query)
+    {
+        return $query->where('is_archived', false);
     }
 
     /**
