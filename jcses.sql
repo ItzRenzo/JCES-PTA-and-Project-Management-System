@@ -223,6 +223,24 @@ CREATE TABLE `project_contributions` (
 	CONSTRAINT `project_contributions_parentID_foreign` FOREIGN KEY (`parentID`) REFERENCES `parents` (`parentID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `project_milestones` (
+	`milestoneID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`projectID` BIGINT(20) UNSIGNED NOT NULL,
+	`title` VARCHAR(200) NOT NULL,
+	`description` TEXT NULL,
+	`target_date` DATE NULL,
+	`completed_date` DATE NULL,
+	`is_completed` TINYINT(1) NOT NULL DEFAULT 0,
+	`sort_order` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+	`created_by` BIGINT(20) UNSIGNED NOT NULL,
+	`created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`milestoneID`),
+	KEY `project_milestones_projectID_index` (`projectID`),
+	KEY `project_milestones_sort_order_index` (`sort_order`),
+	CONSTRAINT `project_milestones_projectID_foreign` FOREIGN KEY (`projectID`) REFERENCES `projects` (`projectID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `project_updates` (
 	`updateID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`projectID` BIGINT(20) UNSIGNED NOT NULL,
