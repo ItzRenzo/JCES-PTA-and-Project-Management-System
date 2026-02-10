@@ -25,8 +25,8 @@
             <!-- Logo and School Name -->
             <div class="p-6 bg-white border-r border-gray-200 sidebar-padding">
                 <div class="flex items-center gap-3 sidebar-logo">
-                    <img src="http://127.0.0.1:8000/images/logos/jces-logo.png" 
-                         alt="JCES Logo" 
+                    <img src="http://127.0.0.1:8000/images/logos/jces-logo.png"
+                         alt="JCES Logo"
                          class="w-12 h-12 object-contain">
                     <div class="sidebar-label" x-cloak>
                         <div class="text-sm font-semibold text-gray-900">J. Cruz Sr.</div>
@@ -37,7 +37,7 @@
 
             <!-- Navigation Menu -->
             <nav class="flex-1 px-3 py-6 space-y-2">
-                <a href="{{ route('principal.dashboard') }}" 
+                <a href="{{ route('principal.dashboard') }}"
                    class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
@@ -45,7 +45,7 @@
                     <span class="sidebar-label" x-cloak>Dashboard</span>
                 </a>
 
-                                 <a href="{{ route('principal.announcements') }}" 
+                                 <a href="{{ route('principal.announcements') }}"
                                      class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.announcements') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
@@ -53,7 +53,7 @@
                     <span class="sidebar-label" x-cloak>Announcement</span>
                 </a>
 
-                                <a href="{{ route('principal.projects.index') }}" 
+                                <a href="{{ route('principal.projects.index') }}"
                                      class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.projects*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"/>
@@ -62,7 +62,7 @@
                     <span class="sidebar-label" x-cloak>Projects</span>
                 </a>
 
-                     <a href="{{ route('principal.contributions.index') }}" 
+                     <a href="{{ route('principal.contributions.index') }}"
                          class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.contributions*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
@@ -71,7 +71,7 @@
                     <span class="sidebar-label" x-cloak>Payments</span>
                 </a>
 
-                <a href="{{ route('principal.users') }}" 
+                <a href="{{ route('principal.users') }}"
                    class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.users') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
@@ -79,7 +79,7 @@
                     <span class="sidebar-label" x-cloak>Users</span>
                 </a>
 
-                <a href="{{ route('principal.create-account') }}" 
+                <a href="{{ route('principal.create-account') }}"
                    class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.create-account') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
@@ -87,7 +87,7 @@
                     <span class="sidebar-label" x-cloak>Create Account</span>
                 </a>
 
-                <a href="{{ route('principal.reports') }}" 
+                <a href="{{ route('principal.reports') }}"
                    class="sidebar-link flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('principal.reports*') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
@@ -143,12 +143,8 @@
         </div>
     </div>
 
-    <!-- Floating Action Button -->
-    <button class="fixed bottom-6 right-6 w-14 h-14 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"/>
-        </svg>
-    </button>
+    <!-- Floating Message Popup -->
+    @include('components.message-floating-button')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
