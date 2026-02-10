@@ -29,6 +29,7 @@ CREATE TABLE `users` (
 	`first_name` VARCHAR(100) NOT NULL,
 	`last_name` VARCHAR(100) NOT NULL,
 	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
+	`is_archived` TINYINT(1) NOT NULL DEFAULT 0,
 	`created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`last_login` TIMESTAMP NULL,
 	`password_changed_date` TIMESTAMP NULL,
@@ -42,7 +43,8 @@ CREATE TABLE `users` (
 	UNIQUE KEY `users_email_unique` (`email`),
 	KEY `users_username_index` (`username`),
 	KEY `users_user_type_index` (`user_type`),
-	KEY `users_is_active_index` (`is_active`)
+	KEY `users_is_active_index` (`is_active`),
+	KEY `users_is_archived_index` (`is_archived`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `password_reset_tokens` (
@@ -152,6 +154,7 @@ CREATE TABLE `students` (
 	`grade_level` VARCHAR(20) NOT NULL,
 	`section` VARCHAR(50) NULL,
 	`enrollment_status` ENUM('active','transferred','graduated','dropped') NOT NULL DEFAULT 'active',
+	`is_archived` TINYINT(1) NOT NULL DEFAULT 0,
 	`academic_year` VARCHAR(20) NOT NULL,
 	`enrollment_date` DATE NOT NULL,
 	`birth_date` DATE NULL,
@@ -161,7 +164,8 @@ CREATE TABLE `students` (
 	PRIMARY KEY (`studentID`),
 	KEY `students_grade_level_index` (`grade_level`),
 	KEY `students_academic_year_index` (`academic_year`),
-	KEY `students_enrollment_status_index` (`enrollment_status`)
+	KEY `students_enrollment_status_index` (`enrollment_status`),
+	KEY `students_is_archived_index` (`is_archived`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `parent_student_relationships` (
