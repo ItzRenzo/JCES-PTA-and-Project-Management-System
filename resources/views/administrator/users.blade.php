@@ -199,7 +199,27 @@
                     </div>
                 </div>
                 <div>
-                    {{ $users->appends(request()->query())->links() }}
+                    <div class="flex items-center gap-1">
+                        @if ($users->onFirstPage())
+                            <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&lt;</span>
+                        @else
+                            <a href="{{ $users->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&lt;</a>
+                        @endif
+
+                        @for ($page = max(1, $users->currentPage() - 2); $page <= min($users->lastPage(), $users->currentPage() + 2); $page++)
+                            @if ($page == $users->currentPage())
+                                <span class="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-md">{{ $page }}</span>
+                            @else
+                                <a href="{{ $users->appends(request()->query())->url($page) }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">{{ $page }}</a>
+                            @endif
+                        @endfor
+
+                        @if ($users->hasMorePages())
+                            <a href="{{ $users->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&gt;</a>
+                        @else
+                            <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&gt;</span>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -474,7 +494,27 @@
                     </div>
                 </div>
                 <div>
-                    {{ $students->appends(request()->query())->links() }}
+                    <div class="flex items-center gap-1">
+                        @if ($students->onFirstPage())
+                            <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&lt;</span>
+                        @else
+                            <a href="{{ $students->appends(request()->query())->previousPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&lt;</a>
+                        @endif
+
+                        @for ($page = max(1, $students->currentPage() - 2); $page <= min($students->lastPage(), $students->currentPage() + 2); $page++)
+                            @if ($page == $students->currentPage())
+                                <span class="px-3 py-1 text-sm font-semibold text-white bg-green-600 rounded-md">{{ $page }}</span>
+                            @else
+                                <a href="{{ $students->appends(request()->query())->url($page) }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">{{ $page }}</a>
+                            @endif
+                        @endfor
+
+                        @if ($students->hasMorePages())
+                            <a href="{{ $students->appends(request()->query())->nextPageUrl() }}" class="px-3 py-1 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">&gt;</a>
+                        @else
+                            <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">&gt;</span>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
