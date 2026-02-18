@@ -58,7 +58,11 @@ class AnnouncementController extends Controller
             ->limit(3)
             ->get();
 
-        return view('administrator.announcements.index', compact('announcements', 'upcomingSchedules'));
+        $view = $user->user_type === 'principal'
+            ? 'principal.announcements.index'
+            : 'administrator.announcements.index';
+
+        return view($view, compact('announcements', 'upcomingSchedules'));
     }
 
     /**

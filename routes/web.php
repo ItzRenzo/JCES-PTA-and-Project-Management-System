@@ -64,9 +64,9 @@ Route::get('/principal/users', [PrincipalController::class, 'users'])
     ->middleware(['auth', 'verified'])
     ->name('principal.users');
 
-Route::get('/principal/announcements', function () {
-    return view('principal.announcements.index');
-})->middleware(['auth', 'verified'])->name('principal.announcements');
+Route::get('/principal/announcements', [AnnouncementController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.announcements');
 
 Route::put('/principal/users/{id}', [PrincipalController::class, 'updateUser'])
     ->middleware(['auth', 'verified'])
