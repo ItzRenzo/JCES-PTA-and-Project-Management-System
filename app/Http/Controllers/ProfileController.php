@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -53,13 +55,31 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->user_type === 'parent') {
+            $hasEmergencyColumns = Schema::hasColumn('users', 'emergency_contact_name')
+                && Schema::hasColumn('users', 'emergency_contact_phone');
+
+            if ($hasEmergencyColumns) {
+                $user->forceFill(Arr::only($validated, [
+                    'emergency_contact_name',
+                    'emergency_contact_phone',
+                ]));
+            }
+        } else {
+            $user->fill(Arr::except($validated, [
+                'emergency_contact_name',
+                'emergency_contact_phone',
+            ]));
+
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
         }
 
-        $request->user()->save();
+        $user->save();
 
         return Redirect::route('profile.edit')
             ->with('status', 'profile-updated')

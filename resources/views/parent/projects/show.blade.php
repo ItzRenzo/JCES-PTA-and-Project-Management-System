@@ -105,6 +105,41 @@
                     @endif
                 </div>
             </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">My Contributions</h2>
+
+                @if($parentContributions->isEmpty())
+                    <p class="text-sm text-gray-500">You have not contributed to this project yet.</p>
+                @else
+                    <div class="mb-4 pb-4 border-b border-gray-200">
+                        <div class="text-sm text-gray-500">Your Total Contribution</div>
+                        <div class="text-2xl font-bold text-gray-900">₱{{ number_format($parentContributions->sum('contribution_amount'), 2) }}</div>
+                    </div>
+
+                    <div class="space-y-3 max-h-72 overflow-y-auto">
+                        @foreach($parentContributions as $contribution)
+                            <div class="border border-gray-200 rounded-lg p-3">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div>
+                                        <div class="font-semibold text-gray-900">₱{{ number_format($contribution->contribution_amount, 2) }}</div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            {{ optional($contribution->contribution_date)->format('M d, Y h:i A') }}
+                                        </div>
+                                        @if($contribution->receipt_number)
+                                            <div class="text-xs text-gray-500 mt-1">Receipt: {{ $contribution->receipt_number }}</div>
+                                        @endif
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                        {{ $contribution->payment_status === 'completed' ? 'bg-green-100 text-green-800' : ($contribution->payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                        {{ ucfirst($contribution->payment_status) }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>
