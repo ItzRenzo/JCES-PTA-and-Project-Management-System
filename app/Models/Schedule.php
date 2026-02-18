@@ -69,12 +69,33 @@ class Schedule extends Model
 
     /**
      * Scope to filter by visibility/role
+     * Handles group audiences:
+     * - supporting_staff: administrator + principal
+     * - faculty: principal + teachers + administrator
      */
     public function scopeForRole($query, $role)
     {
-        return $query->where(function($q) use ($role) {
-            $q->where('visibility', $role)
+        // Map singular role names to plural for database compatibility
+        $roleMap = [
+            'parent' => 'parents',
+            'teacher' => 'teachers',
+        ];
+
+        $dbRole = $roleMap[$role] ?? $role;
+
+        return $query->where(function($q) use ($dbRole, $role) {
+            // Match both singular and plural forms for compatibility
+            $q->where('visibility', $dbRole)
+              ->orWhere('visibility', $role)
               ->orWhere('visibility', 'everyone');
+
+            // Handle group audience memberships
+            if (in_array($role, ['administrator', 'principal'])) {
+                $q->orWhere('visibility', 'supporting_staff')
+                  ->orWhere('visibility', 'faculty');
+            } elseif (in_array($role, ['teacher', 'teachers'])) {
+                $q->orWhere('visibility', 'faculty');
+            }
         });
     }
 

@@ -114,19 +114,27 @@ class TeacherController extends Controller
      */
     public function users(Request $request)
     {
-        $query = User::query();
+        $query = User::notArchived();
 
         // Only show parent accounts for teachers
         $query->where('user_type', 'parent');
 
-        // Apply search filter
+        // Apply search filter - searches across name, email, phone, and address (for parents)
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%");
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  // Search in parent profile for address fields
+                  ->orWhereHas('parentProfile', function($pq) use ($search) {
+                      $pq->where('street_address', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%")
+                        ->orWhere('barangay', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                  });
             });
         }
 
@@ -142,9 +150,83 @@ class TeacherController extends Controller
         // Order by created_date (newest first)
         $query->orderBy('created_date', 'desc');
 
-        $users = $query->paginate(10);
+        // Get per page value for users (default 10)
+        $usersPerPage = $request->input('users_per_page', 10);
+        $usersPerPage = in_array($usersPerPage, [10, 25, 50, 100]) ? $usersPerPage : 10;
+
+        $users = $query->paginate($usersPerPage);
 
         return view('teacher.users', compact('users'));
+    }
+
+    /**
+     * Delete (archive) a user.
+     */
+    public function deleteUser($id)
+    {
+        try {
+            $user = User::where('userID', $id)->firstOrFail();
+
+            // Teachers can only archive parent accounts
+            if ($user->user_type !== 'parent') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You can only archive parent accounts.'
+                ], 403);
+            }
+
+            // Prevent archiving the currently logged-in user
+            if ($user->userID === Auth::user()->userID) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot archive your own account.'
+                ], 422);
+            }
+
+            // Store user data for logging before archiving
+            $oldData = [
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'user_type' => $user->user_type,
+                'is_active' => $user->is_active,
+                'is_archived' => $user->is_archived
+            ];
+
+            // Archive the user instead of deleting
+            $user->is_archived = true;
+            $user->is_active = false;
+            $user->save();
+
+            // Log the user archive activity
+            \App\Models\SecurityAuditLog::logActivity(
+                Auth::user()->userID,
+                'archive_user_account',
+                'users',
+                $id,
+                $oldData,
+                ['is_archived' => true, 'is_active' => false],
+                true,
+                null
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User archived successfully!'
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error archiving user: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

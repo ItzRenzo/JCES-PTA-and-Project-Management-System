@@ -24,9 +24,11 @@ class PrincipalController extends Controller
         $user = Auth::user();
 
         // Get recent announcements (prioritize important, then 3 most recent)
+        // Filter by principal audience (includes 'everyone', 'principal', 'supporting_staff', and 'faculty')
         $recentAnnouncements = Announcement::with('creator')
             ->active()
             ->published()
+            ->forAudience('principal')
             ->orderByRaw("CASE WHEN category = 'important' THEN 0 ELSE 1 END")
             ->orderBy('published_at', 'desc')
             ->limit(3)
@@ -35,12 +37,39 @@ class PrincipalController extends Controller
         // Get upcoming schedules (exclusive to user role)
         $upcomingSchedules = Schedule::active()
             ->upcoming()
-            ->forRole($user->user_type)
+            ->forRole('principal')
             ->orderBy('scheduled_date', 'asc')
             ->limit(3)
             ->get();
 
-        return view('principal.dashboard', compact('recentAnnouncements', 'upcomingSchedules'));
+        // Dashboard statistics
+        $stats = [
+            'proposedProjects' => \App\Models\Project::where('project_status', 'created')
+                ->whereMonth('created_date', now()->month)
+                ->whereYear('created_date', now()->year)
+                ->count(),
+            'activeParents' => User::where('user_type', 'parent')
+                ->where('is_active', 1)
+                ->count(),
+            'newParentsThisMonth' => User::where('user_type', 'parent')
+                ->where('is_active', 1)
+                ->whereMonth('created_date', now()->month)
+                ->whereYear('created_date', now()->year)
+                ->count(),
+            'upcomingEvents' => Schedule::active()
+                ->upcoming()
+                ->whereMonth('scheduled_date', now()->month)
+                ->whereYear('scheduled_date', now()->year)
+                ->count(),
+            'activeProjects' => \App\Models\Project::whereIn('project_status', ['active', 'in_progress'])
+                ->count(),
+            'completedProjectsThisMonth' => \App\Models\Project::where('project_status', 'completed')
+                ->whereMonth('actual_completion_date', now()->month)
+                ->whereYear('actual_completion_date', now()->year)
+                ->count(),
+        ];
+
+        return view('principal.dashboard', compact('recentAnnouncements', 'upcomingSchedules', 'stats'));
     }
 
     /**
@@ -119,10 +148,12 @@ class PrincipalController extends Controller
     {
         $user = Auth::user();
 
-        // Get recent announcements (visible to everyone or matching user role)
+        // Get recent announcements (visible to administrators)
+        // Filter by administrator audience (includes 'everyone', 'administrator', 'supporting_staff', and 'faculty')
         $recentAnnouncements = Announcement::with('creator')
             ->active()
             ->published()
+            ->forAudience('administrator')
             ->orderByRaw("CASE WHEN category = 'important' THEN 0 ELSE 1 END")
             ->orderBy('published_at', 'desc')
             ->limit(3)
@@ -131,7 +162,7 @@ class PrincipalController extends Controller
         // Get upcoming schedules (exclusive to user role)
         $upcomingSchedules = Schedule::active()
             ->upcoming()
-            ->forRole($user->user_type)
+            ->forRole('administrator')
             ->orderBy('scheduled_date', 'asc')
             ->limit(3)
             ->get();
@@ -171,7 +202,7 @@ class PrincipalController extends Controller
      */
     public function users(Request $request)
     {
-        $query = User::query();
+        $query = User::notArchived();
 
         // Apply search filter - searches across name, email, phone, and address (for parents)
         if ($request->has('search') && $request->search) {
@@ -217,7 +248,7 @@ class PrincipalController extends Controller
         $users = $query->paginate($usersPerPage);
 
         // Students listing mirrors administrator experience
-        $studentQuery = Student::with(['parents.user']);
+        $studentQuery = Student::notArchived()->with(['parents.user']);
 
         if ($request->has('student_search') && $request->student_search) {
             $search = $request->student_search;
@@ -426,7 +457,7 @@ class PrincipalController extends Controller
     }
 
     /**
-     * Delete a user.
+     * Archive a user (soft delete).
      */
     public function deleteUser($id)
     {
@@ -434,42 +465,45 @@ class PrincipalController extends Controller
             // Find user by userID (our custom primary key)
             $user = User::where('userID', $id)->firstOrFail();
 
-            // Prevent deletion of the currently logged-in user
+            // Prevent archiving the currently logged-in user
             if ($user->userID === Auth::user()->userID) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You cannot delete your own account.'
+                    'message' => 'You cannot archive your own account.'
                 ], 422);
             }
 
-            // Store user data for logging before deletion
-            $userData = [
+            // Store user data for logging before archiving
+            $oldData = [
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'user_type' => $user->user_type,
-                'is_active' => $user->is_active
+                'is_active' => $user->is_active,
+                'is_archived' => $user->is_archived
             ];
 
-            // Delete the user
-            $user->delete();
+            // Archive the user instead of deleting
+            $user->is_archived = true;
+            $user->is_active = false;
+            $user->save();
 
-            // Log the user deletion activity
+            // Log the user archive activity
             SecurityAuditLog::logActivity(
                 Auth::user()->userID,
-                'delete_user_account',
+                'archive_user_account',
                 'users',
                 $id,
-                $userData,
-                null,
+                $oldData,
+                ['is_archived' => true, 'is_active' => false],
                 true,
                 null
             );
 
             return response()->json([
                 'success' => true,
-                'message' => 'User deleted successfully!'
+                'message' => 'User archived successfully!'
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -480,7 +514,7 @@ class PrincipalController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting user: ' . $e->getMessage()
+                'message' => 'Error archiving user: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -490,7 +524,7 @@ class PrincipalController extends Controller
      */
     public function adminUsers(Request $request)
     {
-        $query = User::query();
+        $query = User::notArchived();
 
         // Apply search filter - searches across name, email, phone, and address (for parents)
         if ($request->has('search') && $request->search) {
@@ -536,7 +570,7 @@ class PrincipalController extends Controller
         $users = $query->paginate($usersPerPage);
 
         // Query students
-        $studentQuery = Student::with(['parents.user']);
+        $studentQuery = Student::notArchived()->with(['parents.user']);
 
         // Apply student search filter
         if ($request->has('student_search') && $request->student_search) {
@@ -681,7 +715,7 @@ class PrincipalController extends Controller
     }
 
     /**
-     * Delete a user (Admin function).
+     * Archive a user (Admin function - soft delete).
      */
     public function adminDeleteUser($id)
     {
@@ -689,42 +723,45 @@ class PrincipalController extends Controller
             // Find user by userID (our custom primary key)
             $user = User::where('userID', $id)->firstOrFail();
 
-            // Prevent deletion of the currently logged-in user
+            // Prevent archiving the currently logged-in user
             if ($user->userID === Auth::user()->userID) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You cannot delete your own account.'
+                    'message' => 'You cannot archive your own account.'
                 ], 422);
             }
 
-            // Store user data for logging before deletion
-            $userData = [
+            // Store user data for logging before archiving
+            $oldData = [
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'user_type' => $user->user_type,
-                'is_active' => $user->is_active
+                'is_active' => $user->is_active,
+                'is_archived' => $user->is_archived
             ];
 
-            // Delete the user
-            $user->delete();
+            // Archive the user instead of deleting
+            $user->is_archived = true;
+            $user->is_active = false;
+            $user->save();
 
-            // Log the user deletion activity
+            // Log the user archive activity
             SecurityAuditLog::logActivity(
                 Auth::user()->userID,
-                'admin_delete_user_account',
+                'admin_archive_user_account',
                 'users',
                 $id,
-                $userData,
-                null,
+                $oldData,
+                ['is_archived' => true, 'is_active' => false],
                 true,
                 null
             );
 
             return response()->json([
                 'success' => true,
-                'message' => 'User deleted successfully!'
+                'message' => 'User archived successfully!'
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -735,7 +772,7 @@ class PrincipalController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting user: ' . $e->getMessage()
+                'message' => 'Error archiving user: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -745,7 +782,7 @@ class PrincipalController extends Controller
      */
     public function adminStudents(Request $request)
     {
-        $query = Student::with(['parents.user']);
+        $query = Student::notArchived()->with(['parents.user']);
 
         // Apply search filter
         if ($request->has('student_search') && $request->student_search) {
@@ -974,40 +1011,34 @@ class PrincipalController extends Controller
     }
 
     /**
-     * Delete a student (Admin function).
+     * Archive a student (Admin function - soft delete).
      */
     public function adminDeleteStudent($id)
     {
         try {
             $student = Student::where('studentID', $id)->firstOrFail();
 
-            $studentData = $student->toArray();
+            $oldData = $student->toArray();
 
-            DB::beginTransaction();
+            // Archive the student instead of deleting
+            $student->is_archived = true;
+            $student->save();
 
-            // Delete parent-student relationships first
-            DB::table('parent_student_relationships')->where('studentID', $id)->delete();
-
-            // Delete the student
-            $student->delete();
-
-            DB::commit();
-
-            // Log the student deletion
+            // Log the student archive
             SecurityAuditLog::logActivity(
                 Auth::user()->userID,
-                'admin_delete_student',
+                'admin_archive_student',
                 'students',
                 $id,
-                $studentData,
-                null,
+                $oldData,
+                ['is_archived' => true],
                 true,
                 null
             );
 
             return response()->json([
                 'success' => true,
-                'message' => 'Student deleted successfully!'
+                'message' => 'Student archived successfully!'
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -1016,10 +1047,9 @@ class PrincipalController extends Controller
                 'message' => 'Student not found.'
             ], 404);
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting student: ' . $e->getMessage()
+                'message' => 'Error archiving student: ' . $e->getMessage()
             ], 500);
         }
     }

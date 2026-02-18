@@ -19,6 +19,7 @@ class Student extends Model
         'enrollment_date',
         'birth_date',
         'gender',
+        'is_archived',
         'created_date',
         'updated_date',
     ];
@@ -28,7 +29,16 @@ class Student extends Model
         'birth_date' => 'date',
         'created_date' => 'datetime',
         'updated_date' => 'datetime',
+        'is_archived' => 'boolean',
     ];
+
+    /**
+     * Scope a query to exclude archived students.
+     */
+    public function scopeNotArchived($query)
+    {
+        return $query->where('is_archived', false);
+    }
 
     public function parents()
     {

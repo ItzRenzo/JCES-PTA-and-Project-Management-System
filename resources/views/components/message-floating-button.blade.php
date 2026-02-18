@@ -141,10 +141,8 @@
                         <option value="everyone">Everyone</option>
                         <option value="administrator">Administrators</option>
                         <option value="principal">Principals</option>
-                        <option value="teachers">Teachers</option>
-                        <option value="parents">Parents</option>
-                        <option value="supporting_staff">Supporting Staff (Admin & Principal)</option>
-                        <option value="faculty">Faculty (Principal, Teachers & Admin)</option>
+                        <option value="teacher">Teachers</option>
+                        <option value="parent">Parents</option>
                     </select>
                     <p x-show="errors.visibility" x-text="errors.visibility" class="text-red-500 text-xs mt-1"></p>
                 </div>
@@ -207,30 +205,28 @@
                 <!-- Warning Icon -->
                 <div x-show="toast.type === 'warning'" class="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
                     <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 2l10 18H2L12 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
-                <!-- Text -->
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold"
+                    <p class="font-semibold text-sm"
                        :class="{
-                           'text-green-800': toast.type === 'success',
-                           'text-red-800': toast.type === 'error',
-                           'text-yellow-800': toast.type === 'warning'
+                           'text-green-900': toast.type === 'success',
+                           'text-red-900': toast.type === 'error',
+                           'text-yellow-900': toast.type === 'warning'
                        }"
                        x-text="toast.title"></p>
-                    <p class="text-xs mt-0.5"
+                    <p class="text-xs mt-1"
                        :class="{
-                           'text-green-600': toast.type === 'success',
-                           'text-red-600': toast.type === 'error',
-                           'text-yellow-600': toast.type === 'warning'
+                           'text-green-700': toast.type === 'success',
+                           'text-red-700': toast.type === 'error',
+                           'text-yellow-700': toast.type === 'warning'
                        }"
                        x-text="toast.message"></p>
                 </div>
-                <!-- Close Button -->
                 <button @click="removeToast(toast.id)" class="flex-shrink-0 text-gray-400 hover:text-gray-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                     </svg>
                 </button>
             </div>
@@ -363,8 +359,8 @@ function messagePopup() {
                     this.addToast('success', 'Success!', successMsg);
                     this.resetForm();
                     this.open = false;
-                    // Redirect to announcements page
-                    setTimeout(() => window.location.href = '{{ route('administrator.announcements') }}', 1000);
+                    // Reload page to show new announcement/schedule
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
                     this.addToast('error', 'Error', data.message || 'Operation failed.');
                 }

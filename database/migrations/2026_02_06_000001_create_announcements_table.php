@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title', 255);
             $table->text('content');
             $table->enum('category', ['important', 'notice', 'update', 'event'])->default('notice');
-            $table->enum('audience', ['everyone', 'parents', 'teachers', 'administrator', 'principal'])->default('everyone');
+            $table->enum('audience', ['everyone', 'parents', 'teachers', 'administrator', 'principal', 'supporting_staff', 'faculty'])->default('everyone');
             $table->unsignedBigInteger('created_by');
             $table->timestamp('published_at')->nullable();
             $table->timestamp('expires_at')->nullable();

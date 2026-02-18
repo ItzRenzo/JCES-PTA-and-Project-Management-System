@@ -508,6 +508,10 @@ Route::put('/teacher/users/{id}', [TeacherController::class, 'updateUser'])
     ->middleware(['auth', 'verified'])
     ->name('teacher.users.update');
 
+Route::delete('/teacher/users/{id}', [TeacherController::class, 'deleteUser'])
+    ->middleware(['auth', 'verified'])
+    ->name('teacher.users.delete');
+
 // Parent routes
 Route::get('/parent/payments', [ParentContributionController::class, 'paymentIndex'])
     ->middleware(['auth', 'verified'])

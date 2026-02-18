@@ -1,652 +1,3 @@
--- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server version:               10.4.32-MariaDB - mariadb.org binary distribution
--- Server OS:                    Win64
--- HeidiSQL Version:             12.6.0.6765
--- --------------------------------------------------------
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
-
--- Dumping database structure for jcses_pta_system
-CREATE DATABASE IF NOT EXISTS `jcses_pta_system` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
-USE `jcses_pta_system`;
--- Tables
-CREATE TABLE `users` (
-	`userID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`username` VARCHAR(100) NOT NULL,
-	`password_hash` VARCHAR(255) NOT NULL,
-	`user_type` ENUM('parent','administrator','teacher','principal') NOT NULL,
-	`email` VARCHAR(150) NOT NULL,
-	`phone` VARCHAR(20) NULL,
-	`first_name` VARCHAR(100) NOT NULL,
-	`last_name` VARCHAR(100) NOT NULL,
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	`is_archived` TINYINT(1) NOT NULL DEFAULT 0,
-	`created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`last_login` TIMESTAMP NULL,
-	`password_changed_date` TIMESTAMP NULL,
-	`failed_login_attempts` INT(11) NOT NULL DEFAULT 0,
-	`account_locked_until` TIMESTAMP NULL,
-	`address` TEXT NULL,
-	`remember_token` VARCHAR(100) NULL,
-	`plain_password` VARCHAR(255) NULL,
-	PRIMARY KEY (`userID`),
-	UNIQUE KEY `users_username_unique` (`username`),
-	UNIQUE KEY `users_email_unique` (`email`),
-	KEY `users_username_index` (`username`),
-	KEY `users_user_type_index` (`user_type`),
-	KEY `users_is_active_index` (`is_active`),
-	KEY `users_is_archived_index` (`is_archived`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `password_reset_tokens` (
-	`email` VARCHAR(255) NOT NULL,
-	`token` VARCHAR(255) NOT NULL,
-	`created_at` TIMESTAMP NULL,
-	PRIMARY KEY (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `sessions` (
-	`id` VARCHAR(255) NOT NULL,
-	`user_id` BIGINT(20) UNSIGNED NULL,
-	`ip_address` VARCHAR(45) NULL,
-	`user_agent` TEXT NULL,
-	`payload` LONGTEXT NOT NULL,
-	`last_activity` INT(11) NOT NULL,
-	PRIMARY KEY (`id`),
-	KEY `sessions_user_id_index` (`user_id`),
-	KEY `sessions_last_activity_index` (`last_activity`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `cache` (
-	`key` VARCHAR(255) NOT NULL,
-	`value` MEDIUMTEXT NOT NULL,
-	`expiration` INT(11) NOT NULL,
-	PRIMARY KEY (`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `cache_locks` (
-	`key` VARCHAR(255) NOT NULL,
-	`owner` VARCHAR(255) NOT NULL,
-	`expiration` INT(11) NOT NULL,
-	PRIMARY KEY (`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `jobs` (
-	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`queue` VARCHAR(255) NOT NULL,
-	`payload` LONGTEXT NOT NULL,
-	`attempts` TINYINT(3) UNSIGNED NOT NULL,
-	`reserved_at` INT(10) UNSIGNED NULL,
-	`available_at` INT(10) UNSIGNED NOT NULL,
-	`created_at` INT(10) UNSIGNED NOT NULL,
-	PRIMARY KEY (`id`),
-	KEY `jobs_queue_index` (`queue`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `job_batches` (
-	`id` VARCHAR(255) NOT NULL,
-	`name` VARCHAR(255) NOT NULL,
-	`total_jobs` INT(11) NOT NULL,
-	`pending_jobs` INT(11) NOT NULL,
-	`failed_jobs` INT(11) NOT NULL,
-	`failed_job_ids` LONGTEXT NOT NULL,
-	`options` MEDIUMTEXT NULL,
-	`cancelled_at` INT(11) NULL,
-	`created_at` INT(11) NOT NULL,
-	`finished_at` INT(11) NULL,
-	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `failed_jobs` (
-	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`uuid` VARCHAR(255) NOT NULL,
-	`connection` TEXT NOT NULL,
-	`queue` TEXT NOT NULL,
-	`payload` LONGTEXT NOT NULL,
-	`exception` LONGTEXT NOT NULL,
-	`failed_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`id`),
-	UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `migrations` (
-	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`migration` VARCHAR(255) NOT NULL,
-	`batch` INT(11) NOT NULL,
-	PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `parents` (
-	`parentID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`first_name` VARCHAR(100) NOT NULL,
-	`last_name` VARCHAR(100) NOT NULL,
-	`email` VARCHAR(150) NOT NULL,
-	`phone` VARCHAR(20) NOT NULL,
-	`street_address` VARCHAR(255) NULL,
-	`city` VARCHAR(100) NULL,
-	`barangay` VARCHAR(100) NULL,
-	`zipcode` VARCHAR(10) NULL,
-	`password_hash` VARCHAR(255) NOT NULL,
-	`created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`last_login` TIMESTAMP NULL,
-	`account_status` ENUM('active','inactive','suspended') NOT NULL DEFAULT 'active',
-	`userID` BIGINT(20) UNSIGNED NULL,
-	PRIMARY KEY (`parentID`),
-	UNIQUE KEY `parents_email_unique` (`email`),
-	UNIQUE KEY `parents_userID_unique` (`userID`),
-	KEY `parents_email_index` (`email`),
-	KEY `parents_phone_index` (`phone`),
-	KEY `parents_last_name_first_name_index` (`last_name`, `first_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `students` (
-	`studentID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`student_name` VARCHAR(150) NOT NULL,
-	`grade_level` VARCHAR(20) NOT NULL,
-	`section` VARCHAR(50) NULL,
-	`enrollment_status` ENUM('active','transferred','graduated','dropped') NOT NULL DEFAULT 'active',
-	`is_archived` TINYINT(1) NOT NULL DEFAULT 0,
-	`academic_year` VARCHAR(20) NOT NULL,
-	`enrollment_date` DATE NOT NULL,
-	`birth_date` DATE NULL,
-	`gender` ENUM('male','female') NOT NULL,
-	`created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`studentID`),
-	KEY `students_grade_level_index` (`grade_level`),
-	KEY `students_academic_year_index` (`academic_year`),
-	KEY `students_enrollment_status_index` (`enrollment_status`),
-	KEY `students_is_archived_index` (`is_archived`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `parent_student_relationships` (
-	`relationshipID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`parentID` BIGINT(20) UNSIGNED NOT NULL,
-	`studentID` BIGINT(20) UNSIGNED NOT NULL,
-	`relationship_type` ENUM('mother','father','guardian','grandparent','sibling','other') NOT NULL,
-	`is_primary_contact` TINYINT(1) NOT NULL DEFAULT 0,
-	`created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`relationshipID`),
-	UNIQUE KEY `unique_parent_student` (`parentID`, `studentID`),
-	CONSTRAINT `parent_student_relationships_parentID_foreign` FOREIGN KEY (`parentID`) REFERENCES `parents` (`parentID`) ON DELETE CASCADE,
-	CONSTRAINT `parent_student_relationships_studentID_foreign` FOREIGN KEY (`studentID`) REFERENCES `students` (`studentID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `projects` (
-	`projectID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`project_name` VARCHAR(200) NOT NULL,
-	`description` TEXT NOT NULL,
-	`goals` TEXT NOT NULL,
-	`target_budget` DECIMAL(12,2) NOT NULL,
-	`current_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-	`start_date` DATE NOT NULL,
-	`target_completion_date` DATE NOT NULL,
-	`actual_completion_date` DATE NULL,
-	`project_status` ENUM('created','active','in_progress','completed','archived','cancelled') NOT NULL DEFAULT 'created',
-	`created_by` BIGINT(20) UNSIGNED NOT NULL,
-	`created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`projectID`),
-	KEY `projects_project_status_index` (`project_status`),
-	KEY `projects_created_date_index` (`created_date`),
-	KEY `projects_current_amount_index` (`current_amount`),
-	KEY `projects_start_date_target_completion_date_index` (`start_date`, `target_completion_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `project_contributions` (
-	`contributionID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`projectID` BIGINT(20) UNSIGNED NOT NULL,
-	`parentID` BIGINT(20) UNSIGNED NOT NULL,
-	`contribution_amount` DECIMAL(10,2) NOT NULL,
-	`payment_method` ENUM('cash','check','bank_transfer','gcash') NOT NULL,
-	`payment_status` ENUM('pending','completed','refunded','failed') NOT NULL DEFAULT 'pending',
-	`contribution_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`receipt_number` VARCHAR(50) NULL,
-	`notes` TEXT NULL,
-	`processed_by` BIGINT(20) UNSIGNED NULL,
-	PRIMARY KEY (`contributionID`),
-	UNIQUE KEY `project_contributions_receipt_number_unique` (`receipt_number`),
-	KEY `project_contributions_projectID_index` (`projectID`),
-	KEY `project_contributions_parentID_index` (`parentID`),
-	KEY `project_contributions_contribution_date_index` (`contribution_date`),
-	KEY `project_contributions_contribution_amount_index` (`contribution_amount`),
-	CONSTRAINT `project_contributions_projectID_foreign` FOREIGN KEY (`projectID`) REFERENCES `projects` (`projectID`) ON DELETE CASCADE,
-	CONSTRAINT `project_contributions_parentID_foreign` FOREIGN KEY (`parentID`) REFERENCES `parents` (`parentID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `project_milestones` (
-	`milestoneID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`projectID` BIGINT(20) UNSIGNED NOT NULL,
-	`title` VARCHAR(200) NOT NULL,
-	`description` TEXT NULL,
-	`target_date` DATE NULL,
-	`completed_date` DATE NULL,
-	`is_completed` TINYINT(1) NOT NULL DEFAULT 0,
-	`sort_order` INT(10) UNSIGNED NOT NULL DEFAULT 0,
-	`created_by` BIGINT(20) UNSIGNED NOT NULL,
-	`created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`milestoneID`),
-	KEY `project_milestones_projectID_index` (`projectID`),
-	KEY `project_milestones_sort_order_index` (`sort_order`),
-	CONSTRAINT `project_milestones_projectID_foreign` FOREIGN KEY (`projectID`) REFERENCES `projects` (`projectID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `project_updates` (
-	`updateID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`projectID` BIGINT(20) UNSIGNED NOT NULL,
-	`update_title` VARCHAR(200) NOT NULL,
-	`update_description` TEXT NOT NULL,
-	`milestone_achieved` VARCHAR(200) NULL,
-	`progress_percentage` DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-	`update_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`updated_by` BIGINT(20) UNSIGNED NOT NULL,
-	PRIMARY KEY (`updateID`),
-	KEY `project_updates_projectID_index` (`projectID`),
-	KEY `project_updates_update_date_index` (`update_date`),
-	CONSTRAINT `project_updates_projectID_foreign` FOREIGN KEY (`projectID`) REFERENCES `projects` (`projectID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `payment_transactions` (
-	`paymentID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`parentID` BIGINT(20) UNSIGNED NOT NULL,
-	`projectID` BIGINT(20) UNSIGNED NOT NULL,
-	`contributionID` BIGINT(20) UNSIGNED NOT NULL,
-	`amount` DECIMAL(10,2) NOT NULL,
-	`payment_method` ENUM('cash','check','bank_transfer') NOT NULL,
-	`transaction_status` ENUM('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
-	`transaction_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`receipt_number` VARCHAR(50) NOT NULL,
-	`reference_number` VARCHAR(100) NULL,
-	`processed_by` BIGINT(20) UNSIGNED NOT NULL,
-	`notes` TEXT NULL,
-	PRIMARY KEY (`paymentID`),
-	UNIQUE KEY `payment_transactions_receipt_number_unique` (`receipt_number`),
-	KEY `payment_transactions_parentID_index` (`parentID`),
-	KEY `payment_transactions_projectID_index` (`projectID`),
-	KEY `payment_transactions_transaction_date_index` (`transaction_date`),
-	KEY `payment_transactions_receipt_number_index` (`receipt_number`),
-	KEY `payment_transactions_transaction_status_index` (`transaction_status`),
-	CONSTRAINT `payment_transactions_parentID_foreign` FOREIGN KEY (`parentID`) REFERENCES `parents` (`parentID`) ON DELETE CASCADE,
-	CONSTRAINT `payment_transactions_projectID_foreign` FOREIGN KEY (`projectID`) REFERENCES `projects` (`projectID`) ON DELETE CASCADE,
-	CONSTRAINT `payment_transactions_contributionID_foreign` FOREIGN KEY (`contributionID`) REFERENCES `project_contributions` (`contributionID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `payment_receipts` (
-	`receiptID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`paymentID` BIGINT(20) UNSIGNED NOT NULL,
-	`receipt_number` VARCHAR(50) NOT NULL,
-	`receipt_content` TEXT NOT NULL,
-	`generated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`generated_by` BIGINT(20) UNSIGNED NOT NULL,
-	`email_sent` TINYINT(1) NOT NULL DEFAULT 0,
-	`print_count` INT(11) NOT NULL DEFAULT 0,
-	PRIMARY KEY (`receiptID`),
-	UNIQUE KEY `payment_receipts_receipt_number_unique` (`receipt_number`),
-	KEY `payment_receipts_receipt_number_index` (`receipt_number`),
-	KEY `payment_receipts_generated_date_index` (`generated_date`),
-	CONSTRAINT `payment_receipts_paymentID_foreign` FOREIGN KEY (`paymentID`) REFERENCES `payment_transactions` (`paymentID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `refunds` (
-	`refundID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`paymentID` BIGINT(20) UNSIGNED NOT NULL,
-	`refund_amount` DECIMAL(10,2) NOT NULL,
-	`refund_reason` TEXT NOT NULL,
-	`refund_status` ENUM('pending','approved','completed','rejected') NOT NULL DEFAULT 'pending',
-	`requested_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`processed_date` TIMESTAMP NULL,
-	`requested_by` BIGINT(20) UNSIGNED NOT NULL,
-	`processed_by` BIGINT(20) UNSIGNED NULL,
-	`notes` TEXT NULL,
-	PRIMARY KEY (`refundID`),
-	KEY `refunds_refund_status_index` (`refund_status`),
-	KEY `refunds_requested_date_index` (`requested_date`),
-	CONSTRAINT `refunds_paymentID_foreign` FOREIGN KEY (`paymentID`) REFERENCES `payment_transactions` (`paymentID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `financial_reconciliations` (
-	`reconciliationID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`reconciliation_period` VARCHAR(20) NOT NULL,
-	`start_date` DATE NOT NULL,
-	`end_date` DATE NOT NULL,
-	`total_system_amount` DECIMAL(12,2) NOT NULL,
-	`total_bank_amount` DECIMAL(12,2) NOT NULL,
-	`discrepancy_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-	`reconciliation_status` ENUM('pending','completed','discrepancy_found') NOT NULL DEFAULT 'pending',
-	`reconciled_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`reconciled_by` BIGINT(20) UNSIGNED NOT NULL,
-	`notes` TEXT NULL,
-	PRIMARY KEY (`reconciliationID`),
-	KEY `financial_reconciliations_reconciliation_period_index` (`reconciliation_period`),
-	KEY `financial_reconciliations_reconciled_date_index` (`reconciled_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `user_roles` (
-	`roleID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`role_name` VARCHAR(50) NOT NULL,
-	`role_description` TEXT NULL,
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	`created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`roleID`),
-	UNIQUE KEY `user_roles_role_name_unique` (`role_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `user_permissions` (
-	`permissionID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`permission_name` VARCHAR(100) NOT NULL,
-	`permission_description` TEXT NULL,
-	`module_name` VARCHAR(50) NOT NULL,
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	`created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`permissionID`),
-	UNIQUE KEY `user_permissions_permission_name_unique` (`permission_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `role_permissions` (
-	`rolePermissionID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`roleID` BIGINT(20) UNSIGNED NOT NULL,
-	`permissionID` BIGINT(20) UNSIGNED NOT NULL,
-	`granted_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`granted_by` BIGINT(20) UNSIGNED NOT NULL,
-	PRIMARY KEY (`rolePermissionID`),
-	UNIQUE KEY `unique_role_permission` (`roleID`, `permissionID`),
-	CONSTRAINT `role_permissions_roleID_foreign` FOREIGN KEY (`roleID`) REFERENCES `user_roles` (`roleID`) ON DELETE CASCADE,
-	CONSTRAINT `role_permissions_permissionID_foreign` FOREIGN KEY (`permissionID`) REFERENCES `user_permissions` (`permissionID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `user_role_assignments` (
-	`assignmentID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`userID` BIGINT(20) UNSIGNED NOT NULL,
-	`roleID` BIGINT(20) UNSIGNED NOT NULL,
-	`assigned_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`assigned_by` BIGINT(20) UNSIGNED NOT NULL,
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	PRIMARY KEY (`assignmentID`),
-	KEY `user_role_assignments_userID_index` (`userID`),
-	KEY `user_role_assignments_is_active_index` (`is_active`),
-	CONSTRAINT `user_role_assignments_userID_foreign` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`) ON DELETE CASCADE,
-	CONSTRAINT `user_role_assignments_roleID_foreign` FOREIGN KEY (`roleID`) REFERENCES `user_roles` (`roleID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `security_audit_log` (
-	`logID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`userID` BIGINT(20) UNSIGNED NULL,
-	`action` VARCHAR(100) NOT NULL,
-	`table_affected` VARCHAR(50) NULL,
-	`record_id` INT(11) NULL,
-	`old_values` JSON NULL,
-	`new_values` JSON NULL,
-	`ip_address` VARCHAR(45) NULL,
-	`user_agent` TEXT NULL,
-	`session_id` VARCHAR(128) NULL,
-	`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`success` TINYINT(1) NOT NULL DEFAULT 1,
-	`error_message` TEXT NULL,
-	PRIMARY KEY (`logID`),
-	KEY `security_audit_log_userID_index` (`userID`),
-	KEY `security_audit_log_timestamp_index` (`timestamp`),
-	KEY `security_audit_log_action_index` (`action`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `user_sessions` (
-	`sessionID` VARCHAR(128) NOT NULL,
-	`userID` BIGINT(20) UNSIGNED NOT NULL,
-	`ip_address` VARCHAR(45) NOT NULL,
-	`user_agent` TEXT NULL,
-	`created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`last_activity` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	`expires_at` TIMESTAMP NULL,
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	PRIMARY KEY (`sessionID`),
-	KEY `user_sessions_userID_index` (`userID`),
-	KEY `user_sessions_last_activity_index` (`last_activity`),
-	KEY `user_sessions_is_active_index` (`is_active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `reports` (
-	`reportID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`report_name` VARCHAR(200) NOT NULL,
-	`report_type` ENUM('participation','financial','project_analytics','custom','automated') NOT NULL,
-	`report_description` TEXT NULL,
-	`parameters` JSON NULL,
-	`generated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`generated_by` BIGINT(20) UNSIGNED NOT NULL,
-	`file_path` VARCHAR(500) NULL,
-	`file_format` ENUM('pdf','excel','csv','html') NOT NULL,
-	`is_scheduled` TINYINT(1) NOT NULL DEFAULT 0,
-	`schedule_frequency` ENUM('daily','weekly','monthly','quarterly','yearly') NULL,
-	`next_run_date` TIMESTAMP NULL,
-	PRIMARY KEY (`reportID`),
-	KEY `reports_report_type_index` (`report_type`),
-	KEY `reports_generated_date_index` (`generated_date`),
-	KEY `reports_is_scheduled_next_run_date_index` (`is_scheduled`, `next_run_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `report_recipients` (
-	`recipientID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`reportID` BIGINT(20) UNSIGNED NOT NULL,
-	`userID` BIGINT(20) UNSIGNED NOT NULL,
-	`recipient_email` VARCHAR(150) NOT NULL,
-	`delivery_method` ENUM('email','download','both') NOT NULL DEFAULT 'email',
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	`added_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`recipientID`),
-	KEY `report_recipients_reportID_index` (`reportID`),
-	KEY `report_recipients_is_active_index` (`is_active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `dashboard_metrics` (
-	`metricID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`metric_name` VARCHAR(100) NOT NULL,
-	`metric_category` ENUM('enrollment','projects','financial','participation','system') NOT NULL,
-	`current_value` DECIMAL(15,2) NOT NULL,
-	`target_value` DECIMAL(15,2) NULL,
-	`unit_of_measure` VARCHAR(20) NULL,
-	`calculation_method` TEXT NULL,
-	`last_updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	`display_order` INT(11) NOT NULL DEFAULT 0,
-	PRIMARY KEY (`metricID`),
-	KEY `dashboard_metrics_metric_category_index` (`metric_category`),
-	KEY `dashboard_metrics_is_active_index` (`is_active`),
-	KEY `dashboard_metrics_display_order_index` (`display_order`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `report_execution_log` (
-	`executionID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`reportID` BIGINT(20) UNSIGNED NOT NULL,
-	`execution_start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`execution_end` TIMESTAMP NULL,
-	`execution_status` ENUM('running','completed','failed','cancelled') NOT NULL DEFAULT 'running',
-	`record_count` INT(11) NOT NULL DEFAULT 0,
-	`file_size_bytes` INT(11) NOT NULL DEFAULT 0,
-	`error_message` TEXT NULL,
-	`executed_by` BIGINT(20) UNSIGNED NULL,
-	PRIMARY KEY (`executionID`),
-	KEY `report_execution_log_reportID_index` (`reportID`),
-	KEY `report_execution_log_execution_start_index` (`execution_start`),
-	KEY `report_execution_log_execution_status_index` (`execution_status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Foreign keys added after table creation
-ALTER TABLE `parents`
-	ADD CONSTRAINT `parents_userID_foreign` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`) ON DELETE SET NULL;
-
-ALTER TABLE `projects`
-	ADD CONSTRAINT `projects_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`userID`) ON DELETE RESTRICT;
-
-ALTER TABLE `project_contributions`
-	ADD CONSTRAINT `project_contributions_processed_by_foreign` FOREIGN KEY (`processed_by`) REFERENCES `users` (`userID`) ON DELETE SET NULL;
-
-ALTER TABLE `payment_transactions`
-	ADD CONSTRAINT `payment_transactions_processed_by_foreign` FOREIGN KEY (`processed_by`) REFERENCES `users` (`userID`) ON DELETE RESTRICT;
-
-ALTER TABLE `payment_receipts`
-	ADD CONSTRAINT `payment_receipts_generated_by_foreign` FOREIGN KEY (`generated_by`) REFERENCES `users` (`userID`) ON DELETE RESTRICT;
-
-ALTER TABLE `refunds`
-	ADD CONSTRAINT `refunds_requested_by_foreign` FOREIGN KEY (`requested_by`) REFERENCES `users` (`userID`) ON DELETE RESTRICT,
-	ADD CONSTRAINT `refunds_processed_by_foreign` FOREIGN KEY (`processed_by`) REFERENCES `users` (`userID`) ON DELETE SET NULL;
-
-ALTER TABLE `financial_reconciliations`
-	ADD CONSTRAINT `financial_reconciliations_reconciled_by_foreign` FOREIGN KEY (`reconciled_by`) REFERENCES `users` (`userID`) ON DELETE RESTRICT;
-
-ALTER TABLE `project_updates`
-	ADD CONSTRAINT `project_updates_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `users` (`userID`) ON DELETE RESTRICT;
-
-ALTER TABLE `role_permissions`
-	ADD CONSTRAINT `role_permissions_granted_by_foreign` FOREIGN KEY (`granted_by`) REFERENCES `users` (`userID`) ON DELETE RESTRICT;
-
-ALTER TABLE `user_role_assignments`
-	ADD CONSTRAINT `user_role_assignments_assigned_by_foreign` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`userID`) ON DELETE RESTRICT;
-
-ALTER TABLE `security_audit_log`
-	ADD CONSTRAINT `security_audit_log_userID_foreign` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`) ON DELETE SET NULL;
-
-ALTER TABLE `user_sessions`
-	ADD CONSTRAINT `user_sessions_userID_foreign` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`) ON DELETE CASCADE;
-
-ALTER TABLE `reports`
-	ADD CONSTRAINT `reports_generated_by_foreign` FOREIGN KEY (`generated_by`) REFERENCES `users` (`userID`) ON DELETE CASCADE;
-
-ALTER TABLE `report_recipients`
-	ADD CONSTRAINT `report_recipients_reportID_foreign` FOREIGN KEY (`reportID`) REFERENCES `reports` (`reportID`) ON DELETE CASCADE,
-	ADD CONSTRAINT `report_recipients_userID_foreign` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`) ON DELETE CASCADE;
-
-ALTER TABLE `report_execution_log`
-	ADD CONSTRAINT `report_execution_log_reportID_foreign` FOREIGN KEY (`reportID`) REFERENCES `reports` (`reportID`) ON DELETE CASCADE,
-	ADD CONSTRAINT `report_execution_log_executed_by_foreign` FOREIGN KEY (`executed_by`) REFERENCES `users` (`userID`) ON DELETE SET NULL;
-
--- Views
-DROP VIEW IF EXISTS `active_parent_students`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `active_parent_students` AS
-	SELECT
-		p.parentID,
-		p.first_name AS parent_first_name,
-		p.last_name AS parent_last_name,
-		p.email,
-		p.phone,
-		s.studentID,
-		s.student_name,
-		s.grade_level,
-		s.section,
-		psr.relationship_type
-	FROM parents p
-	JOIN parent_student_relationships psr ON p.parentID = psr.parentID
-	JOIN students s ON psr.studentID = s.studentID
-	WHERE p.account_status = 'active' AND s.enrollment_status = 'active';
-
-DROP VIEW IF EXISTS `project_financial_summary`;
-CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `project_financial_summary` AS
-	SELECT
-		p.projectID,
-		p.project_name,
-		p.target_budget,
-		p.current_amount,
-		(p.current_amount / p.target_budget * 100) AS completion_percentage,
-		COUNT(pc.contributionID) AS total_contributions,
-		p.project_status
-	FROM projects p
-	LEFT JOIN project_contributions pc ON p.projectID = pc.projectID
-	WHERE pc.payment_status = 'completed' OR pc.payment_status IS NULL
-	GROUP BY p.projectID, p.project_name, p.target_budget, p.current_amount, p.project_status;
-
--- Triggers
-SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-DELIMITER //
-CREATE TRIGGER update_project_amount_after_contribution
-	AFTER INSERT ON project_contributions
-	FOR EACH ROW
-	BEGIN
-		UPDATE projects
-		SET current_amount = (
-			SELECT COALESCE(SUM(contribution_amount), 0)
-			FROM project_contributions
-			WHERE projectID = NEW.projectID AND payment_status = 'completed'
-		)
-		WHERE projectID = NEW.projectID;
-	END//
-DELIMITER ;
-SET SQL_MODE=@OLDTMP_SQL_MODE;
-
-SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-DELIMITER //
-CREATE TRIGGER update_project_amount_after_contribution_update
-	AFTER UPDATE ON project_contributions
-	FOR EACH ROW
-	BEGIN
-		UPDATE projects
-		SET current_amount = (
-			SELECT COALESCE(SUM(contribution_amount), 0)
-			FROM project_contributions
-			WHERE projectID = NEW.projectID AND payment_status = 'completed'
-		)
-		WHERE projectID = NEW.projectID;
-	END//
-DELIMITER ;
-SET SQL_MODE=@OLDTMP_SQL_MODE;
-
-CREATE TABLE `schedules` (
-	`scheduleID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`title` VARCHAR(255) NOT NULL,
-	`description` TEXT NULL,
-	`scheduled_date` DATETIME NOT NULL,
-	`start_time` TIME NULL,
-	`end_time` TIME NULL,
-	`category` ENUM('meeting','event','maintenance','academic','review','other') NOT NULL DEFAULT 'other',
-	`priority` ENUM('high','medium','low') NOT NULL DEFAULT 'medium',
-	`visibility` ENUM('everyone','administrator','principal','teacher','parent') NOT NULL DEFAULT 'everyone',
-	`created_by` BIGINT(20) UNSIGNED NOT NULL,
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	`is_completed` TINYINT(1) NOT NULL DEFAULT 0,
-	`created_at` TIMESTAMP NULL,
-	`updated_at` TIMESTAMP NULL,
-	PRIMARY KEY (`scheduleID`),
-	KEY `schedules_scheduled_date_index` (`scheduled_date`),
-	KEY `schedules_category_index` (`category`),
-	KEY `schedules_priority_index` (`priority`),
-	KEY `schedules_visibility_index` (`visibility`),
-	KEY `schedules_is_active_index` (`is_active`),
-	KEY `schedules_is_completed_index` (`is_completed`),
-	CONSTRAINT `schedules_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`userID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `announcements` (
-	`announcementID` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`title` VARCHAR(255) NOT NULL,
-	`content` TEXT NOT NULL,
-	`category` ENUM('important','notice','update','event') NOT NULL DEFAULT 'notice',
-	`audience` ENUM('everyone','parents','teachers','administrator','principal','staff') NOT NULL DEFAULT 'everyone',
-	`created_by` BIGINT(20) UNSIGNED NOT NULL,
-	`published_at` TIMESTAMP NULL,
-	`expires_at` TIMESTAMP NULL,
-	`is_active` TINYINT(1) NOT NULL DEFAULT 1,
-	`created_at` TIMESTAMP NULL,
-	`updated_at` TIMESTAMP NULL,
-	PRIMARY KEY (`announcementID`),
-	KEY `announcements_category_index` (`category`),
-	KEY `announcements_audience_index` (`audience`),
-	KEY `announcements_is_active_index` (`is_active`),
-	KEY `announcements_published_at_index` (`published_at`),
-	KEY `announcements_expires_at_index` (`expires_at`),
-	CONSTRAINT `announcements_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`userID`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
 -- Data exported from SQLite database
 -- Generated on 2026-02-10 02:22:34
 
@@ -669,27 +20,21 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (17, '2026_02_06_000002_create_schedules_table', 6),
 (18, '2026_02_06_000001_create_announcements_table', 7);
 
--- Ensure users table includes newer columns when importing into an existing database
-ALTER TABLE `users`
-	ADD COLUMN IF NOT EXISTS `address` TEXT NULL,
-	ADD COLUMN IF NOT EXISTS `remember_token` VARCHAR(100) NULL,
-	ADD COLUMN IF NOT EXISTS `plain_password` VARCHAR(255) NULL;
-
 -- Table: users (13 rows)
 INSERT INTO `users` (`userID`, `username`, `password_hash`, `user_type`, `email`, `phone`, `first_name`, `last_name`, `is_active`, `created_date`, `last_login`, `password_changed_date`, `failed_login_attempts`, `account_locked_until`, `address`, `remember_token`, `plain_password`) VALUES
-(1, 'admin', '$2y$12$NUEgiflxAVJG30pgEaa7Duno1kRA37NwxFuchkDaxUm6GuzkSziPy', 'administrator', 'admin@jcses.edu.ph', '09123456789', 'System', 'Administrator', 1, '2026-01-26 14:45:37', NULL, NULL, 0, NULL, NULL, NULL, 'password'),
-(2, 'principal', '$2y$12$Go4aXn1ZGWaoHl2SpYZH4OvKv8MBoZ/8SJbTyIjcAB6O3ek5of6R6', 'principal', 'principal@jcses.edu.ph', '09234567890', 'Maria', 'Santos', 1, '2026-01-26 14:45:37', NULL, NULL, 0, NULL, NULL, NULL, 'principal123'),
-(3, 'teacher', '$2y$12$lwwNx1cyeeQEweGMOLOLneixdzdNWgmYVz1GdwgRubJh3BtGRqo22', 'teacher', 'teacher@jcses.edu.ph', '09345678901', 'Juan', 'Dela Cruz', 1, '2026-01-26 14:45:38', NULL, NULL, 0, NULL, NULL, NULL, 'teacher123'),
-(4, 'parent', '$2y$12$tBsJHddZYb.BlPtEsTX5HeM6f8GMnymJm8/d8O3zoPRxEqTIk5Uaq', 'parent', 'parent@gmail.com', '09456789012', 'Anna', 'Garcia', 1, '2026-01-26 14:45:38', NULL, NULL, 0, NULL, NULL, NULL, 'parent123'),
-(5, 'creyes', '$2y$12$Ek8N6/qnLYtvJSVsqFE3A.qPjIAMpUsgxmz0uykLX2TD9sSF82ktO', 'parent', 'parent12@gmail.com', '09182345688', 'Carmen', 'reyes', 0, '2026-01-26 17:26:10', NULL, NULL, 0, NULL, NULL, NULL, 'creyes123'),
-(6, 'mfernandez', '$2y$12$76MlgidKKip17wP/fejD3.zI7mnn8kbK/k5/rmtZrDTtSnDcGubQG', 'parent', 'parent2@gmail.com', '09193456789', 'Miguel', 'Fernandez', 1, '2026-01-26 17:26:10', NULL, NULL, 0, NULL, NULL, NULL, 'mfernandez123'),
-(7, 'smendoza', '$2y$12$t9Ak4a4YNLd0nTpRu7LMzeyUmfidmnXUTZ6YMsn4ak3AIb/M.1XFe', 'parent', 'parent3@gmail.com', '09204567890', 'Sofia', 'Mendoza', 1, '2026-01-26 17:26:10', NULL, NULL, 0, NULL, NULL, NULL, 'smendoza123'),
-(8, 'jhoanacamus', '$2y$12$ntljuEORbE4nxnRWfBkDLO0DB0V89SV97kY7lT6amJ0F5rFHazdh.', 'administrator', 'Feranz.Salonga@umindanao.edu.ph', '09123456789', 'Jhoana', 'Camus', 1, '2026-01-30 05:59:13', NULL, NULL, 0, NULL, NULL, NULL, 'jcamus123'),
-(9, 'teacher1', '$2y$12$BzGIJOGNqEhDeLYEP4HxBOcH2DFmk4hVffJTyb0XXpvzlA1PUq.TS', 'teacher', 'teacher1@jcses.edu.ph', '09345678901', 'Juan', 'Dela Cruz', 1, '2026-02-06 05:01:14', NULL, NULL, 0, NULL, NULL, NULL, 'jdelacruz123'),
-(10, 'teacher2', '$2y$12$Rq1MWUC/8nIpXi1gTS/R6elTpdvjBMeRLl4DCeQZkoCKgIUKySJkS', 'teacher', 'teacher2@jcses.edu.ph', '09345678902', 'Roberto', 'Santos', 1, '2026-02-06 05:01:14', NULL, NULL, 0, NULL, NULL, NULL, 'rsantos123'),
-(11, 'teacher3', '$2y$12$QqKkzFEY3cVSGa6ELHEKFOopsVzypFCpNx5RkpA3/0JketOLa/itO', 'teacher', 'teacher3@jcses.edu.ph', '09345678903', 'Maria', 'Gonzales', 1, '2026-02-06 05:01:14', NULL, NULL, 0, NULL, NULL, NULL, 'mgonzales123'),
-(12, 'agarcia', '$2y$12$gQNYyD8ZwMdefQn0PvByxOwILo0juYiQIOMpeGs85k9zTNFZfKmF6', 'parent', 'parent4@gmail.com', '09456789012', 'Anna', 'Garcia', 1, '2026-02-06 05:01:16', NULL, NULL, 0, NULL, NULL, NULL, 'agarcia123'),
-(13, 'jcruz', '$2y$12$fMQZ7YV4.WSVaAc65y8qQOXpHC1Fqnv37c8jc0vwSTb9IxGAGnTJ2', 'parent', 'parent5@gmail.com', '09567890123', 'Jose', 'Cruz', 1, '2026-02-06 05:01:16', NULL, NULL, 0, NULL, NULL, NULL, 'jcruz123');
+(1, 'admin', '$2y$12$NUEgiflxAVJG30pgEaa7Duno1kRA37NwxFuchkDaxUm6GuzkSziPy', 'administrator', 'admin@jcses.edu.ph', 09123456789, 'System', 'Administrator', 1, '2026-01-26 14:45:37', NULL, NULL, 0, NULL, NULL, NULL, 'password'),
+(2, 'principal', '$2y$12$Go4aXn1ZGWaoHl2SpYZH4OvKv8MBoZ/8SJbTyIjcAB6O3ek5of6R6', 'principal', 'principal@jcses.edu.ph', 09234567890, 'Maria', 'Santos', 1, '2026-01-26 14:45:37', NULL, NULL, 0, NULL, NULL, NULL, 'principal123'),
+(3, 'teacher', '$2y$12$lwwNx1cyeeQEweGMOLOLneixdzdNWgmYVz1GdwgRubJh3BtGRqo22', 'teacher', 'teacher@jcses.edu.ph', 09345678901, 'Juan', 'Dela Cruz', 1, '2026-01-26 14:45:38', NULL, NULL, 0, NULL, NULL, NULL, 'teacher123'),
+(4, 'parent', '$2y$12$tBsJHddZYb.BlPtEsTX5HeM6f8GMnymJm8/d8O3zoPRxEqTIk5Uaq', 'parent', 'parent@gmail.com', 09456789012, 'Anna', 'Garcia', 1, '2026-01-26 14:45:38', NULL, NULL, 0, NULL, NULL, NULL, 'parent123'),
+(5, 'creyes', '$2y$12$Ek8N6/qnLYtvJSVsqFE3A.qPjIAMpUsgxmz0uykLX2TD9sSF82ktO', 'parent', 'parent12@gmail.com', 09182345688, 'Carmen', 'reyes', 0, '2026-01-26 17:26:10', NULL, NULL, 0, NULL, NULL, NULL, 'creyes123'),
+(6, 'mfernandez', '$2y$12$76MlgidKKip17wP/fejD3.zI7mnn8kbK/k5/rmtZrDTtSnDcGubQG', 'parent', 'parent2@gmail.com', 09193456789, 'Miguel', 'Fernandez', 1, '2026-01-26 17:26:10', NULL, NULL, 0, NULL, NULL, NULL, 'mfernandez123'),
+(7, 'smendoza', '$2y$12$t9Ak4a4YNLd0nTpRu7LMzeyUmfidmnXUTZ6YMsn4ak3AIb/M.1XFe', 'parent', 'parent3@gmail.com', 09204567890, 'Sofia', 'Mendoza', 1, '2026-01-26 17:26:10', NULL, NULL, 0, NULL, NULL, NULL, 'smendoza123'),
+(8, 'jhoanacamus', '$2y$12$ntljuEORbE4nxnRWfBkDLO0DB0V89SV97kY7lT6amJ0F5rFHazdh.', 'administrator', 'Feranz.Salonga@umindanao.edu.ph', 09123456789, 'Jhoana', 'Camus', 1, '2026-01-30 05:59:13', NULL, NULL, 0, NULL, NULL, NULL, 'jcamus123'),
+(9, 'teacher1', '$2y$12$BzGIJOGNqEhDeLYEP4HxBOcH2DFmk4hVffJTyb0XXpvzlA1PUq.TS', 'teacher', 'teacher1@jcses.edu.ph', 09345678901, 'Juan', 'Dela Cruz', 1, '2026-02-06 05:01:14', NULL, NULL, 0, NULL, NULL, NULL, 'jdelacruz123'),
+(10, 'teacher2', '$2y$12$Rq1MWUC/8nIpXi1gTS/R6elTpdvjBMeRLl4DCeQZkoCKgIUKySJkS', 'teacher', 'teacher2@jcses.edu.ph', 09345678902, 'Roberto', 'Santos', 1, '2026-02-06 05:01:14', NULL, NULL, 0, NULL, NULL, NULL, 'rsantos123'),
+(11, 'teacher3', '$2y$12$QqKkzFEY3cVSGa6ELHEKFOopsVzypFCpNx5RkpA3/0JketOLa/itO', 'teacher', 'teacher3@jcses.edu.ph', 09345678903, 'Maria', 'Gonzales', 1, '2026-02-06 05:01:14', NULL, NULL, 0, NULL, NULL, NULL, 'mgonzales123'),
+(12, 'agarcia', '$2y$12$gQNYyD8ZwMdefQn0PvByxOwILo0juYiQIOMpeGs85k9zTNFZfKmF6', 'parent', 'parent4@gmail.com', 09456789012, 'Anna', 'Garcia', 1, '2026-02-06 05:01:16', NULL, NULL, 0, NULL, NULL, NULL, 'agarcia123'),
+(13, 'jcruz', '$2y$12$fMQZ7YV4.WSVaAc65y8qQOXpHC1Fqnv37c8jc0vwSTb9IxGAGnTJ2', 'parent', 'parent5@gmail.com', 09567890123, 'Jose', 'Cruz', 1, '2026-02-06 05:01:16', NULL, NULL, 0, NULL, NULL, NULL, 'jcruz123');
 
 -- Table: sessions (5 rows)
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
@@ -707,6 +52,21 @@ INSERT INTO `students` (`studentID`, `student_name`, `grade_level`, `section`, `
 (4, 'Kristel Faith Gawan', 3, 'Garcia', 'active', 2025, '2025-12-04 05:22:13', '2015-03-04 05:22:13', 'female', '2026-02-04 05:22:13', '2026-02-04 05:22:13'),
 (5, 'Aiza Orilla', 2, 'Arroyo', 'active', 2025, '2026-01-04 05:22:13', '2016-10-04 05:22:13', 'female', '2026-02-04 05:22:13', '2026-02-04 05:22:13'),
 (6, 'Ed Lorenz Bersamin', 1, 'Ramos', 'active', 2025, '2025-08-04 05:22:13', '2014-09-04 05:22:13', 'male', '2026-02-04 05:22:13', '2026-02-04 05:22:13');
+
+-- Table: parent_student_relationships (12 rows)
+INSERT INTO `parent_student_relationships` (`relationshipID`, `parentID`, `studentID`, `relationship_type`, `is_primary_contact`, `created_date`) VALUES
+(1, 1, 1, 'father', 1, '2026-02-04 05:22:13'),
+(2, 1, 2, 'guardian', 0, '2026-02-04 05:22:13'),
+(3, 2, 3, 'guardian', 1, '2026-02-04 05:22:13'),
+(4, 2, 4, 'guardian', 0, '2026-02-04 05:22:13'),
+(5, 2, 5, 'guardian', 0, '2026-02-04 05:22:13'),
+(6, 3, 6, 'mother', 1, '2026-02-04 05:22:13'),
+(7, 16, 1, 'mother', 1, '2026-02-04 05:27:10'),
+(8, 16, 2, 'mother', 0, '2026-02-04 05:27:10'),
+(9, 14, 3, 'father', 1, '2026-02-04 05:34:41'),
+(10, 14, 4, 'father', 0, '2026-02-04 05:34:41'),
+(11, 14, 5, 'father', 0, '2026-02-04 05:34:41'),
+(12, 15, 6, 'mother', 1, '2026-02-04 05:46:14');
 
 -- Table: user_roles (4 rows)
 INSERT INTO `user_roles` (`roleID`, `role_name`, `role_description`, `is_active`, `created_date`) VALUES
@@ -3174,71 +2534,56 @@ INSERT INTO `dashboard_metrics` (`metricID`, `metric_name`, `metric_category`, `
 
 -- Table: parents (50 rows)
 INSERT INTO `parents` (`parentID`, `first_name`, `last_name`, `email`, `phone`, `street_address`, `city`, `barangay`, `zipcode`, `password_hash`, `created_date`, `last_login`, `account_status`, `userID`) VALUES
-(1, 'Maria', 'Santos', 'maria.santos@email.com', '09666135507', '635 Sample Street', 'Manila', 'Barangay 16', 1769, '$2y$12$9TXaMQn/ORQCA2GuDVm/puEiIU/DIMG/QnSuuIwDUBmDiQZ4vkzCq', '2026-01-26 17:03:22', NULL, 'active', NULL),
-(2, 'Jose', 'Reyes', 'jose.reyes@email.com', '09824688309', '668 Sample Street', 'Manila', 'Barangay 83', 1739, '$2y$12$tyFurAhhhvWy3q0ncLEbG.g..E3RhLfjcOEzK1VmylQEVarwEJLee', '2026-01-26 17:03:22', NULL, 'active', NULL),
-(3, 'Ana', 'Cruz', 'ana.cruz@email.com', '09322069693', '570 Sample Street', 'Manila', 'Barangay 63', 1379, '$2y$12$R88a4fVSr1YPAbIpIvsBn.vdcVHHy5ZSM1bmGrM3mLks6Bd4cc5i6', '2026-01-26 17:03:23', NULL, 'active', NULL),
-(4, 'Pedro', 'Garcia', 'pedro.garcia@email.com', '09872778635', '682 Sample Street', 'Manila', 'Barangay 35', 1373, '$2y$12$ZlKDKZ0BoGxHaA/lgWfqWuKxHRWDP//bU8rWxICT5rj.wPSJDrQ2i', '2026-01-26 17:03:23', NULL, 'active', NULL),
-(5, 'Rosa', 'Mendoza', 'rosa.mendoza@email.com', '09764665140', '770 Sample Street', 'Manila', 'Barangay 54', 1265, '$2y$12$2qKuHesWYI1tDmjKN1U5C.Vyf7uderylkCV0DxDqLe87FPB.MwCU2', '2026-01-26 17:03:23', NULL, 'active', NULL),
-(6, 'Juan', 'Dela Cruz', 'juan.dela cruz@email.com', '09176315383', '826 Sample Street', 'Manila', 'Barangay 69', 1559, '$2y$12$hk6yE66YdAmr4mxtJTZVguqnvDHa3rtHnFm/8zMpNAlRZLsm2PWpa', '2026-01-26 17:03:23', NULL, 'active', NULL),
-(7, 'Elena', 'Villanueva', 'elena.villanueva@email.com', '09160830418', '915 Sample Street', 'Manila', 'Barangay 63', 1375, '$2y$12$JSunQOpzqx1KU4whpi/Et.qxcM1prv1ROuQmHFMSY0q3bbj6eI1BS', '2026-01-26 17:03:23', NULL, 'active', NULL),
-(8, 'Carlos', 'Ramos', 'carlos.ramos@email.com', '09215719928', '549 Sample Street', 'Manila', 'Barangay 80', 1351, '$2y$12$gkTYNCS8MNRhCPOetu.WgetLbNH8a9lepreVTyNSGF1tZSX5oz1Aq', '2026-01-26 17:03:24', NULL, 'active', NULL),
-(9, 'Lucia', 'Bautista', 'lucia.bautista@email.com', '09742126078', '491 Sample Street', 'Manila', 'Barangay 35', 1916, '$2y$12$MVxZcxxWt2esqpBPxquSQulGQ.2ZuQhUeiPGWUoxRQFnz1CXpDema', '2026-01-26 17:03:24', NULL, 'active', NULL),
-(10, 'Miguel', 'Torres', 'miguel.torres@email.com', '09291880032', '744 Sample Street', 'Manila', 'Barangay 71', 1285, '$2y$12$OZW1iu28pYrSHo7lA3fr6uwsIUVAZkELyKrZLB6TGcabPEz4sSe1u', '2026-01-26 17:03:24', NULL, 'active', NULL),
-(11, 'Carmen', 'Aquino', 'carmen.aquino@email.com', '09847268069', '630 Sample Street', 'Manila', 'Barangay 70', 1949, '$2y$12$EGk.1obsggAq4Lbiie4i4eNrmhekUE6CnwkFwvDYO1KWwScB.sS.u', '2026-01-26 17:03:24', NULL, 'active', NULL),
-(12, 'Roberto', 'Fernandez', 'roberto.fernandez@email.com', '09978529192', '712 Sample Street', 'Manila', 'Barangay 2', 1682, '$2y$12$Z9VP.7trfcQZzT5aqSX3G.e426gP6fDIN/uYBEtnH5yEzIzfaCUuG', '2026-01-26 17:03:24', NULL, 'active', NULL),
-(13, 'Carmen', 'Reyes', 'parent1@gmail.com', '09182345678', '456 Main Avenue', 'Quezon City', 'Barangay 1', 1100, '$2y$12$PiviNv5iU/m81aXqv7PcqOTJuIobqXzqUA3C7d.6upH7wYZqXg7X6', '2026-01-26 17:26:10', NULL, 'active', 5),
-(14, 'Miguel', 'Fernandez', 'parent2@gmail.com', '09193456789', '789 Sunset Boulevard', 'Manila', 'Barangay 2', 1000, '$2y$12$JqbvL.iwPxZdu9RgZQl0Y.YZuiyqjqj9Rygm6yGmOMP8Ihvl0.Ddu', '2026-01-26 17:26:10', NULL, 'active', 6),
-(15, 'Sofia', 'Mendoza', 'parent3@gmail.com', '09204567890', '321 Park Lane', 'Makati', 'Barangay 3', 1200, '$2y$12$.vVWvDAhRIkVLFV9Be..oeJmfpDBrL4ntCPZFgFnVfWuf7UtWqy.m', '2026-01-26 17:26:11', NULL, 'active', 7),
-(16, 'Anna', 'Garcia', 'anna.garcia@example.com', '09456789012', NULL, 'Davao City', NULL, NULL, '$2y$12$08oCvL4A95DNkSIR7Smh/uxdZRJMh5MUdW50pytZEkdn/6olBri6G', '2026-01-26 18:13:30', NULL, 'active', 4),
-(17, 'Elena', 'Cruz', 'elena.cruz@example.com', '09345678901', NULL, 'Cebu City', NULL, NULL, '$2y$12$AegAAXmzP2cmqtsWIJSI.OrBHR8XF5N2lSQG.t5K.U6esFBByyf7W', '2026-01-26 18:13:31', NULL, 'active', NULL),
-(18, 'Roberto', 'Dela Cruz', 'roberto.dela cruz@example.com', '09456789012', NULL, 'Makati City', NULL, NULL, '$2y$12$vEkNjaEFCpDYLu9oFYad2OojvIMaGkUx7Jffbb1uWQxAruhlZrFyW', '2026-01-26 18:13:31', NULL, 'active', NULL),
-(19, 'Carmen', 'Fernandez', 'carmen.fernandez@example.com', '09567890123', NULL, 'Pasig City', NULL, NULL, '$2y$12$g4T9DmoHSwYqD.rzxth/g.t1Z1oAYvPO.ByJMUgjIsgbS6jkeWJF.', '2026-01-26 18:13:31', NULL, 'active', NULL),
-(20, 'Pedro', 'Mendoza', 'pedro.mendoza@example.com', '09678901234', NULL, 'Taguig City', NULL, NULL, '$2y$12$WhLOkAnbOwKgL/mDbjneOOsMM1D.9bxHFIANzl3sorRCXlQC0fZde', '2026-01-26 18:13:31', NULL, 'active', NULL),
-(21, 'Rosa', 'Villanueva', 'rosa.villanueva@example.com', '09789012345', NULL, 'Paranaque City', NULL, NULL, '$2y$12$kHFDd4jMPmE3ln.asJLWQ.MOZZEbRqcHdeYw5pQvMGt7Q6DM71cuG', '2026-01-26 18:13:32', NULL, 'active', NULL),
-(22, 'Antonio', 'Ramos', 'antonio.ramos@example.com', '09890123456', NULL, 'Las Pinas City', NULL, NULL, '$2y$12$GhS7MgTJ6btnnuG9wjbKTeEyVSbx78/j/NwbXkZSqyJsJi9EGS3dW', '2026-01-26 18:13:32', NULL, 'active', NULL),
-(23, 'Lucia', 'Torres', 'lucia.torres@example.com', '09901234567', NULL, 'Muntinlupa City', NULL, NULL, '$2y$12$yHF2hs9t1NSGZWNDXiJuVuAT.MEWMh0l9Z2T9USbIJ4RehSq.3VZK', '2026-01-26 18:13:32', NULL, 'active', NULL),
-(24, 'Miguel', 'Gonzales', 'miguel.gonzales@example.com', '09112345678', NULL, 'Caloocan City', NULL, NULL, '$2y$12$0tmHO6lPixtCyPiQPsxV3.REQ9h1cz3OvxgM4wdovU2lPhD7XftP.', '2026-01-26 18:13:32', NULL, 'active', NULL),
-(25, 'Teresa', 'Aquino', 'teresa.aquino@example.com', '09223456789', NULL, 'Valenzuela City', NULL, NULL, '$2y$12$hphoZqBMR8cmLsZURcTKBu/Hl2FHAcck0dX5mY/qEP7BXloW6GSl2', '2026-01-26 18:13:33', NULL, 'active', NULL),
-(26, 'Ricardo', 'Bautista', 'ricardo.bautista@example.com', '09334567890', NULL, 'Malabon City', NULL, NULL, '$2y$12$aYhBdXATjqHHNo.xY2a8weqdDaZWIOBvABzYp5MMAnLiInTRxxzOm', '2026-01-26 18:13:33', NULL, 'active', NULL),
-(27, 'Sofia', 'Castillo', 'sofia.castillo@example.com', '09445678901', NULL, 'Navotas City', NULL, NULL, '$2y$12$/AhR9PIfriWS8MRwYRDX0e79gZGeCBlG3jq64ezqQ22VyJ95iDWbm', '2026-01-26 18:13:33', NULL, 'active', NULL),
-(28, 'Fernando', 'Jimenez', 'fernando.jimenez@example.com', '09556789012', NULL, 'San Juan City', NULL, NULL, '$2y$12$OFHnt9gW7lObnvj3vWiVxOVhkhqwZ.lu05NR0/g62/uzV9OaYpcUy', '2026-01-26 18:13:34', NULL, 'active', NULL),
-(29, 'Isabel', 'Morales', 'isabel.morales@example.com', '09667890123', NULL, 'Mandaluyong City', NULL, NULL, '$2y$12$0umbK.n/vAhjxAkBP1gN4./RmBe8sSTltuGK.VghPLcRjwPc2tr72', '2026-01-26 18:13:34', NULL, 'active', NULL),
-(30, 'Carlos', 'Navarro', 'carlos.navarro@example.com', '09778901234', NULL, 'Marikina City', NULL, NULL, '$2y$12$DBE3/.1QywGAgQXpio.gh.HdSSrwGjs.P53A2rF07UlFJhSdHeoN2', '2026-01-26 18:13:34', NULL, 'active', NULL),
-(31, 'Patricia', 'Ocampo', 'patricia.ocampo@example.com', '09889012345', NULL, 'Pasay City', NULL, NULL, '$2y$12$JplnaXpAoJC8aiFH/morUedUZBkA2mETTVzzFz9RYGn4HFIPofI5G', '2026-01-26 18:13:35', NULL, 'active', NULL),
-(32, 'Daniel', 'Pascual', 'daniel.pascual@example.com', '09990123456', NULL, 'Batangas City', NULL, NULL, '$2y$12$QYPJNHz1zothDPIUKjWh8.HYo3WuGkzQ/vPKpD/qLvd9/WWCDnbFe', '2026-01-26 18:13:35', NULL, 'active', NULL),
-(33, 'Gloria', 'Quizon', 'gloria.quizon@example.com', '09101234567', NULL, 'Laguna', NULL, NULL, '$2y$12$kPgm9Y5J8vUmL90/TuA3..ccvaDc/azCUsBWYzzmdHMYZ2EvTZEJe', '2026-01-26 18:13:35', NULL, 'active', NULL),
-(34, 'Manuel', 'Rivera', 'manuel.rivera@example.com', '09212345678', NULL, 'Cavite City', NULL, NULL, '$2y$12$X06LGymmcHYFMQw6KfniM.cUmComG.ZRm54zbtRZ7CRqi3z26qm9m', '2026-01-26 18:13:35', NULL, 'active', NULL),
-(35, 'Angelica', 'Salazar', 'angelica.salazar@example.com', '09323456789', NULL, 'Bulacan', NULL, NULL, '$2y$12$w9oQ97Ss8TNnqdIo.enWIOaM../50Antw78kI.br.8LNlt/wTthsa', '2026-01-26 18:13:36', NULL, 'active', NULL),
-(36, 'Eduardo', 'Tan', 'eduardo.tan@example.com', '09434567890', NULL, 'Pampanga', NULL, NULL, '$2y$12$TNl1NOSfCdcI7sJNfDtRQ.9dccI5rR8.g/NDWd1okr9CRQryRYwxS', '2026-01-26 18:13:36', NULL, 'active', NULL),
-(37, 'Victoria', 'Uy', 'victoria.uy@example.com', '09545678901', NULL, 'Tarlac City', NULL, NULL, '$2y$12$/uzxvtnFTtlYljkGYk.YZ.0hTAwqA9ysht1kYSDbeIA83At75oWf2', '2026-01-26 18:13:36', NULL, 'active', NULL),
-(38, 'Benjamin', 'Vera', 'benjamin.vera@example.com', '09656789012', NULL, 'Zambales', NULL, NULL, '$2y$12$R/vOkpFy9Gnhc97QGdsO6.R.BJixEz1HKC1CJ0fMNO1C46QdLV/Qm', '2026-01-26 18:13:36', NULL, 'active', NULL),
-(39, 'Cristina', 'Wong', 'cristina.wong@example.com', '09767890123', NULL, 'Bataan', NULL, NULL, '$2y$12$/D3ztmyL4J9j8OAsWvCJaevJtbtEQ9WvdooFUdQ0/AR4.vdQsXjH6', '2026-01-26 18:13:36', NULL, 'active', NULL),
-(40, 'Andres', 'Yap', 'andres.yap@example.com', '09878901234', NULL, 'Nueva Ecija', NULL, NULL, '$2y$12$yriDd6Rp87zF5ubkatURGOwau0QmX.gT/2we.1TG5FheI.wmrYTBS', '2026-01-26 18:13:37', NULL, 'active', NULL),
-(41, 'Maricel', 'Zamora', 'maricel.zamora@example.com', '09989012345', NULL, 'Pangasinan', NULL, NULL, '$2y$12$5Dhky5LDi.hry2oeJVwCgulVn9PfS9UGVRLdh5gZm3y3ASrUu0XzW', '2026-01-26 18:13:37', NULL, 'active', NULL),
-(42, 'Lorenzo', 'Abella', 'lorenzo.abella@example.com', '09190123456', NULL, 'La Union', NULL, NULL, '$2y$12$qpn2wrMEAGWMAi/vx.Xt8eH6uxrI8UvJpENdLtk61WYSRvgR4HqLq', '2026-01-26 18:13:37', NULL, 'active', NULL),
-(43, 'Beatriz', 'Borja', 'beatriz.borja@example.com', '09291234567', NULL, 'Ilocos Norte', NULL, NULL, '$2y$12$0ckydJwXmW/SbGZL5Rd3YedodZPHsD1ExUQMM/O3nJ93jLe3k.7aW', '2026-01-26 18:13:37', NULL, 'active', NULL),
-(44, 'Ramon', 'Castro', 'ramon.castro@example.com', '09392345678', NULL, 'Ilocos Sur', NULL, NULL, '$2y$12$yO2gSCly/AEF3xhxRQA6Le7NBHQ2ql9V0zjJjz4QYSnEO2e8rfl5i', '2026-01-26 18:13:37', NULL, 'active', NULL),
-(45, 'Diana', 'Domingo', 'diana.domingo@example.com', '09493456789', NULL, 'Baguio City', NULL, NULL, '$2y$12$Ujvb/5Bb9YHTf3.heFREkeCmYDZqjfkaI9VHqWs3kUbYtAb9vvZTy', '2026-01-26 18:13:38', NULL, 'active', NULL),
-(46, 'Felipe', 'Espino', 'felipe.espino@example.com', '09594567890', NULL, 'Dagupan City', NULL, NULL, '$2y$12$t/f1zAaiCl/Tt61IIR/.aexHCbVGlMEwTO9KnVf8yvAi6QHt3h.pa', '2026-01-26 18:13:38', NULL, 'active', NULL),
-(47, 'Grace', 'Francisco', 'grace.francisco@example.com', '09695678901', NULL, 'San Fernando', NULL, NULL, '$2y$12$s06kTYKz9L691mVqmXghTuOEWOasqi3fo2M96FGQwboRkCCKU5ZP2', '2026-01-26 18:13:38', NULL, 'active', NULL),
-(48, 'Henry', 'Garcia', 'henry.garcia@example.com', '09796789012', NULL, 'Angeles City', NULL, NULL, '$2y$12$g/CluMLbMeplGSKDt5B2SejWiVv43QMrb8BgYoVZjEzUsdAgFG/xW', '2026-01-26 18:13:38', NULL, 'active', NULL),
-(49, 'Anna', 'Garcia', 'parent4@gmail.com', '09456789012', 'Sample Street Address', 'Quezon City', 'Sample Barangay', 1100, '$2y$12$X4HXJ56gx7jIzaYujcltS.hHfUKEe5Lve.A5sn3C9hyhcrW5UaE2m', '2026-02-06 05:01:16', NULL, 'active', 12),
-(50, 'Jose', 'Cruz', 'parent5@gmail.com', '09567890123', 'Sample Street Address', 'Quezon City', 'Sample Barangay', 1100, '$2y$12$HDJ8Hbt9RpoOG2XJ4Mw69.tkNX0qT98AFSvQ9qCBXlUcWbvQaPXyK', '2026-02-06 05:01:16', NULL, 'active', 13);
-
--- Table: parent_student_relationships (12 rows)
-INSERT INTO `parent_student_relationships` (`relationshipID`, `parentID`, `studentID`, `relationship_type`, `is_primary_contact`, `created_date`) VALUES
-(1, 1, 1, 'father', 1, '2026-02-04 05:22:13'),
-(2, 1, 2, 'guardian', 0, '2026-02-04 05:22:13'),
-(3, 2, 3, 'guardian', 1, '2026-02-04 05:22:13'),
-(4, 2, 4, 'guardian', 0, '2026-02-04 05:22:13'),
-(5, 2, 5, 'guardian', 0, '2026-02-04 05:22:13'),
-(6, 3, 6, 'mother', 1, '2026-02-04 05:22:13'),
-(7, 16, 1, 'mother', 1, '2026-02-04 05:27:10'),
-(8, 16, 2, 'mother', 0, '2026-02-04 05:27:10'),
-(9, 14, 3, 'father', 1, '2026-02-04 05:34:41'),
-(10, 14, 4, 'father', 0, '2026-02-04 05:34:41'),
-(11, 14, 5, 'father', 0, '2026-02-04 05:34:41'),
-(12, 15, 6, 'mother', 1, '2026-02-04 05:46:14');
+(1, 'Maria', 'Santos', 'maria.santos@email.com', 09666135507, '635 Sample Street', 'Manila', 'Barangay 16', 1769, '$2y$12$9TXaMQn/ORQCA2GuDVm/puEiIU/DIMG/QnSuuIwDUBmDiQZ4vkzCq', '2026-01-26 17:03:22', NULL, 'active', NULL),
+(2, 'Jose', 'Reyes', 'jose.reyes@email.com', 09824688309, '668 Sample Street', 'Manila', 'Barangay 83', 1739, '$2y$12$tyFurAhhhvWy3q0ncLEbG.g..E3RhLfjcOEzK1VmylQEVarwEJLee', '2026-01-26 17:03:22', NULL, 'active', NULL),
+(3, 'Ana', 'Cruz', 'ana.cruz@email.com', 09322069693, '570 Sample Street', 'Manila', 'Barangay 63', 1379, '$2y$12$R88a4fVSr1YPAbIpIvsBn.vdcVHHy5ZSM1bmGrM3mLks6Bd4cc5i6', '2026-01-26 17:03:23', NULL, 'active', NULL),
+(4, 'Pedro', 'Garcia', 'pedro.garcia@email.com', 09872778635, '682 Sample Street', 'Manila', 'Barangay 35', 1373, '$2y$12$ZlKDKZ0BoGxHaA/lgWfqWuKxHRWDP//bU8rWxICT5rj.wPSJDrQ2i', '2026-01-26 17:03:23', NULL, 'active', NULL),
+(5, 'Rosa', 'Mendoza', 'rosa.mendoza@email.com', 09764665140, '770 Sample Street', 'Manila', 'Barangay 54', 1265, '$2y$12$2qKuHesWYI1tDmjKN1U5C.Vyf7uderylkCV0DxDqLe87FPB.MwCU2', '2026-01-26 17:03:23', NULL, 'active', NULL),
+(6, 'Juan', 'Dela Cruz', 'juan.dela cruz@email.com', 09176315383, '826 Sample Street', 'Manila', 'Barangay 69', 1559, '$2y$12$hk6yE66YdAmr4mxtJTZVguqnvDHa3rtHnFm/8zMpNAlRZLsm2PWpa', '2026-01-26 17:03:23', NULL, 'active', NULL),
+(7, 'Elena', 'Villanueva', 'elena.villanueva@email.com', 09160830418, '915 Sample Street', 'Manila', 'Barangay 63', 1375, '$2y$12$JSunQOpzqx1KU4whpi/Et.qxcM1prv1ROuQmHFMSY0q3bbj6eI1BS', '2026-01-26 17:03:23', NULL, 'active', NULL),
+(8, 'Carlos', 'Ramos', 'carlos.ramos@email.com', 09215719928, '549 Sample Street', 'Manila', 'Barangay 80', 1351, '$2y$12$gkTYNCS8MNRhCPOetu.WgetLbNH8a9lepreVTyNSGF1tZSX5oz1Aq', '2026-01-26 17:03:24', NULL, 'active', NULL),
+(9, 'Lucia', 'Bautista', 'lucia.bautista@email.com', 09742126078, '491 Sample Street', 'Manila', 'Barangay 35', 1916, '$2y$12$MVxZcxxWt2esqpBPxquSQulGQ.2ZuQhUeiPGWUoxRQFnz1CXpDema', '2026-01-26 17:03:24', NULL, 'active', NULL),
+(10, 'Miguel', 'Torres', 'miguel.torres@email.com', 09291880032, '744 Sample Street', 'Manila', 'Barangay 71', 1285, '$2y$12$OZW1iu28pYrSHo7lA3fr6uwsIUVAZkELyKrZLB6TGcabPEz4sSe1u', '2026-01-26 17:03:24', NULL, 'active', NULL),
+(11, 'Carmen', 'Aquino', 'carmen.aquino@email.com', 09847268069, '630 Sample Street', 'Manila', 'Barangay 70', 1949, '$2y$12$EGk.1obsggAq4Lbiie4i4eNrmhekUE6CnwkFwvDYO1KWwScB.sS.u', '2026-01-26 17:03:24', NULL, 'active', NULL),
+(12, 'Roberto', 'Fernandez', 'roberto.fernandez@email.com', 09978529192, '712 Sample Street', 'Manila', 'Barangay 2', 1682, '$2y$12$Z9VP.7trfcQZzT5aqSX3G.e426gP6fDIN/uYBEtnH5yEzIzfaCUuG', '2026-01-26 17:03:24', NULL, 'active', NULL),
+(13, 'Carmen', 'Reyes', 'parent1@gmail.com', 09182345678, '456 Main Avenue', 'Quezon City', 'Barangay 1', 1100, '$2y$12$PiviNv5iU/m81aXqv7PcqOTJuIobqXzqUA3C7d.6upH7wYZqXg7X6', '2026-01-26 17:26:10', NULL, 'active', 5),
+(14, 'Miguel', 'Fernandez', 'parent2@gmail.com', 09193456789, '789 Sunset Boulevard', 'Manila', 'Barangay 2', 1000, '$2y$12$JqbvL.iwPxZdu9RgZQl0Y.YZuiyqjqj9Rygm6yGmOMP8Ihvl0.Ddu', '2026-01-26 17:26:10', NULL, 'active', 6),
+(15, 'Sofia', 'Mendoza', 'parent3@gmail.com', 09204567890, '321 Park Lane', 'Makati', 'Barangay 3', 1200, '$2y$12$.vVWvDAhRIkVLFV9Be..oeJmfpDBrL4ntCPZFgFnVfWuf7UtWqy.m', '2026-01-26 17:26:11', NULL, 'active', 7),
+(16, 'Anna', 'Garcia', 'anna.garcia@example.com', 09456789012, NULL, 'Davao City', NULL, NULL, '$2y$12$08oCvL4A95DNkSIR7Smh/uxdZRJMh5MUdW50pytZEkdn/6olBri6G', '2026-01-26 18:13:30', NULL, 'active', 4),
+(17, 'Elena', 'Cruz', 'elena.cruz@example.com', 09345678901, NULL, 'Cebu City', NULL, NULL, '$2y$12$AegAAXmzP2cmqtsWIJSI.OrBHR8XF5N2lSQG.t5K.U6esFBByyf7W', '2026-01-26 18:13:31', NULL, 'active', NULL),
+(18, 'Roberto', 'Dela Cruz', 'roberto.dela cruz@example.com', 09456789012, NULL, 'Makati City', NULL, NULL, '$2y$12$vEkNjaEFCpDYLu9oFYad2OojvIMaGkUx7Jffbb1uWQxAruhlZrFyW', '2026-01-26 18:13:31', NULL, 'active', NULL),
+(19, 'Carmen', 'Fernandez', 'carmen.fernandez@example.com', 09567890123, NULL, 'Pasig City', NULL, NULL, '$2y$12$g4T9DmoHSwYqD.rzxth/g.t1Z1oAYvPO.ByJMUgjIsgbS6jkeWJF.', '2026-01-26 18:13:31', NULL, 'active', NULL),
+(20, 'Pedro', 'Mendoza', 'pedro.mendoza@example.com', 09678901234, NULL, 'Taguig City', NULL, NULL, '$2y$12$WhLOkAnbOwKgL/mDbjneOOsMM1D.9bxHFIANzl3sorRCXlQC0fZde', '2026-01-26 18:13:31', NULL, 'active', NULL),
+(21, 'Rosa', 'Villanueva', 'rosa.villanueva@example.com', 09789012345, NULL, 'Paranaque City', NULL, NULL, '$2y$12$kHFDd4jMPmE3ln.asJLWQ.MOZZEbRqcHdeYw5pQvMGt7Q6DM71cuG', '2026-01-26 18:13:32', NULL, 'active', NULL),
+(22, 'Antonio', 'Ramos', 'antonio.ramos@example.com', 09890123456, NULL, 'Las Pinas City', NULL, NULL, '$2y$12$GhS7MgTJ6btnnuG9wjbKTeEyVSbx78/j/NwbXkZSqyJsJi9EGS3dW', '2026-01-26 18:13:32', NULL, 'active', NULL),
+(23, 'Lucia', 'Torres', 'lucia.torres@example.com', 09901234567, NULL, 'Muntinlupa City', NULL, NULL, '$2y$12$yHF2hs9t1NSGZWNDXiJuVuAT.MEWMh0l9Z2T9USbIJ4RehSq.3VZK', '2026-01-26 18:13:32', NULL, 'active', NULL),
+(24, 'Miguel', 'Gonzales', 'miguel.gonzales@example.com', 09112345678, NULL, 'Caloocan City', NULL, NULL, '$2y$12$0tmHO6lPixtCyPiQPsxV3.REQ9h1cz3OvxgM4wdovU2lPhD7XftP.', '2026-01-26 18:13:32', NULL, 'active', NULL),
+(25, 'Teresa', 'Aquino', 'teresa.aquino@example.com', 09223456789, NULL, 'Valenzuela City', NULL, NULL, '$2y$12$hphoZqBMR8cmLsZURcTKBu/Hl2FHAcck0dX5mY/qEP7BXloW6GSl2', '2026-01-26 18:13:33', NULL, 'active', NULL),
+(26, 'Ricardo', 'Bautista', 'ricardo.bautista@example.com', 09334567890, NULL, 'Malabon City', NULL, NULL, '$2y$12$aYhBdXATjqHHNo.xY2a8weqdDaZWIOBvABzYp5MMAnLiInTRxxzOm', '2026-01-26 18:13:33', NULL, 'active', NULL),
+(27, 'Sofia', 'Castillo', 'sofia.castillo@example.com', 09445678901, NULL, 'Navotas City', NULL, NULL, '$2y$12$/AhR9PIfriWS8MRwYRDX0e79gZGeCBlG3jq64ezqQ22VyJ95iDWbm', '2026-01-26 18:13:33', NULL, 'active', NULL),
+(28, 'Fernando', 'Jimenez', 'fernando.jimenez@example.com', 09556789012, NULL, 'San Juan City', NULL, NULL, '$2y$12$OFHnt9gW7lObnvj3vWiVxOVhkhqwZ.lu05NR0/g62/uzV9OaYpcUy', '2026-01-26 18:13:34', NULL, 'active', NULL),
+(29, 'Isabel', 'Morales', 'isabel.morales@example.com', 09667890123, NULL, 'Mandaluyong City', NULL, NULL, '$2y$12$0umbK.n/vAhjxAkBP1gN4./RmBe8sSTltuGK.VghPLcRjwPc2tr72', '2026-01-26 18:13:34', NULL, 'active', NULL),
+(30, 'Carlos', 'Navarro', 'carlos.navarro@example.com', 09778901234, NULL, 'Marikina City', NULL, NULL, '$2y$12$DBE3/.1QywGAgQXpio.gh.HdSSrwGjs.P53A2rF07UlFJhSdHeoN2', '2026-01-26 18:13:34', NULL, 'active', NULL),
+(31, 'Patricia', 'Ocampo', 'patricia.ocampo@example.com', 09889012345, NULL, 'Pasay City', NULL, NULL, '$2y$12$JplnaXpAoJC8aiFH/morUedUZBkA2mETTVzzFz9RYGn4HFIPofI5G', '2026-01-26 18:13:35', NULL, 'active', NULL),
+(32, 'Daniel', 'Pascual', 'daniel.pascual@example.com', 09990123456, NULL, 'Batangas City', NULL, NULL, '$2y$12$QYPJNHz1zothDPIUKjWh8.HYo3WuGkzQ/vPKpD/qLvd9/WWCDnbFe', '2026-01-26 18:13:35', NULL, 'active', NULL),
+(33, 'Gloria', 'Quizon', 'gloria.quizon@example.com', 09101234567, NULL, 'Laguna', NULL, NULL, '$2y$12$kPgm9Y5J8vUmL90/TuA3..ccvaDc/azCUsBWYzzmdHMYZ2EvTZEJe', '2026-01-26 18:13:35', NULL, 'active', NULL),
+(34, 'Manuel', 'Rivera', 'manuel.rivera@example.com', 09212345678, NULL, 'Cavite City', NULL, NULL, '$2y$12$X06LGymmcHYFMQw6KfniM.cUmComG.ZRm54zbtRZ7CRqi3z26qm9m', '2026-01-26 18:13:35', NULL, 'active', NULL),
+(35, 'Angelica', 'Salazar', 'angelica.salazar@example.com', 09323456789, NULL, 'Bulacan', NULL, NULL, '$2y$12$w9oQ97Ss8TNnqdIo.enWIOaM../50Antw78kI.br.8LNlt/wTthsa', '2026-01-26 18:13:36', NULL, 'active', NULL),
+(36, 'Eduardo', 'Tan', 'eduardo.tan@example.com', 09434567890, NULL, 'Pampanga', NULL, NULL, '$2y$12$TNl1NOSfCdcI7sJNfDtRQ.9dccI5rR8.g/NDWd1okr9CRQryRYwxS', '2026-01-26 18:13:36', NULL, 'active', NULL),
+(37, 'Victoria', 'Uy', 'victoria.uy@example.com', 09545678901, NULL, 'Tarlac City', NULL, NULL, '$2y$12$/uzxvtnFTtlYljkGYk.YZ.0hTAwqA9ysht1kYSDbeIA83At75oWf2', '2026-01-26 18:13:36', NULL, 'active', NULL),
+(38, 'Benjamin', 'Vera', 'benjamin.vera@example.com', 09656789012, NULL, 'Zambales', NULL, NULL, '$2y$12$R/vOkpFy9Gnhc97QGdsO6.R.BJixEz1HKC1CJ0fMNO1C46QdLV/Qm', '2026-01-26 18:13:36', NULL, 'active', NULL),
+(39, 'Cristina', 'Wong', 'cristina.wong@example.com', 09767890123, NULL, 'Bataan', NULL, NULL, '$2y$12$/D3ztmyL4J9j8OAsWvCJaevJtbtEQ9WvdooFUdQ0/AR4.vdQsXjH6', '2026-01-26 18:13:36', NULL, 'active', NULL),
+(40, 'Andres', 'Yap', 'andres.yap@example.com', 09878901234, NULL, 'Nueva Ecija', NULL, NULL, '$2y$12$yriDd6Rp87zF5ubkatURGOwau0QmX.gT/2we.1TG5FheI.wmrYTBS', '2026-01-26 18:13:37', NULL, 'active', NULL),
+(41, 'Maricel', 'Zamora', 'maricel.zamora@example.com', 09989012345, NULL, 'Pangasinan', NULL, NULL, '$2y$12$5Dhky5LDi.hry2oeJVwCgulVn9PfS9UGVRLdh5gZm3y3ASrUu0XzW', '2026-01-26 18:13:37', NULL, 'active', NULL),
+(42, 'Lorenzo', 'Abella', 'lorenzo.abella@example.com', 09190123456, NULL, 'La Union', NULL, NULL, '$2y$12$qpn2wrMEAGWMAi/vx.Xt8eH6uxrI8UvJpENdLtk61WYSRvgR4HqLq', '2026-01-26 18:13:37', NULL, 'active', NULL),
+(43, 'Beatriz', 'Borja', 'beatriz.borja@example.com', 09291234567, NULL, 'Ilocos Norte', NULL, NULL, '$2y$12$0ckydJwXmW/SbGZL5Rd3YedodZPHsD1ExUQMM/O3nJ93jLe3k.7aW', '2026-01-26 18:13:37', NULL, 'active', NULL),
+(44, 'Ramon', 'Castro', 'ramon.castro@example.com', 09392345678, NULL, 'Ilocos Sur', NULL, NULL, '$2y$12$yO2gSCly/AEF3xhxRQA6Le7NBHQ2ql9V0zjJjz4QYSnEO2e8rfl5i', '2026-01-26 18:13:37', NULL, 'active', NULL),
+(45, 'Diana', 'Domingo', 'diana.domingo@example.com', 09493456789, NULL, 'Baguio City', NULL, NULL, '$2y$12$Ujvb/5Bb9YHTf3.heFREkeCmYDZqjfkaI9VHqWs3kUbYtAb9vvZTy', '2026-01-26 18:13:38', NULL, 'active', NULL),
+(46, 'Felipe', 'Espino', 'felipe.espino@example.com', 09594567890, NULL, 'Dagupan City', NULL, NULL, '$2y$12$t/f1zAaiCl/Tt61IIR/.aexHCbVGlMEwTO9KnVf8yvAi6QHt3h.pa', '2026-01-26 18:13:38', NULL, 'active', NULL),
+(47, 'Grace', 'Francisco', 'grace.francisco@example.com', 09695678901, NULL, 'San Fernando', NULL, NULL, '$2y$12$s06kTYKz9L691mVqmXghTuOEWOasqi3fo2M96FGQwboRkCCKU5ZP2', '2026-01-26 18:13:38', NULL, 'active', NULL),
+(48, 'Henry', 'Garcia', 'henry.garcia@example.com', 09796789012, NULL, 'Angeles City', NULL, NULL, '$2y$12$g/CluMLbMeplGSKDt5B2SejWiVv43QMrb8BgYoVZjEzUsdAgFG/xW', '2026-01-26 18:13:38', NULL, 'active', NULL),
+(49, 'Anna', 'Garcia', 'parent4@gmail.com', 09456789012, 'Sample Street Address', 'Quezon City', 'Sample Barangay', 1100, '$2y$12$X4HXJ56gx7jIzaYujcltS.hHfUKEe5Lve.A5sn3C9hyhcrW5UaE2m', '2026-02-06 05:01:16', NULL, 'active', 12),
+(50, 'Jose', 'Cruz', 'parent5@gmail.com', 09567890123, 'Sample Street Address', 'Quezon City', 'Sample Barangay', 1100, '$2y$12$HDJ8Hbt9RpoOG2XJ4Mw69.tkNX0qT98AFSvQ9qCBXlUcWbvQaPXyK', '2026-02-06 05:01:16', NULL, 'active', 13);
 
 -- Table: projects (4 rows)
 INSERT INTO `projects` (`projectID`, `project_name`, `description`, `goals`, `target_budget`, `current_amount`, `start_date`, `target_completion_date`, `actual_completion_date`, `project_status`, `created_by`, `created_date`, `updated_date`) VALUES

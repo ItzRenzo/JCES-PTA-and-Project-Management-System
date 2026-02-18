@@ -144,7 +144,7 @@
     </div>
 
     <!-- Floating Message Popup -->
-    @include('administrator.message.index')
+    @include('components.message-floating-button')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
