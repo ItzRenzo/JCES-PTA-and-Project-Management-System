@@ -12,7 +12,7 @@ class SecurityAuditLog extends Model
 
     protected $table = 'security_audit_log';
     protected $primaryKey = 'logID';
-    
+
     public $timestamps = false; // We use custom timestamp column
 
     protected $fillable = [

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DashboardMetric extends Model
 {
+    use HasFactory;
     protected $table = 'dashboard_metrics';
     protected $primaryKey = 'metricID';
     public $timestamps = false;
@@ -27,4 +29,9 @@ class DashboardMetric extends Model
         'target_value' => 'decimal:2',
         'last_updated' => 'datetime',
     ];
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'projectID', 'projectID');
+    }
 }

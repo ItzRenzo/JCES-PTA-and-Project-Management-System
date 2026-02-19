@@ -57,6 +57,8 @@ class User extends Authenticatable
         'address',
         'is_active',
         'is_archived',
+        'failed_login_attempts',
+        'account_locked_until',
     ];
 
     /**
