@@ -11,6 +11,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Reports Dashboard</h1>
                 <p class="text-gray-600 mt-1">Monitor system activity and user behavior</p>
+                <p class="text-sm text-gray-600 mt-2">All digital payments must be confirmed by administrators (treasurer) against actual received funds before they are marked as completed.</p>
             </div>
             <div class="flex items-center gap-3">
                 <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -18,6 +19,44 @@
                 </svg>
             </div>
         </div>
+    </div>
+
+    <!-- Reconciliation Summary -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-gray-900">Latest Financial Reconciliation</h2>
+            @if($latestReconciliation)
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    {{ $latestReconciliation->reconciliation_status === 'completed' ? 'bg-green-100 text-green-800' : ($latestReconciliation->reconciliation_status === 'discrepancy_found' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
+                    {{ ucwords(str_replace('_', ' ', $latestReconciliation->reconciliation_status)) }}
+                </span>
+            @endif
+        </div>
+
+        @if($latestReconciliation)
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <p class="text-gray-500">Period</p>
+                    <p class="font-semibold text-gray-900">{{ $latestReconciliation->reconciliation_period }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Date Reconciled</p>
+                    <p class="font-semibold text-gray-900">{{ \Illuminate\Support\Carbon::parse($latestReconciliation->reconciled_date)->format('M d, Y') }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Discrepancy</p>
+                    <p class="font-semibold {{ (float)$latestReconciliation->discrepancy_amount > 0 ? 'text-red-600' : 'text-green-600' }}">
+                        ₱{{ number_format($latestReconciliation->discrepancy_amount, 2) }}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500">Reconciled By</p>
+                    <p class="font-semibold text-gray-900">{{ trim($latestReconciliation->reconciled_by_name) ?: 'N/A' }}</p>
+                </div>
+            </div>
+        @else
+            <p class="text-sm text-gray-500">No reconciliation records available yet.</p>
+        @endif
     </div>
 
     <!-- Statistics Overview -->

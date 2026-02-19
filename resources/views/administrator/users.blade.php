@@ -239,6 +239,18 @@
                     <p class="text-sm text-gray-600 mt-1">Manage students and link them to parent accounts</p>
                 </div>
                 <div class="flex gap-2">
+                    <form method="POST" action="{{ route($routePrefix . '.students.import') }}" enctype="multipart/form-data" class="inline-flex">
+                        @csrf
+                        <input type="file" name="students_file" id="studentsImportFile" accept=".xls,.xlsx" class="hidden"
+                               onchange="if(this.files.length){ this.form.submit(); }">
+                        <button type="button" onclick="document.getElementById('studentsImportFile').click()"
+                                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2 transition-colors duration-200">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            Import Students XLS
+                        </button>
+                    </form>
                     <button type="button" onclick="openBulkTransferModal()"
                             class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 flex items-center gap-2 transition-colors duration-200"
                             id="bulkTransferBtn" style="display: none;">
@@ -257,6 +269,18 @@
                 </div>
             </div>
         </div>
+
+        @if(session('student_import_success'))
+        <div class="mx-6 mt-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm">
+            {{ session('student_import_success') }}
+        </div>
+        @endif
+
+        @if(session('student_import_error'))
+        <div class="mx-6 mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-sm">
+            {{ session('student_import_error') }}
+        </div>
+        @endif
 
         <!-- Student Filters -->
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">

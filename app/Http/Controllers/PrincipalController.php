@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Shuchkin\SimpleXLS;
+use Shuchkin\SimpleXLSX;
 
 class PrincipalController extends Controller
 {
@@ -904,6 +906,407 @@ class PrincipalController extends Controller
                 'message' => 'Error creating student: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Import students from XLS/XLSX master list.
+     */
+    public function adminImportStudents(Request $request)
+    {
+        $request->validate([
+            'students_file' => ['required', 'file', 'mimes:xls,xlsx', 'max:10240'],
+        ]);
+
+        $file = $request->file('students_file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $filePath = $file->getRealPath();
+
+        try {
+            $rows = $this->parseStudentSpreadsheetRows($filePath, $extension);
+
+            if (count($rows) < 2) {
+                return redirect()->back()->with('student_import_error', 'The uploaded file has no data rows to import.');
+            }
+
+            $headerRowIndex = $this->detectStudentHeaderRowIndex($rows);
+            if ($headerRowIndex === null) {
+                return redirect()->back()->with('student_import_error', 'Could not find a student header row in the uploaded file.');
+            }
+
+            $headers = array_map([$this, 'normalizeHeaderValue'], (array) $rows[$headerRowIndex]);
+            $defaults = $this->extractStudentImportDefaults($rows);
+
+            $insertedCount = 0;
+            $updatedCount = 0;
+            $skippedCount = 0;
+
+            DB::beginTransaction();
+
+            foreach (array_slice($rows, $headerRowIndex + 1) as $index => $row) {
+                $rowNumber = $headerRowIndex + $index + 2;
+                $mapped = $this->mapStudentImportRow($headers, (array) $row, $defaults);
+
+                if (!$mapped['student_name'] || !$mapped['grade_level']) {
+                    $skippedCount++;
+                    continue;
+                }
+
+                if ($this->shouldSkipImportedStudentName($mapped['student_name'])) {
+                    $skippedCount++;
+                    continue;
+                }
+
+                $studentLookup = [
+                    'student_name' => $mapped['student_name'],
+                    'academic_year' => $mapped['academic_year'],
+                    'grade_level' => $mapped['grade_level'],
+                    'section' => $mapped['section'],
+                ];
+
+                $existingStudent = Student::where($studentLookup)->first();
+
+                if ($existingStudent) {
+                    $oldData = $existingStudent->toArray();
+
+                    $existingStudent->update([
+                        'enrollment_date' => $mapped['enrollment_date'],
+                        'birth_date' => $mapped['birth_date'],
+                        'gender' => $mapped['gender'],
+                        'enrollment_status' => $mapped['enrollment_status'],
+                        'is_archived' => false,
+                    ]);
+
+                    SecurityAuditLog::logActivity(
+                        Auth::user()->userID,
+                        'admin_update_student_import',
+                        'students',
+                        $existingStudent->studentID,
+                        $oldData,
+                        $existingStudent->fresh()->toArray(),
+                        true,
+                        "Imported row {$rowNumber}"
+                    );
+
+                    $updatedCount++;
+                    continue;
+                }
+
+                $student = Student::create([
+                    'student_name' => $mapped['student_name'],
+                    'grade_level' => $mapped['grade_level'],
+                    'section' => $mapped['section'],
+                    'academic_year' => $mapped['academic_year'],
+                    'enrollment_date' => $mapped['enrollment_date'],
+                    'birth_date' => $mapped['birth_date'],
+                    'gender' => $mapped['gender'],
+                    'enrollment_status' => $mapped['enrollment_status'],
+                    'is_archived' => false,
+                ]);
+
+                SecurityAuditLog::logActivity(
+                    Auth::user()->userID,
+                    'admin_create_student_import',
+                    'students',
+                    $student->studentID,
+                    null,
+                    $student->toArray(),
+                    true,
+                    "Imported row {$rowNumber}"
+                );
+
+                $insertedCount++;
+            }
+
+            DB::commit();
+
+            $message = "Import complete: {$insertedCount} added, {$updatedCount} updated, {$skippedCount} skipped.";
+
+            return redirect()->back()->with('student_import_success', $message);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->with('student_import_error', 'Student import failed: ' . $e->getMessage());
+        }
+    }
+
+    private function parseStudentSpreadsheetRows(string $filePath, string $extension): array
+    {
+        if ($extension === 'xlsx') {
+            $xlsx = SimpleXLSX::parseFile($filePath);
+            if (!$xlsx) {
+                throw new \RuntimeException(SimpleXLSX::parseError() ?: 'Unable to parse XLSX file.');
+            }
+
+            return $xlsx->rows();
+        }
+
+        $xls = SimpleXLS::parseFile($filePath);
+        if (!$xls) {
+            throw new \RuntimeException(SimpleXLS::parseError() ?: 'Unable to parse XLS file.');
+        }
+
+        return $xls->rows();
+    }
+
+    private function normalizeHeaderValue($value): string
+    {
+        $normalized = strtolower(trim((string) $value));
+        $normalized = str_replace(['_', '-', '.'], ' ', $normalized);
+        $normalized = preg_replace('/\s+/', ' ', $normalized);
+
+        return trim($normalized);
+    }
+
+    private function normalizeStringValue($value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $text = trim((string) $value);
+
+        return $text === '' ? null : $text;
+    }
+
+    private function resolveImportValue(array $rowMap, array $aliases): ?string
+    {
+        foreach ($aliases as $alias) {
+            if (array_key_exists($alias, $rowMap) && $rowMap[$alias] !== null && $rowMap[$alias] !== '') {
+                return $this->normalizeStringValue($rowMap[$alias]);
+            }
+        }
+
+        return null;
+    }
+
+    private function findColumnIndex(array $headers, array $needles): ?int
+    {
+        foreach ($headers as $index => $header) {
+            foreach ($needles as $needle) {
+                if ($header && str_contains($header, $needle)) {
+                    return $index;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function valueFromColumn(array $row, ?int $columnIndex): ?string
+    {
+        if ($columnIndex === null) {
+            return null;
+        }
+
+        return $this->normalizeStringValue($row[$columnIndex] ?? null);
+    }
+
+    private function firstNonEmptyValueAfter(array $row, int $startColumn): ?string
+    {
+        $columnCount = count($row);
+        for ($column = $startColumn; $column < $columnCount; $column++) {
+            $value = $this->normalizeStringValue($row[$column] ?? null);
+            if ($value !== null) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    private function extractStudentImportDefaults(array $rows): array
+    {
+        $defaults = [
+            'grade_level' => null,
+            'section' => null,
+            'academic_year' => null,
+        ];
+
+        foreach (array_slice($rows, 0, 20) as $row) {
+            foreach ((array) $row as $columnIndex => $cellValue) {
+                $label = $this->normalizeHeaderValue($cellValue);
+                if (!$label) {
+                    continue;
+                }
+
+                if ($defaults['grade_level'] === null && ($label === 'grade level' || $label === 'grade')) {
+                    $defaults['grade_level'] = $this->firstNonEmptyValueAfter((array) $row, $columnIndex + 1);
+                }
+
+                if ($defaults['section'] === null && $label === 'section') {
+                    $defaults['section'] = $this->firstNonEmptyValueAfter((array) $row, $columnIndex + 1);
+                }
+
+                if ($defaults['academic_year'] === null && ($label === 'school year' || $label === 'academic year')) {
+                    $defaults['academic_year'] = $this->firstNonEmptyValueAfter((array) $row, $columnIndex + 1);
+                }
+            }
+        }
+
+        return $defaults;
+    }
+
+    private function detectStudentHeaderRowIndex(array $rows): ?int
+    {
+        foreach (array_slice($rows, 0, 40, true) as $rowIndex => $row) {
+            $normalizedCells = array_map([$this, 'normalizeHeaderValue'], (array) $row);
+
+            $hasName = false;
+            $hasSexOrGender = false;
+
+            foreach ($normalizedCells as $cell) {
+                if (!$cell) {
+                    continue;
+                }
+
+                if (str_contains($cell, 'name')) {
+                    $hasName = true;
+                }
+
+                if (str_contains($cell, 'sex') || str_contains($cell, 'gender')) {
+                    $hasSexOrGender = true;
+                }
+            }
+
+            if ($hasName && $hasSexOrGender) {
+                return $rowIndex;
+            }
+        }
+
+        return null;
+    }
+
+    private function shouldSkipImportedStudentName(string $studentName): bool
+    {
+        $name = strtolower(trim($studentName));
+
+        if ($name === '' || strlen($name) < 3) {
+            return true;
+        }
+
+        if (str_starts_with($name, '<') || str_starts_with($name, '=') || str_starts_with($name, '-')) {
+            return true;
+        }
+
+        $blockedPhrases = [
+            'total',
+            'combined',
+            'prepared by',
+            'certified correct',
+            'generated',
+            'list and code',
+            'indicator',
+            'bosy',
+            'eosy',
+            'register',
+            'school form',
+        ];
+
+        foreach ($blockedPhrases as $phrase) {
+            if (str_contains($name, $phrase)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function normalizeGenderValue(?string $value): string
+    {
+        $gender = strtolower(trim((string) $value));
+
+        if (in_array($gender, ['m', 'male', 'boy'], true)) {
+            return 'male';
+        }
+
+        if (in_array($gender, ['f', 'female', 'girl'], true)) {
+            return 'female';
+        }
+
+        return 'male';
+    }
+
+    private function normalizeStatusValue(?string $value): string
+    {
+        $status = strtolower(trim((string) $value));
+
+        return match ($status) {
+            'active', 'transferred', 'graduated', 'dropped' => $status,
+            default => 'active',
+        };
+    }
+
+    private function normalizeImportedDateValue(?string $value, ?string $default = null): ?string
+    {
+        $raw = $this->normalizeStringValue($value);
+
+        if ($raw === null) {
+            return $default;
+        }
+
+        $formats = [
+            'm-d-Y',
+            'm/d/Y',
+            'Y-m-d',
+            'Y/m/d',
+            'd-m-Y',
+            'd/m/Y',
+            'm-d-y',
+            'm/d/y',
+        ];
+
+        foreach ($formats as $format) {
+            try {
+                $parsed = \Carbon\Carbon::createFromFormat($format, $raw);
+                if ($parsed !== false) {
+                    return $parsed->format('Y-m-d');
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
+        try {
+            return \Carbon\Carbon::parse($raw)->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return $default;
+        }
+    }
+
+    private function mapStudentImportRow(array $headers, array $row, array $defaults): array
+    {
+        $nameColumn = $this->findColumnIndex($headers, ['student name', 'learner name', 'name']);
+        $gradeColumn = $this->findColumnIndex($headers, ['grade level', 'year level']);
+        $sectionColumn = $this->findColumnIndex($headers, ['section']);
+        $yearColumn = $this->findColumnIndex($headers, ['academic year', 'school year', 'sy']);
+        $enrollmentDateColumn = $this->findColumnIndex($headers, ['enrollment date', 'date enrolled', 'enrolled date']);
+        $birthDateColumn = $this->findColumnIndex($headers, ['birth date', 'birthday', 'date of birth', 'dob']);
+        $genderColumn = $this->findColumnIndex($headers, ['gender', 'sex']);
+        $statusColumn = $this->findColumnIndex($headers, ['enrollment status', 'status']);
+
+        $studentName = $this->valueFromColumn($row, $nameColumn);
+        $gradeLevel = $this->valueFromColumn($row, $gradeColumn) ?? $defaults['grade_level'];
+        $section = $this->valueFromColumn($row, $sectionColumn) ?? $defaults['section'];
+        $academicYear = $this->valueFromColumn($row, $yearColumn)
+            ?? $defaults['academic_year']
+            ?? (date('Y') . '-' . (date('Y') + 1));
+        $enrollmentDate = $this->normalizeImportedDateValue(
+            $this->valueFromColumn($row, $enrollmentDateColumn),
+            now()->toDateString()
+        );
+        $birthDate = $this->normalizeImportedDateValue($this->valueFromColumn($row, $birthDateColumn));
+        $gender = $this->normalizeGenderValue($this->valueFromColumn($row, $genderColumn));
+        $enrollmentStatus = $this->normalizeStatusValue($this->valueFromColumn($row, $statusColumn));
+
+        return [
+            'student_name' => $studentName,
+            'grade_level' => $gradeLevel,
+            'section' => $section,
+            'academic_year' => $academicYear,
+            'enrollment_date' => $enrollmentDate,
+            'birth_date' => $birthDate,
+            'gender' => $gender,
+            'enrollment_status' => $enrollmentStatus,
+        ];
     }
 
     /**

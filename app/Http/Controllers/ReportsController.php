@@ -39,11 +39,26 @@ class ReportsController extends Controller
             ->distinct('userID')->count();
         $topActions = SecurityAuditLog::getActionStats(7);
 
+        $latestReconciliation = DB::table('financial_reconciliations as fr')
+            ->leftJoin('users as u', 'u.userID', '=', 'fr.reconciled_by')
+            ->select(
+                'fr.reconciliation_period',
+                'fr.start_date',
+                'fr.end_date',
+                'fr.reconciliation_status',
+                'fr.reconciled_date',
+                'fr.discrepancy_amount',
+                DB::raw("CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as reconciled_by_name")
+            )
+            ->orderByDesc('fr.end_date')
+            ->first();
+
         return view($this->resolveReportsView('index'), compact(
             'recentActivityCount',
             'failedActionsCount', 
             'uniqueUsersCount',
-            'topActions'
+            'topActions',
+            'latestReconciliation'
         ));
     }
 

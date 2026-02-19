@@ -691,6 +691,10 @@ INSERT INTO `users` (`userID`, `username`, `password_hash`, `user_type`, `email`
 (12, 'agarcia', '$2y$12$gQNYyD8ZwMdefQn0PvByxOwILo0juYiQIOMpeGs85k9zTNFZfKmF6', 'parent', 'parent4@gmail.com', '09456789012', 'Anna', 'Garcia', 1, '2026-02-06 05:01:16', NULL, NULL, 0, NULL, NULL, NULL, 'agarcia123'),
 (13, 'jcruz', '$2y$12$fMQZ7YV4.WSVaAc65y8qQOXpHC1Fqnv37c8jc0vwSTb9IxGAGnTJ2', 'parent', 'parent5@gmail.com', '09567890123', 'Jose', 'Cruz', 1, '2026-02-06 05:01:16', NULL, NULL, 0, NULL, NULL, NULL, 'jcruz123');
 
+-- Table: financial_reconciliations (1 row)
+INSERT INTO `financial_reconciliations` (`reconciliationID`, `reconciliation_period`, `start_date`, `end_date`, `total_system_amount`, `total_bank_amount`, `discrepancy_amount`, `reconciliation_status`, `reconciled_date`, `reconciled_by`, `notes`) VALUES
+(1, '2026-01', '2026-01-01', '2026-01-31', 125000.00, 125000.00, 0.00, 'completed', '2026-02-01 09:00:00', 1, 'All digital payments are confirmed by administrators (treasurer) against actual received funds before being marked as completed.');
+
 -- Table: sessions (5 rows)
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
 ('pQESMpo78HFW5vBLQd3pOZ0gnazk6vQNJkLaZpNC', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 OPR/126.0.0.0 (Edition std-2)', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiNXc0UEdLWWFydERFNUkxekhkV2RjMXlsSW1Scnp3R1pvRkc4amg3RSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbmlzdHJhdG9yL3VzZXJzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1770622456),

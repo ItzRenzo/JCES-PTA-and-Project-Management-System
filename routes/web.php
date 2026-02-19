@@ -85,6 +85,10 @@ Route::post('/principal/students', [PrincipalController::class, 'adminStoreStude
     ->middleware(['auth', 'verified'])
     ->name('principal.students.store');
 
+Route::post('/principal/students/import', [PrincipalController::class, 'adminImportStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('principal.students.import');
+
 Route::put('/principal/students/{id}', [PrincipalController::class, 'adminUpdateStudent'])
     ->middleware(['auth', 'verified'])
     ->name('principal.students.update');
@@ -276,6 +280,10 @@ Route::get('/administrator/students', [PrincipalController::class, 'adminStudent
 Route::post('/administrator/students', [PrincipalController::class, 'adminStoreStudent'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.students.store');
+
+Route::post('/administrator/students/import', [PrincipalController::class, 'adminImportStudents'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.students.import');
 
 Route::put('/administrator/students/{id}', [PrincipalController::class, 'adminUpdateStudent'])
     ->middleware(['auth', 'verified'])
