@@ -186,8 +186,8 @@
                         Showing <span class="font-medium">{{ $users->firstItem() ?? 0 }}</span> to <span class="font-medium">{{ $users->lastItem() ?? 0 }}</span> of <span class="font-medium">{{ $users->total() }}</span> results
                     </p>
                     <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-600">Per page:</label>
-                        <select onchange="changeUsersPerPage(this.value)" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-green-500">
+                        <label for="teacherUsersPerPage" class="text-sm text-gray-600">Per page:</label>
+                        <select id="teacherUsersPerPage" name="users_per_page" onchange="changeUsersPerPage(this.value)" class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-green-500">
                             <option value="10" {{ request('users_per_page', 10) == 10 ? 'selected' : '' }}>10</option>
                             <option value="25" {{ request('users_per_page') == 25 ? 'selected' : '' }}>25</option>
                             <option value="50" {{ request('users_per_page') == 50 ? 'selected' : '' }}>50</option>

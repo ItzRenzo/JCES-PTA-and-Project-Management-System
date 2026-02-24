@@ -10,7 +10,7 @@ class BlackBoxTestCase extends TestCase
     use RefreshDatabase;
 
     /**
-     * Create a user with a given type and verified email.
+        * Create a user with a given type.
      */
     protected function createUser(string $type = 'parent', array $attributes = [])
     {

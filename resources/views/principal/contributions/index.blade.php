@@ -56,7 +56,7 @@
 
         <!-- Parent Selection with Search -->
         <div class="mb-6" x-data="{ open: false }" @click.away="open = false">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Select Parent</label>
+            <label for="parentSearch" class="block text-sm font-medium text-gray-700 mb-2">Select Parent</label>
             <div class="relative">
                 <input
                     type="text"
@@ -387,10 +387,10 @@
                         <div class="space-y-4 mb-6">
                             <!-- Payment Method -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                                <p class="block text-sm font-medium text-gray-700 mb-2">Payment Method</p>
                                 <div class="grid grid-cols-3 gap-3">
-                                    <label class="cursor-pointer">
-                                        <input type="radio" x-model="paymentMethod" value="cash" class="sr-only peer">
+                                    <label for="manualPaymentMethodCash" class="cursor-pointer">
+                                        <input id="manualPaymentMethodCash" name="payment_method" type="radio" x-model="paymentMethod" value="cash" class="sr-only peer">
                                         <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-gray-500 peer-checked:bg-gray-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
                                             <div class="w-7 h-7 bg-gray-600 rounded-lg flex items-center justify-center">
                                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -400,8 +400,8 @@
                                             <span class="text-sm font-semibold text-gray-700">Cash</span>
                                         </div>
                                     </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" x-model="paymentMethod" value="gcash" class="sr-only peer">
+                                    <label for="manualPaymentMethodGcash" class="cursor-pointer">
+                                        <input id="manualPaymentMethodGcash" name="payment_method" type="radio" x-model="paymentMethod" value="gcash" class="sr-only peer">
                                         <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
                                             <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
                                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -411,8 +411,8 @@
                                             <span class="text-sm font-semibold text-blue-700">GCash</span>
                                         </div>
                                     </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" x-model="paymentMethod" value="maya" class="sr-only peer">
+                                    <label for="manualPaymentMethodMaya" class="cursor-pointer">
+                                        <input id="manualPaymentMethodMaya" name="payment_method" type="radio" x-model="paymentMethod" value="maya" class="sr-only peer">
                                         <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
                                             <div class="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center">
                                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -427,8 +427,10 @@
 
                             <!-- Notes -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
-                                <textarea x-model="notes"
+                                <label for="manualPaymentNotes" class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                                <textarea id="manualPaymentNotes"
+                                          name="notes"
+                                          x-model="notes"
                                           rows="2"
                                           placeholder="Additional payment details..."
                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
@@ -436,8 +438,8 @@
 
                             <!-- Proof of Payment Upload -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Proof of Payment</label>
-                                <label class="block cursor-pointer">
+                                <label for="manualProofImage" class="block text-sm font-medium text-gray-700 mb-2">Proof of Payment</label>
+                                <label for="manualProofImage" class="block cursor-pointer">
                                     <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 hover:bg-green-50 transition-all"
                                          :class="{'border-green-500 bg-green-50': proofImage}">
                                         <template x-if="!proofImage">
@@ -459,7 +461,7 @@
                                             </div>
                                         </template>
                                     </div>
-                                    <input type="file" accept="image/*" @change="proofImage = $event.target.files[0]" class="hidden">
+                                    <input id="manualProofImage" name="proof_image" type="file" accept="image/*" @change="proofImage = $event.target.files[0]" class="hidden">
                                 </label>
                             </div>
                         </div>
@@ -738,7 +740,7 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
             <div class="flex">
                 <!-- Left: Receipt Image -->
                 <div class="w-1/2 p-4 bg-gray-50 border-r border-gray-200">
-                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Receipt Image</label>
+                    <p class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Receipt Image</p>
                     <div class="bg-white rounded-lg border border-gray-200 p-2 flex items-center justify-center" style="height: 280px; overflow: auto;">
                         <img id="receiptImagePreview" alt="Payment Receipt" class="max-w-full max-h-full object-contain rounded" style="display: block;">
                     </div>
@@ -760,7 +762,7 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
 
                 <!-- Right: Verification Actions -->
                 <div class="w-1/2 p-4 bg-white">
-                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Update Status</label>
+                    <p class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Update Status</p>
 
                     <div class="space-y-2">
                         <!-- Approve Button -->

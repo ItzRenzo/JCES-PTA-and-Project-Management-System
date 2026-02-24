@@ -80,10 +80,6 @@ class ProfileController extends Controller
                 'emergency_contact_name',
                 'emergency_contact_phone',
             ]));
-
-            if ($user->isDirty('email')) {
-                $user->email_verified_at = null;
-            }
         }
 
         $user->save();

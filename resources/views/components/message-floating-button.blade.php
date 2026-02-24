@@ -45,8 +45,8 @@
         <form @submit.prevent="sendMessage()" class="p-5 space-y-4">
             <!-- Type Selection -->
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Type</label>
-                <select x-model="form.type"
+                <label for="floatingMessageType" class="block text-xs font-semibold text-gray-600 mb-1">Type</label>
+                <select id="floatingMessageType" name="type" x-model="form.type"
                         class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                     <option value="announcement">Announcement</option>
                     <option value="schedule">Schedule</option>
@@ -55,8 +55,8 @@
 
             <!-- Title -->
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">Title</label>
-                <input type="text" x-model="form.title" placeholder="Enter title..."
+                <label for="floatingMessageTitle" class="block text-xs font-semibold text-gray-600 mb-1">Title</label>
+                <input id="floatingMessageTitle" name="title" type="text" x-model="form.title" placeholder="Enter title..."
                        class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                 <p x-show="errors.title" x-text="errors.title" class="text-red-500 text-xs mt-1"></p>
             </div>
@@ -65,8 +65,8 @@
             <div x-show="form.type === 'announcement'">
                 <!-- Category -->
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Category</label>
-                    <select x-model="form.category"
+                    <label for="floatingMessageCategory" class="block text-xs font-semibold text-gray-600 mb-1">Category</label>
+                    <select id="floatingMessageCategory" name="category" x-model="form.category"
                             class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                         <option value="">Select category...</option>
                         <option value="important">Important</option>
@@ -79,8 +79,8 @@
 
                 <!-- Audience -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Audience</label>
-                    <select x-model="form.audience"
+                    <label for="floatingMessageAudience" class="block text-xs font-semibold text-gray-600 mb-1">Audience</label>
+                    <select id="floatingMessageAudience" name="audience" x-model="form.audience"
                             class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                         <option value="">Select audience...</option>
                         <option value="everyone">Everyone</option>
@@ -99,8 +99,8 @@
             <div x-show="form.type === 'schedule'">
                 <!-- Date -->
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Date</label>
-                    <input type="date" x-model="form.scheduled_date"
+                    <label for="floatingMessageDate" class="block text-xs font-semibold text-gray-600 mb-1">Date</label>
+                    <input id="floatingMessageDate" name="scheduled_date" type="date" x-model="form.scheduled_date"
                            class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                     <p x-show="errors.scheduled_date" x-text="errors.scheduled_date" class="text-red-500 text-xs mt-1"></p>
                 </div>
@@ -108,21 +108,21 @@
                 <!-- Time -->
                 <div class="mb-4 grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Start Time</label>
-                        <input type="time" x-model="form.start_time"
+                        <label for="floatingMessageStartTime" class="block text-xs font-semibold text-gray-600 mb-1">Start Time</label>
+                        <input id="floatingMessageStartTime" name="start_time" type="time" x-model="form.start_time"
                                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">End Time</label>
-                        <input type="time" x-model="form.end_time"
+                        <label for="floatingMessageEndTime" class="block text-xs font-semibold text-gray-600 mb-1">End Time</label>
+                        <input id="floatingMessageEndTime" name="end_time" type="time" x-model="form.end_time"
                                class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                     </div>
                 </div>
 
                 <!-- Priority -->
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Priority</label>
-                    <select x-model="form.priority"
+                    <label for="floatingMessagePriority" class="block text-xs font-semibold text-gray-600 mb-1">Priority</label>
+                    <select id="floatingMessagePriority" name="priority" x-model="form.priority"
                             class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                         <option value="">Select priority...</option>
                         <option value="high">High</option>
@@ -134,8 +134,8 @@
 
                 <!-- Visibility -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Visibility</label>
-                    <select x-model="form.visibility"
+                    <label for="floatingMessageVisibility" class="block text-xs font-semibold text-gray-600 mb-1">Visibility</label>
+                    <select id="floatingMessageVisibility" name="visibility" x-model="form.visibility"
                             class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition">
                         <option value="">Select visibility...</option>
                         <option value="everyone">Everyone</option>
@@ -150,8 +150,8 @@
 
             <!-- Content/Description -->
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1" x-text="form.type === 'schedule' ? 'Description' : 'Content'"></label>
-                <textarea x-model="form.description" rows="3" :placeholder="form.type === 'schedule' ? 'Type schedule description...' : 'Type announcement content...'"
+                <label for="floatingMessageDescription" class="block text-xs font-semibold text-gray-600 mb-1" x-text="form.type === 'schedule' ? 'Description' : 'Content'"></label>
+                <textarea id="floatingMessageDescription" name="description" x-model="form.description" rows="3" :placeholder="form.type === 'schedule' ? 'Type schedule description...' : 'Type announcement content...'"
                           class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition resize-none"></textarea>
                 <p x-show="errors.description" x-text="errors.description" class="text-red-500 text-xs mt-1"></p>
             </div>

@@ -30,21 +30,10 @@ class UserFactory extends Factory
             'last_name' => $last,
             'username' => Str::slug(strtolower($first . '.' . $last)) . rand(1, 999),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
             'user_type' => $this->faker->randomElement(['parent','administrator','teacher','principal']),
             'is_active' => true,
             'password_hash' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
-    }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
     }
 }
