@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('password_hash', 255);
             $table->enum('user_type', ['parent', 'administrator', 'teacher', 'principal']);
             $table->string('email', 150)->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('phone', 20)->nullable();
             $table->string('first_name', 100);
             $table->string('last_name', 100);
@@ -27,7 +28,7 @@ return new class extends Migration
             $table->timestamp('password_changed_date')->nullable();
             $table->integer('failed_login_attempts')->default(0);
             $table->timestamp('account_locked_until')->nullable();
-            
+
             $table->index('username');
             $table->index('user_type');
             $table->index('is_active');
