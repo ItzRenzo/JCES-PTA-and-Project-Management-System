@@ -19,7 +19,7 @@ class ProjectContributionFactory extends Factory
             'parentID' => 1,
             'contribution_amount' => $this->faker->randomFloat(2, 1, 1000),
             'contribution_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'processed_by' => 1,
+            'processed_by' => null,
         ];
     }
 }
