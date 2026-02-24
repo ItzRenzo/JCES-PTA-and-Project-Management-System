@@ -33,3 +33,4 @@ public/images/projects/**
 public\images\receipt_img\*
 public/images/receipt_img/*
 public/images/receipt_img/**
+sample_data_50_rows_per_table.sql
