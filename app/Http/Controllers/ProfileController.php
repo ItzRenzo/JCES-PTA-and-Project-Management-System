@@ -58,6 +58,12 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
+        if (!empty($validated['name']) && (empty($validated['first_name']) || empty($validated['last_name']))) {
+            $nameParts = preg_split('/\s+/', trim($validated['name']), 2);
+            $validated['first_name'] = $validated['first_name'] ?? ($nameParts[0] ?? null);
+            $validated['last_name'] = $validated['last_name'] ?? ($nameParts[1] ?? null);
+        }
+
         if ($user->user_type === 'parent') {
             $hasEmergencyColumns = Schema::hasColumn('users', 'emergency_contact_name')
                 && Schema::hasColumn('users', 'emergency_contact_phone');
@@ -70,6 +76,7 @@ class ProfileController extends Controller
             }
         } else {
             $user->fill(Arr::except($validated, [
+                'name',
                 'emergency_contact_name',
                 'emergency_contact_phone',
             ]));

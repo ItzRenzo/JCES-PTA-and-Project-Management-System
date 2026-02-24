@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmailContract
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, MustVerifyEmail;
 
     /**
      * The primary key associated with the table.
@@ -113,6 +114,39 @@ class User extends Authenticatable
         }
 
         return trim($firstName . ' ' . $lastName);
+    }
+
+    /**
+     * Get id attribute for compatibility with Laravel's default scaffolding.
+     *
+     * @return int|null
+     */
+    public function getIdAttribute()
+    {
+        return $this->attributes['userID'] ?? null;
+    }
+
+    /**
+     * Get password attribute for compatibility with Laravel's default scaffolding.
+     *
+     * @return string|null
+     */
+    public function getPasswordAttribute()
+    {
+        return $this->attributes['password_hash'] ?? null;
+    }
+
+    /**
+     * Set name attribute by splitting into first and last names.
+     *
+     * @param string $value
+     * @return void
+     */
+    public function setNameAttribute($value)
+    {
+        $parts = preg_split('/\s+/', trim((string) $value), 2);
+        $this->attributes['first_name'] = $parts[0] ?? '';
+        $this->attributes['last_name'] = $parts[1] ?? '';
     }
 
     /**
