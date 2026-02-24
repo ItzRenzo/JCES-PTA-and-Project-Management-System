@@ -16,7 +16,6 @@ class BlackBoxTestCase extends TestCase
     {
         return \App\Models\User::factory()->create(array_merge([
             'user_type' => $type,
-            'email_verified_at' => now(),
         ], $attributes));
     }
 }
