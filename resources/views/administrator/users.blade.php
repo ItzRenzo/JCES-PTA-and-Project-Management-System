@@ -291,15 +291,15 @@
                 <input type="hidden" name="status" value="{{ request('status') }}">
 
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Search Student</label>
-                    <input type="text" name="student_search" value="{{ request('student_search') }}"
+                    <label for="studentSearchFilter" class="block text-xs font-medium text-gray-600 mb-1">Search Student</label>
+                    <input id="studentSearchFilter" type="text" name="student_search" value="{{ request('student_search') }}"
                            placeholder="Search by name, grade, section..."
                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <div class="min-w-[140px]">
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Grade Level</label>
-                    <select name="grade_level" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label for="gradeLevelFilter" class="block text-xs font-medium text-gray-600 mb-1">Grade Level</label>
+                    <select id="gradeLevelFilter" name="grade_level" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">All Grades</option>
                         <option value="Kinder" {{ request('grade_level') == 'Kinder' ? 'selected' : '' }}>Kinder</option>
                         <option value="Grade 1" {{ request('grade_level') == 'Grade 1' ? 'selected' : '' }}>Grade 1</option>
@@ -312,8 +312,8 @@
                 </div>
 
                 <div class="min-w-[140px]">
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Academic Year</label>
-                    <select name="academic_year" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label for="academicYearFilter" class="block text-xs font-medium text-gray-600 mb-1">Academic Year</label>
+                    <select id="academicYearFilter" name="academic_year" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">All Years</option>
                         @foreach($academicYears as $year)
                         <option value="{{ $year }}" {{ request('academic_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -322,8 +322,8 @@
                 </div>
 
                 <div class="min-w-[140px]">
-                    <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                    <select name="enrollment_status" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <label for="enrollmentStatusFilter" class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                    <select id="enrollmentStatusFilter" name="enrollment_status" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">All Status</option>
                         <option value="active" {{ request('enrollment_status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="transferred" {{ request('enrollment_status') == 'transferred' ? 'selected' : '' }}>Transferred</option>
@@ -562,16 +562,16 @@
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
-                        <input type="text" name="student_name" required
+                        <label for="addStudentName" class="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
+                        <input id="addStudentName" type="text" name="student_name" required
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                placeholder="Full name of the student">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Grade Level *</label>
-                            <select name="grade_level" required
+                            <label for="addStudentGradeLevel" class="block text-sm font-medium text-gray-700 mb-1">Grade Level *</label>
+                            <select id="addStudentGradeLevel" name="grade_level" required
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                                 <option value="">Select Grade</option>
                                 <option value="Kinder">Kinder</option>
@@ -584,8 +584,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Section</label>
-                            <input type="text" name="section"
+                            <label for="addStudentSection" class="block text-sm font-medium text-gray-700 mb-1">Section</label>
+                            <input id="addStudentSection" type="text" name="section"
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                                    placeholder="e.g., Section A">
                         </div>
@@ -593,14 +593,14 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Academic Year *</label>
-                            <input type="text" name="academic_year" required
+                            <label for="addStudentAcademicYear" class="block text-sm font-medium text-gray-700 mb-1">Academic Year *</label>
+                            <input id="addStudentAcademicYear" type="text" name="academic_year" required
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                                    placeholder="e.g., 2025-2026" value="{{ date('Y') }}-{{ date('Y') + 1 }}">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Date *</label>
-                            <input type="date" name="enrollment_date" required
+                            <label for="addStudentEnrollmentDate" class="block text-sm font-medium text-gray-700 mb-1">Enrollment Date *</label>
+                            <input id="addStudentEnrollmentDate" type="date" name="enrollment_date" required
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                                    value="{{ date('Y-m-d') }}">
                         </div>
@@ -608,13 +608,13 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
-                            <input type="date" name="birth_date"
+                            <label for="addStudentBirthDate" class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
+                            <input id="addStudentBirthDate" type="date" name="birth_date"
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
-                            <select name="gender" required
+                            <label for="addStudentGender" class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+                            <select id="addStudentGender" name="gender" required
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                                 <option value="">Select Gender</option>
                                 <option value="male">Male</option>
@@ -624,8 +624,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Status *</label>
-                        <select name="enrollment_status" required
+                        <label for="addStudentEnrollmentStatus" class="block text-sm font-medium text-gray-700 mb-1">Enrollment Status *</label>
+                        <select id="addStudentEnrollmentStatus" name="enrollment_status" required
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                             <option value="active" selected>Active</option>
                             <option value="transferred">Transferred</option>
@@ -637,7 +637,7 @@
                     <hr class="my-4">
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Link to Parent Account</label>
+                        <label for="addStudentParentSearch" class="block text-sm font-medium text-gray-700 mb-1">Link to Parent Account</label>
                         <div class="relative">
                             <input type="hidden" name="parent_id" id="addStudentParentId">
                             <input type="text" id="addStudentParentSearch"
@@ -660,8 +660,8 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Relationship Type</label>
-                            <select name="relationship_type"
+                            <label for="addStudentRelationshipType" class="block text-sm font-medium text-gray-700 mb-1">Relationship Type</label>
+                            <select id="addStudentRelationshipType" name="relationship_type"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                                 <option value="guardian">Guardian</option>
                                 <option value="mother">Mother</option>
@@ -713,14 +713,14 @@
                 <input type="hidden" id="editStudentId" name="student_id" value="">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
+                        <label for="editStudentName" class="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
                         <input type="text" id="editStudentName" name="student_name" required
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Grade Level *</label>
+                            <label for="editGradeLevel" class="block text-sm font-medium text-gray-700 mb-1">Grade Level *</label>
                             <select id="editGradeLevel" name="grade_level" required
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                                 <option value="Kinder">Kinder</option>
@@ -733,7 +733,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Section</label>
+                            <label for="editSection" class="block text-sm font-medium text-gray-700 mb-1">Section</label>
                             <input type="text" id="editSection" name="section"
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                         </div>
@@ -741,12 +741,12 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Academic Year *</label>
+                            <label for="editAcademicYear" class="block text-sm font-medium text-gray-700 mb-1">Academic Year *</label>
                             <input type="text" id="editAcademicYear" name="academic_year" required
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Date *</label>
+                            <label for="editEnrollmentDate" class="block text-sm font-medium text-gray-700 mb-1">Enrollment Date *</label>
                             <input type="date" id="editEnrollmentDate" name="enrollment_date" required
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                         </div>
@@ -754,12 +754,12 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
+                            <label for="editBirthDate" class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
                             <input type="date" id="editBirthDate" name="birth_date"
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
+                            <label for="editGender" class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
                             <select id="editGender" name="gender" required
                                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                                 <option value="male">Male</option>
@@ -769,7 +769,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Status *</label>
+                        <label for="editEnrollmentStatus" class="block text-sm font-medium text-gray-700 mb-1">Enrollment Status *</label>
                         <select id="editEnrollmentStatus" name="enrollment_status" required
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
                             <option value="active">Active</option>
@@ -819,33 +819,33 @@
 
                 <div class="grid grid-cols-2 gap-4 pt-4 border-t">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 uppercase">Grade Level</label>
+                        <p class="block text-xs font-medium text-gray-500 uppercase">Grade Level</p>
                         <div id="viewStudentGrade" class="text-sm text-gray-900 mt-1"></div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 uppercase">Section</label>
+                        <p class="block text-xs font-medium text-gray-500 uppercase">Section</p>
                         <div id="viewStudentSection" class="text-sm text-gray-900 mt-1"></div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 uppercase">Academic Year</label>
+                        <p class="block text-xs font-medium text-gray-500 uppercase">Academic Year</p>
                         <div id="viewStudentAcademicYear" class="text-sm text-gray-900 mt-1"></div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 uppercase">Status</label>
+                        <p class="block text-xs font-medium text-gray-500 uppercase">Status</p>
                         <div id="viewStudentStatus" class="mt-1"></div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 uppercase">Birth Date</label>
+                        <p class="block text-xs font-medium text-gray-500 uppercase">Birth Date</p>
                         <div id="viewStudentBirthDate" class="text-sm text-gray-900 mt-1"></div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 uppercase">Enrollment Date</label>
+                        <p class="block text-xs font-medium text-gray-500 uppercase">Enrollment Date</p>
                         <div id="viewStudentEnrollmentDate" class="text-sm text-gray-900 mt-1"></div>
                     </div>
                 </div>
 
                 <div class="pt-4 border-t">
-                    <label class="block text-xs font-medium text-gray-500 uppercase mb-2">Linked Parents/Guardians</label>
+                    <p class="block text-xs font-medium text-gray-500 uppercase mb-2">Linked Parents/Guardians</p>
                     <div id="viewStudentParents" class="space-y-2"></div>
                 </div>
             </div>
@@ -891,14 +891,14 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">New Academic Year *</label>
+                        <label for="transferAcademicYear" class="block text-sm font-medium text-gray-700 mb-1">New Academic Year *</label>
                         <input type="text" id="transferAcademicYear" name="new_academic_year" required
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
                                placeholder="e.g., 2026-2027">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">New Grade Level *</label>
+                        <label for="transferGradeLevel" class="block text-sm font-medium text-gray-700 mb-1">New Grade Level *</label>
                         <select id="transferGradeLevel" name="new_grade_level" required
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-amber-500">
                             <option value="Kinder">Kinder</option>
@@ -912,14 +912,14 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">New Section</label>
+                        <label for="transferSection" class="block text-sm font-medium text-gray-700 mb-1">New Section</label>
                         <input type="text" id="transferSection" name="new_section"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
                                placeholder="Leave blank if same section">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Enrollment Status</label>
+                        <label for="transferEnrollmentStatus" class="block text-sm font-medium text-gray-700 mb-1">Enrollment Status</label>
                         <select id="transferEnrollmentStatus" name="new_enrollment_status"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-amber-500">
                             <option value="active">Active</option>
@@ -975,7 +975,7 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">New Academic Year *</label>
+                        <label for="bulkTransferAcademicYear" class="block text-sm font-medium text-gray-700 mb-1">New Academic Year *</label>
                         <input type="text" id="bulkTransferAcademicYear" name="new_academic_year" required
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-amber-500"
                                placeholder="e.g., 2026-2027" value="{{ date('Y') + 1 }}-{{ date('Y') + 2 }}">
@@ -1041,7 +1041,7 @@
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Parent *</label>
+                        <label for="linkParentSearch" class="block text-sm font-medium text-gray-700 mb-1">Select Parent *</label>
                         <div class="relative">
                             <input type="hidden" name="parent_id" id="linkParentId" required>
                             <input type="text" id="linkParentSearch"
@@ -1063,7 +1063,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Relationship Type *</label>
+                        <label for="linkRelationshipType" class="block text-sm font-medium text-gray-700 mb-1">Relationship Type *</label>
                         <select name="relationship_type" id="linkRelationshipType" required
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
                             <option value="guardian">Guardian</option>
@@ -1160,25 +1160,25 @@
                 <div class="space-y-4">
                     <!-- Common Fields -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <label for="editFullName" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                         <input type="text" id="editFullName" name="full_name"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <label for="editEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                         <input type="email" id="editEmail" name="email"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                        <label for="editPhone" class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                         <input type="text" id="editPhone" name="phone"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                        <label for="editRole" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
                         <select id="editRole" name="role"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="parent">Parent</option>
@@ -1189,7 +1189,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                         <select id="editStatus" name="status"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="1">Active</option>
@@ -1200,7 +1200,7 @@
                     <!-- Role-specific fields -->
                     <div id="parentFields" class="hidden">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                            <label for="editAddress" class="block text-sm font-medium text-gray-700 mb-2">Address</label>
                             <textarea id="editAddress" name="address" rows="3"
                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"></textarea>
                         </div>
@@ -1208,19 +1208,19 @@
 
                     <div id="teacherFields" class="hidden space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                            <label for="editSubject" class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
                             <input type="text" id="editSubject" name="subject"
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                            <label for="editDepartment" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
                             <input type="text" id="editDepartment" name="department"
                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">New Password (optional)</label>
+                        <label for="editPassword" class="block text-sm font-medium text-gray-700 mb-2">New Password (optional)</label>
                         <input type="password" id="editPassword" name="password"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                placeholder="Leave blank to keep current">
@@ -1258,48 +1258,48 @@
 
       <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Full Name</p>
           <div id="viewFullName" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Email</p>
           <div id="viewEmail" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Phone</p>
           <div id="viewPhone" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Role</p>
           <div id="viewRole" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Status</p>
           <div id="viewStatus" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Created Date</label>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Created Date</p>
           <div id="viewCreatedDate" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
         </div>
 
         <!-- Role-specific display fields (span full width when present) -->
         <div id="viewParentInfo" class="hidden md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <p class="block text-sm font-medium text-gray-700 mb-2">Address</p>
           <div id="viewAddress" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
         </div>
 
         <div id="viewTeacherInfo" class="hidden md:col-span-2 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                        <p class="block text-sm font-medium text-gray-700 mb-2">Subject</p>
             <div id="viewSubject" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                        <p class="block text-sm font-medium text-gray-700 mb-2">Department</p>
             <div id="viewDepartment" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-900"></div>
           </div>
         </div>
@@ -1354,7 +1354,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="deleteConfirmationInput" class="block text-sm font-medium text-gray-700 mb-2">
                         To confirm, type "<span id="confirmationUserName" class="font-semibold text-red-600"></span>" in the box below:
                     </label>
                     <input type="text" id="deleteConfirmationInput"
@@ -1418,7 +1418,7 @@
 
                     <div class="space-y-3">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
+                            <label for="credentialsEmail" class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
                             <div class="flex items-center">
                                 <input type="text" id="credentialsEmail" readonly
                                        class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-l text-sm text-gray-900">
@@ -1433,7 +1433,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Password</label>
+                            <label for="credentialsPassword" class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Password</label>
                             <div class="flex items-center">
                                 <input type="text" id="credentialsPassword" readonly
                                        class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-l text-sm text-gray-900">
