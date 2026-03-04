@@ -249,7 +249,7 @@ class ParentContributionController extends Controller
             ];
         }
 
-        // Filter to only show unpaid/pending items
+        // Show unpaid and pending items (hide only completed)
         $unpaidItems = array_filter($paymentItems, function($item) {
             return !$item['is_paid'];
         });
@@ -305,6 +305,26 @@ class ParentContributionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'One or more selected projects are not open for payments.'
+            ], 422);
+        }
+
+        $existingOpenPayments = ProjectContribution::with('project')
+            ->where('parentID', $parentProfile->parentID)
+            ->whereIn('projectID', $validated['project_ids'])
+            ->whereIn('payment_status', ['pending', 'completed'])
+            ->get();
+
+        if ($existingOpenPayments->isNotEmpty()) {
+            $projectNames = $existingOpenPayments
+                ->pluck('project.project_name')
+                ->filter()
+                ->unique()
+                ->values()
+                ->implode(', ');
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment is already open or completed for: ' . ($projectNames ?: 'selected project(s)') . '. Please wait for verification or contact the office.'
             ], 422);
         }
 

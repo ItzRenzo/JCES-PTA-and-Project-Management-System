@@ -324,11 +324,15 @@ class TeacherController extends Controller
             ->select('parents.*')
             ->get()
             ->map(function($parentProfile) {
+                $accountEmail = $parentProfile->user->email ?? null;
+                $profileEmail = $parentProfile->email ?? null;
+
                 return (object)[
                     'parentID' => $parentProfile->parentID,
-                    'first_name' => $parentProfile->user->first_name ?? '',
-                    'last_name' => $parentProfile->user->last_name ?? '',
-                    'email' => $parentProfile->user->email ?? '',
+                    'first_name' => $parentProfile->user->first_name ?? ($parentProfile->first_name ?? ''),
+                    'last_name' => $parentProfile->user->last_name ?? ($parentProfile->last_name ?? ''),
+                    'email' => $accountEmail ?: ($profileEmail ?? ''),
+                    'search_email' => trim(implode(' ', array_filter([$accountEmail, $profileEmail]))),
                 ];
             });
 
@@ -374,32 +378,37 @@ class TeacherController extends Controller
             ->orderBy('project_name')
             ->get();
 
-        $unpaidBills = [];
+        $billItems = [];
         foreach ($projects as $project) {
-            // Check if parent has already paid for this project
+            // Check if parent already has an open or completed payment for this project
             $existingPayment = \App\Models\ProjectContribution::where('projectID', $project->projectID)
                 ->where('parentID', $parentId)
-                ->where('payment_status', 'completed')
+                ->whereIn('payment_status', ['pending', 'completed'])
+                ->orderByDesc('contribution_date')
                 ->first();
 
-            // Skip if already paid
-            if ($existingPayment) {
+            // Hide fully completed bills from manual payment list
+            if ($existingPayment && $existingPayment->payment_status === 'completed') {
                 continue;
             }
 
             // Calculate per-parent amount
             $perParentAmount = round($project->target_budget / $totalParents, 2);
 
-            $unpaidBills[] = [
+            $isPending = $existingPayment && $existingPayment->payment_status === 'pending';
+
+            $billItems[] = [
                 'projectID' => $project->projectID,
                 'project_name' => $project->project_name,
-                'amount' => $perParentAmount,
+                'amount' => $isPending ? (float) $existingPayment->contribution_amount : $perParentAmount,
+                'is_pending' => $isPending,
+                'status_note' => $isPending ? 'Pending - waiting for approval' : null,
             ];
         }
 
         return response()->json([
             'success' => true,
-            'bills' => $unpaidBills
+            'bills' => $billItems
         ]);
     }
 
@@ -415,10 +424,49 @@ class TeacherController extends Controller
             'project_ids' => ['required', 'array'],
             'project_ids.*' => ['exists:projects,projectID'],
             'amounts' => ['required', 'array'],
+            'amounts.*' => ['required', 'numeric', 'min:0.01'],
             'payment_method' => ['required', 'in:cash,gcash,maya'],
             'notes' => ['nullable', 'string'],
             'proof_image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:5120'],
         ]);
+
+        if (count($validated['project_ids']) !== count($validated['amounts'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Project and amount counts do not match.'
+            ], 422);
+        }
+
+        $invalidProjectIds = \App\Models\Project::whereIn('projectID', $validated['project_ids'])
+            ->whereNotIn('project_status', ['active', 'in_progress'])
+            ->pluck('projectID');
+
+        if ($invalidProjectIds->isNotEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'One or more selected projects are not open for manual payment processing.'
+            ], 422);
+        }
+
+        $existingOpenPayments = \App\Models\ProjectContribution::with('project')
+            ->where('parentID', $validated['parent_id'])
+            ->whereIn('projectID', $validated['project_ids'])
+            ->whereIn('payment_status', ['pending', 'completed'])
+            ->get();
+
+        if ($existingOpenPayments->isNotEmpty()) {
+            $projectNames = $existingOpenPayments
+                ->pluck('project.project_name')
+                ->filter()
+                ->unique()
+                ->values()
+                ->implode(', ');
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Manual payment cannot be recorded for: ' . ($projectNames ?: 'selected project(s)') . '. A pending or completed payment already exists.'
+            ], 422);
+        }
 
         DB::beginTransaction();
 

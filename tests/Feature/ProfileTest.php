@@ -26,6 +26,7 @@ class ProfileTest extends TestCase
         $user = User::factory()->create([
             'user_type' => 'administrator',
         ]);
+        $originalEmail = $user->email;
 
         $response = $this
             ->actingAs($user)
@@ -44,7 +45,7 @@ class ProfileTest extends TestCase
         $this->assertSame('Test', $user->first_name);
         $this->assertSame('User', $user->last_name);
         $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
+        $this->assertSame($originalEmail, $user->email);
     }
 
     public function test_user_can_delete_their_account(): void

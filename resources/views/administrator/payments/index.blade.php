@@ -30,7 +30,7 @@
                         <option value="">Status</option>
                         <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Paid</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Unpaid</option>
+                        <option value="refunded" {{ request('status') === 'refunded' ? 'selected' : '' }}>Refunded</option>
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,13 +109,13 @@
                             ['name' => 'Pedro Mendoza', 'phone' => '09678901234', 'address' => 'Taguig City', 'project' => 'Community and Parent Involvement', 'required' => 200, 'paid' => 100, 'date' => '2026-01-24 09:00:00', 'status' => 'pending', 'method' => 'Cash', 'txn' => 'TXN9450340239'],
                             ['name' => 'Rosa Villanueva', 'phone' => '09789012345', 'address' => 'Paranaque City', 'project' => 'School Supplies Drive', 'required' => 150, 'paid' => 150, 'date' => '2026-01-24 14:00:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340240'],
                             ['name' => 'Antonio Ramos', 'phone' => '09890123456', 'address' => 'Las Pinas City', 'project' => 'Fun Run for a Cause', 'required' => 500, 'paid' => 500, 'date' => '2026-01-23 08:30:00', 'status' => 'completed', 'method' => 'Bank Transfer', 'txn' => 'TXN9450340241'],
-                            ['name' => 'Lucia Torres', 'phone' => '09901234567', 'address' => 'Muntinlupa City', 'project' => 'Fundraising Projects', 'required' => 300, 'paid' => 0, 'date' => '2026-01-23 15:45:00', 'status' => 'failed', 'method' => 'Failed', 'txn' => 'TXN9450340242'],
+                            ['name' => 'Lucia Torres', 'phone' => '09901234567', 'address' => 'Muntinlupa City', 'project' => 'Fundraising Projects', 'required' => 300, 'paid' => 0, 'date' => '2026-01-23 15:45:00', 'status' => 'refunded', 'method' => 'Refunded', 'txn' => 'TXN9450340242'],
                             ['name' => 'Miguel Gonzales', 'phone' => '09112345678', 'address' => 'Caloocan City', 'project' => 'Community and Parent Involvement', 'required' => 200, 'paid' => 200, 'date' => '2026-01-22 10:00:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340243'],
                             ['name' => 'Teresa Aquino', 'phone' => '09223456789', 'address' => 'Valenzuela City', 'project' => 'School Supplies Drive', 'required' => 150, 'paid' => 150, 'date' => '2026-01-22 13:30:00', 'status' => 'completed', 'method' => 'Cash', 'txn' => 'TXN9450340244'],
                             ['name' => 'Ricardo Bautista', 'phone' => '09334567890', 'address' => 'Malabon City', 'project' => 'Fun Run for a Cause', 'required' => 500, 'paid' => 250, 'date' => '2026-01-21 09:15:00', 'status' => 'pending', 'method' => 'GCASH', 'txn' => 'TXN9450340245'],
                             ['name' => 'Sofia Castillo', 'phone' => '09445678901', 'address' => 'Navotas City', 'project' => 'Fundraising Projects', 'required' => 300, 'paid' => 300, 'date' => '2026-01-21 16:00:00', 'status' => 'completed', 'method' => 'Bank Transfer', 'txn' => 'TXN9450340246'],
                             ['name' => 'Fernando Jimenez', 'phone' => '09556789012', 'address' => 'San Juan City', 'project' => 'Community and Parent Involvement', 'required' => 200, 'paid' => 200, 'date' => '2026-01-20 11:45:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340247'],
-                            ['name' => 'Isabel Morales', 'phone' => '09667890123', 'address' => 'Mandaluyong City', 'project' => 'School Supplies Drive', 'required' => 150, 'paid' => 0, 'date' => '2026-01-20 08:00:00', 'status' => 'failed', 'method' => 'Failed', 'txn' => 'TXN9450340248'],
+                            ['name' => 'Isabel Morales', 'phone' => '09667890123', 'address' => 'Mandaluyong City', 'project' => 'School Supplies Drive', 'required' => 150, 'paid' => 0, 'date' => '2026-01-20 08:00:00', 'status' => 'refunded', 'method' => 'Refunded', 'txn' => 'TXN9450340248'],
                             ['name' => 'Carlos Navarro', 'phone' => '09778901234', 'address' => 'Marikina City', 'project' => 'Fun Run for a Cause', 'required' => 500, 'paid' => 500, 'date' => '2026-01-19 14:30:00', 'status' => 'completed', 'method' => 'Cash', 'txn' => 'TXN9450340249'],
                             ['name' => 'Patricia Ocampo', 'phone' => '09889012345', 'address' => 'Pasay City', 'project' => 'Fundraising Projects', 'required' => 300, 'paid' => 300, 'date' => '2026-01-19 10:20:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340250'],
                             ['name' => 'Daniel Pascual', 'phone' => '09990123456', 'address' => 'Batangas City', 'project' => 'Community and Parent Involvement', 'required' => 200, 'paid' => 100, 'date' => '2026-01-18 15:00:00', 'status' => 'pending', 'method' => 'Bank Transfer', 'txn' => 'TXN9450340251'],
@@ -127,7 +127,7 @@
                             ['name' => 'Benjamin Vera', 'phone' => '09656789012', 'address' => 'Zambales', 'project' => 'Fun Run for a Cause', 'required' => 500, 'paid' => 500, 'date' => '2026-01-15 08:30:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340257'],
                             ['name' => 'Cristina Wong', 'phone' => '09767890123', 'address' => 'Bataan', 'project' => 'Fundraising Projects', 'required' => 300, 'paid' => 150, 'date' => '2026-01-15 11:00:00', 'status' => 'pending', 'method' => 'Cash', 'txn' => 'TXN9450340258'],
                             ['name' => 'Andres Yap', 'phone' => '09878901234', 'address' => 'Nueva Ecija', 'project' => 'Community and Parent Involvement', 'required' => 200, 'paid' => 200, 'date' => '2026-01-14 15:30:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340259'],
-                            ['name' => 'Maricel Zamora', 'phone' => '09989012345', 'address' => 'Pangasinan', 'project' => 'School Supplies Drive', 'required' => 150, 'paid' => 0, 'date' => '2026-01-14 09:00:00', 'status' => 'failed', 'method' => 'Failed', 'txn' => 'TXN9450340260'],
+                            ['name' => 'Maricel Zamora', 'phone' => '09989012345', 'address' => 'Pangasinan', 'project' => 'School Supplies Drive', 'required' => 150, 'paid' => 0, 'date' => '2026-01-14 09:00:00', 'status' => 'refunded', 'method' => 'Refunded', 'txn' => 'TXN9450340260'],
                             ['name' => 'Lorenzo Abella', 'phone' => '09190123456', 'address' => 'La Union', 'project' => 'Fun Run for a Cause', 'required' => 500, 'paid' => 500, 'date' => '2026-01-13 13:15:00', 'status' => 'completed', 'method' => 'Bank Transfer', 'txn' => 'TXN9450340261'],
                             ['name' => 'Beatriz Borja', 'phone' => '09291234567', 'address' => 'Ilocos Norte', 'project' => 'Fundraising Projects', 'required' => 300, 'paid' => 300, 'date' => '2026-01-13 10:45:00', 'status' => 'completed', 'method' => 'GCASH', 'txn' => 'TXN9450340262'],
                         ];
@@ -136,7 +136,7 @@
                     @forelse ($contributions as $index => $contribution)
                         @php
                             $status = $contribution->payment_status;
-                            $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Unpaid');
+                            $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Refunded');
                             $statusClass = $status === 'completed' ? 'bg-green-100 text-green-800' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
                             $requiredPayment = isset($projectPayments[$contribution->projectID]) ? $projectPayments[$contribution->projectID] : 0;
                             $sampleIndex = $index % count($samplePayments);
@@ -223,7 +223,7 @@
                         @foreach($samplePayments as $index => $payment)
                             @php
                                 $status = $payment['status'];
-                                $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Unpaid');
+                                $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Refunded');
                             @endphp
                             <tr class="hover:bg-gray-50 transition-colors"
                                 data-parent="{{ $payment['name'] }}"
@@ -362,11 +362,11 @@
                                 <span class="text-sm text-gray-600">Awaiting payment</span>
                             </span>
                         </label>
-                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" :class="editStatus === 'failed' ? 'border-red-500 bg-red-50' : 'border-gray-200'">
-                            <input type="radio" name="payment_status" value="failed" x-model="editStatus" class="w-4 h-4 text-red-600 focus:ring-red-500">
+                        <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" :class="editStatus === 'refunded' ? 'border-red-500 bg-red-50' : 'border-gray-200'">
+                            <input type="radio" name="payment_status" value="refunded" x-model="editStatus" class="w-4 h-4 text-red-600 focus:ring-red-500">
                             <span class="ml-3 flex items-center gap-2">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Unpaid</span>
-                                <span class="text-sm text-gray-600">Payment failed or cancelled</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Refunded</span>
+                                <span class="text-sm text-gray-600">Payment has been rejected/refunded</span>
                             </span>
                         </label>
                     </div>
@@ -735,7 +735,7 @@
 
         const isPaid = currentStatus === 'completed';
         const isPending = currentStatus === 'pending';
-        const isUnpaid = currentStatus === 'refunded';
+        const isRefunded = currentStatus === 'refunded';
 
         // Create modal
         const modal = document.createElement('div');
@@ -753,7 +753,7 @@
                     <div class="flex items-center gap-2">
                         <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${isPaid ? 'bg-green-100 text-green-700' : (isPending ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}">
                             <span class="w-1.5 h-1.5 rounded-full ${isPaid ? 'bg-green-500' : (isPending ? 'bg-amber-500' : 'bg-red-500')}"></span>
-                            ${isPaid ? 'Paid' : (isPending ? 'Pending' : 'Unpaid')}
+                            ${isPaid ? 'Paid' : (isPending ? 'Pending' : 'Refunded')}
                         </span>
                         <button onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -826,18 +826,18 @@
 
                             <!-- Reject Button -->
                             <button onclick="updatePaymentStatus(${contributionId}, 'refunded')"
-                                    class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isUnpaid ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-500 hover:bg-red-50'}"
-                                    ${isUnpaid ? 'disabled' : ''}>
-                                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isUnpaid ? 'bg-red-500' : 'bg-gray-100'}">
-                                    <svg class="w-5 h-5 ${isUnpaid ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isRefunded ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-500 hover:bg-red-50'}"
+                                    ${isRefunded ? 'disabled' : ''}>
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isRefunded ? 'bg-red-500' : 'bg-gray-100'}">
+                                    <svg class="w-5 h-5 ${isRefunded ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
                                 </div>
                                 <div class="text-left">
-                                    <span class="block text-sm font-semibold ${isUnpaid ? 'text-red-700' : 'text-gray-700'}">Reject Payment</span>
-                                    <span class="block text-xs ${isUnpaid ? 'text-red-600' : 'text-gray-500'}">Mark as Unpaid</span>
+                                    <span class="block text-sm font-semibold ${isRefunded ? 'text-red-700' : 'text-gray-700'}">Reject Payment</span>
+                                    <span class="block text-xs ${isRefunded ? 'text-red-600' : 'text-gray-500'}">Mark as Refunded</span>
                                 </div>
-                                ${isUnpaid ? '<svg class="w-5 h-5 text-red-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
+                                ${isRefunded ? '<svg class="w-5 h-5 text-red-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
                             </button>
                         </div>
 

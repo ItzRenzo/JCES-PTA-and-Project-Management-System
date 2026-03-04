@@ -31,7 +31,7 @@
                 <div>
                     <x-input-label for="email" :value="__('Email Address')" />
                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full bg-gray-100" :value="old('email', $user->email ?? '')" autocomplete="username" readonly />
-
+                    <p class="text-xs text-gray-500 mt-1">Email cannot be changed. Please contact the administrator for updates.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

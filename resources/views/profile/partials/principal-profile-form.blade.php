@@ -29,9 +29,9 @@
 
         <div>
             <x-input-label for="email" :value="__('Official Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
+            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full bg-gray-100" :value="old('email', $user->email)" required autocomplete="username" readonly />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
+            <p class="text-xs text-gray-500 mt-1">Email cannot be changed. Please contact the administrator for updates.</p>
         </div>
 
         <div>
