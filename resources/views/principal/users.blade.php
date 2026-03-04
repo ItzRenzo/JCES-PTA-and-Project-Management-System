@@ -1,4 +1,4 @@
-@extends('layouts.pr-sidebar')
+﻿@extends('layouts.pr-sidebar')
 
 @section('title', 'Users')
 
@@ -9,7 +9,7 @@
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route('principal.users') }}" class="space-y-4">
+        <form id="usersFilterForm" method="GET" action="{{ route('principal.users') }}" class="space-y-4">
             <!-- Main Search Bar -->
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative">
@@ -68,7 +68,7 @@
     </div>
 
     <!-- Users Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div id="usersTableContainer" class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full table-fixed divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -217,8 +217,8 @@
 
 <!-- Edit User Modal -->
 <div id="editUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-full px-4 py-6">
-        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+    <div class="flex items-center justify-center min-h-full px-3 py-4 sm:px-4 sm:py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <div class="flex items-center justify-between pb-4 border-b">
                 <h3 class="text-lg font-semibold text-gray-900">Edit User Details</h3>
                 <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
@@ -277,13 +277,52 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">New Password (optional)</label>
                         <input type="password" id="editPassword" name="password" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Leave blank to keep current">
+                        <div class="mt-2">
+                            <button type="button" onclick="openDefaultPasswordModal()"
+                                    class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                                Use Default Password
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-center justify-end gap-3 pt-6 border-t mt-6">
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">Save Changes</button>
+                <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-6 border-t mt-6">
+                    <button type="button" onclick="closeEditModal()" class="w-full sm:w-auto px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200">Cancel</button>
+                    <button type="submit" class="w-full sm:w-auto px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">Save Changes</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Default Password Confirmation Modal -->
+<div id="defaultPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-full px-4 py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div class="flex items-center justify-between pb-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-900">Set Default Password</h3>
+                <button type="button" onclick="closeDefaultPasswordModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mt-4 text-sm text-gray-700 space-y-2">
+                <p>This will set the user password to the system default:</p>
+                <p class="font-semibold text-gray-900">password123</p>
+                <p class="text-xs text-gray-500">You can still change it manually before saving.</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-5 border-t mt-5">
+                <button type="button" onclick="closeDefaultPasswordModal()"
+                        class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button type="button" onclick="applyDefaultPassword()"
+                        class="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors duration-200">
+                    Set Default
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -497,11 +536,142 @@
     </div>
 </div>
 
+<!-- Users Page Toast Notification (matches flash message style) -->
+<div id="usersToast" class="fixed top-5 right-5 z-50 hidden max-w-sm w-full border rounded-lg shadow-lg px-4 py-3">
+    <div class="flex items-start gap-3">
+        <svg id="usersToastIcon" class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path id="usersToastIconPath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="flex-1">
+            <p id="usersToastTitle" class="font-semibold">Info</p>
+            <p id="usersToastMessage" class="text-sm"></p>
+        </div>
+        <button type="button" onclick="hideUsersToast()" class="text-current/60 hover:text-current">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+</div>
+
 <script>
 let selectedUsers = [];
 let currentCredentialUser = null;
 let currentEditingUserId = null;
 let userToDelete = null;
+const DEFAULT_EDIT_PASSWORD = 'password123';
+let usersToastTimeout = null;
+let usersFilterDebounce = null;
+
+function applyUsersFilters(formValues, pushState = true) {
+    const url = new URL(window.location.href);
+
+    ['search', 'role', 'status'].forEach((key) => {
+        const value = (formValues[key] ?? '').toString().trim();
+        if (value) {
+            url.searchParams.set(key, value);
+        } else {
+            url.searchParams.delete(key);
+        }
+    });
+
+    url.searchParams.delete('page');
+
+    fetch(url.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.text();
+    })
+    .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const freshTable = doc.getElementById('usersTableContainer');
+        const currentTable = document.getElementById('usersTableContainer');
+
+        if (!freshTable || !currentTable) {
+            throw new Error('Unable to refresh users table.');
+        }
+
+        currentTable.innerHTML = freshTable.innerHTML;
+        selectedUsers = [];
+
+        const printBtn = document.getElementById('printSelectedBtn');
+        if (printBtn) {
+            printBtn.classList.add('hidden');
+        }
+
+        if (pushState) {
+            window.history.pushState({}, '', url.toString());
+        }
+    })
+    .catch((error) => {
+        console.error('Users filter error:', error);
+        showUsersToast('error', 'Unable to filter users right now.');
+    });
+}
+
+function showUsersToast(type, message) {
+    const toast = document.getElementById('usersToast');
+    const title = document.getElementById('usersToastTitle');
+    const messageEl = document.getElementById('usersToastMessage');
+    const iconPath = document.getElementById('usersToastIconPath');
+
+    const toastStyles = {
+        success: {
+            title: 'Success',
+            classes: 'bg-green-50 border-green-200 text-green-800',
+            icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+        },
+        error: {
+            title: 'Error',
+            classes: 'bg-red-50 border-red-200 text-red-800',
+            icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        },
+        info: {
+            title: 'Info',
+            classes: 'bg-blue-50 border-blue-200 text-blue-800',
+            icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        },
+    };
+
+    const style = toastStyles[type] || toastStyles.info;
+    toast.className = `fixed top-5 right-5 z-50 max-w-sm w-full border rounded-lg shadow-lg px-4 py-3 ${style.classes}`;
+    title.textContent = style.title;
+    messageEl.textContent = message;
+    iconPath.setAttribute('d', style.icon);
+    toast.classList.remove('hidden');
+
+    if (usersToastTimeout) {
+        clearTimeout(usersToastTimeout);
+    }
+
+    usersToastTimeout = setTimeout(() => {
+        hideUsersToast();
+    }, 4000);
+}
+
+function hideUsersToast() {
+    document.getElementById('usersToast').classList.add('hidden');
+}
+
+function getUsersFilterValues() {
+    const form = document.getElementById('usersFilterForm');
+    if (!form) {
+        return { search: '', role: '', status: '' };
+    }
+
+    return {
+        search: form.querySelector('input[name="search"]')?.value ?? '',
+        role: form.querySelector('select[name="role"]')?.value ?? '',
+        status: form.querySelector('select[name="status"]')?.value ?? '',
+    };
+}
 
 function openEditModal(user) {
     currentEditingUserId = user.userID;
@@ -520,6 +690,19 @@ function openEditModal(user) {
 function closeEditModal() {
     document.getElementById('editUserModal').classList.add('hidden');
     currentEditingUserId = null;
+}
+
+function openDefaultPasswordModal() {
+    document.getElementById('defaultPasswordModal').classList.remove('hidden');
+}
+
+function closeDefaultPasswordModal() {
+    document.getElementById('defaultPasswordModal').classList.add('hidden');
+}
+
+function applyDefaultPassword() {
+    document.getElementById('editPassword').value = DEFAULT_EDIT_PASSWORD;
+    closeDefaultPasswordModal();
 }
 
 function submitEditForm(event) {
@@ -546,8 +729,24 @@ function submitEditForm(event) {
     submitBtn.disabled = true;
     fetch(`/principal/users/${userId}`, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
     .then(response => response.ok ? response.json() : response.json().then(err => Promise.reject(err)))
-    .then(data => { if (data.success) { alert('User updated successfully!'); closeEditModal(); window.location.reload(); } else { alert('Error updating user: ' + (data.message || 'Unknown error')); } })
-    .catch(error => { alert('Error updating user. Please try again.'); })
+    .then(data => {
+        if (data.success) {
+            showUsersToast('success', data.message || 'User updated successfully!');
+            closeEditModal();
+            setTimeout(() => window.location.reload(), 1200);
+        } else {
+            showUsersToast('error', 'Error updating user: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        let errorMessage = 'Error updating user. Please try again.';
+        if (error && error.errors) {
+            const errors = Object.values(error.errors).flat();
+            errorMessage = 'Validation errors:\n' + errors.join('\n');
+        }
+        showUsersToast('error', errorMessage);
+    })
     .finally(() => { submitBtn.textContent = originalText; submitBtn.disabled = false; });
 }
 
@@ -625,6 +824,95 @@ function deleteUserWithCallback(userId, onError) {
 
 document.addEventListener('DOMContentLoaded', function() { document.getElementById('deleteConfirmationInput').addEventListener('input', validateDeleteConfirmation); });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('usersFilterForm');
+    if (!filterForm) return;
+
+    filterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        applyUsersFilters(getUsersFilterValues());
+    });
+
+    const searchInput = filterForm.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            if (usersFilterDebounce) {
+                clearTimeout(usersFilterDebounce);
+            }
+
+            usersFilterDebounce = setTimeout(() => {
+                applyUsersFilters(getUsersFilterValues());
+            }, 300);
+        });
+    }
+
+    const roleSelect = filterForm.querySelector('select[name="role"]');
+    if (roleSelect) {
+        roleSelect.addEventListener('change', function() {
+            applyUsersFilters(getUsersFilterValues());
+        });
+    }
+
+    const statusSelect = filterForm.querySelector('select[name="status"]');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            applyUsersFilters(getUsersFilterValues());
+        });
+    }
+
+    filterForm.querySelectorAll('a[href]').forEach((link) => {
+        if (link.textContent.trim().toLowerCase() === 'clear') {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                if (searchInput) searchInput.value = '';
+                if (roleSelect) roleSelect.value = '';
+                if (statusSelect) statusSelect.value = '';
+                applyUsersFilters(getUsersFilterValues());
+            });
+        }
+    });
+});
+
+document.addEventListener('click', function(event) {
+    const pageLink = event.target.closest('#usersTableContainer a[href]');
+    if (!pageLink) return;
+
+    const url = new URL(pageLink.href, window.location.origin);
+    if (!url.searchParams.has('page')) return;
+
+    event.preventDefault();
+
+    fetch(url.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.text();
+    })
+    .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const freshTable = doc.getElementById('usersTableContainer');
+        const currentTable = document.getElementById('usersTableContainer');
+
+        if (!freshTable || !currentTable) {
+            throw new Error('Unable to change users page.');
+        }
+
+        currentTable.innerHTML = freshTable.innerHTML;
+        selectedUsers = [];
+        window.history.pushState({}, '', url.toString());
+    })
+    .catch((error) => {
+        console.error('Users pagination error:', error);
+        showUsersToast('error', 'Unable to change page right now.');
+    });
+});
+
 function toggleSelectAll() {
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
     document.querySelectorAll('.user-checkbox').forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
@@ -694,6 +982,7 @@ function executePrint() {
 
 window.addEventListener('click', function(event) {
     if (event.target === document.getElementById('editUserModal')) closeEditModal();
+    if (event.target === document.getElementById('defaultPasswordModal')) closeDefaultPasswordModal();
     if (event.target === document.getElementById('viewUserModal')) closeViewModal();
     if (event.target === document.getElementById('deleteUserModal')) closeDeleteModal();
     if (event.target === document.getElementById('credentialsModal')) closeCredentialsModal();

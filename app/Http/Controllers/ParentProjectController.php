@@ -54,8 +54,8 @@ class ParentProjectController extends Controller
      */
     public function show($projectID)
     {
-        $project = Project::with(['contributions.parent', 'updates.updater', 'creator'])
-            ->whereIn('project_status', ['active', 'in_progress'])
+        $project = Project::with(['contributions.parent', 'updates.updater', 'creator', 'milestones'])
+            ->whereIn('project_status', ['active', 'in_progress', 'completed', 'archived'])
             ->findOrFail($projectID);
 
         // Calculate progress

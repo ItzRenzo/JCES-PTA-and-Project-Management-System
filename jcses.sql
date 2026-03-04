@@ -131,6 +131,8 @@ CREATE TABLE `parents` (
 	`last_name` VARCHAR(100) NOT NULL,
 	`email` VARCHAR(150) NOT NULL,
 	`phone` VARCHAR(20) NOT NULL,
+	`emergency_contact_name` VARCHAR(255) NULL,
+	`emergency_contact_phone` VARCHAR(20) NULL,
 	`street_address` VARCHAR(255) NULL,
 	`city` VARCHAR(100) NULL,
 	`barangay` VARCHAR(100) NULL,

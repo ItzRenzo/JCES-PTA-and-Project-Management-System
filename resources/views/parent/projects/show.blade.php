@@ -82,6 +82,39 @@
                     </div>
                 @endif
             </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Project Milestones</h2>
+                @if($project->milestones->isEmpty())
+                    <p class="text-gray-500">No milestones defined yet.</p>
+                @else
+                    <div class="space-y-4">
+                        @foreach($project->milestones as $milestone)
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-start justify-between gap-3">
+                                    <h3 class="text-sm font-semibold text-gray-900">{{ $milestone->title }}</h3>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $milestone->is_completed ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
+                                        {{ $milestone->is_completed ? 'Completed' : 'Pending' }}
+                                    </span>
+                                </div>
+
+                                @if($milestone->description)
+                                    <p class="text-sm text-gray-600 mt-2">{{ $milestone->description }}</p>
+                                @endif
+
+                                <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                    @if($milestone->target_date)
+                                        <span>Target: {{ $milestone->target_date->format('M d, Y') }}</span>
+                                    @endif
+                                    @if($milestone->completed_date)
+                                        <span class="text-green-600">Completed: {{ $milestone->completed_date->format('M d, Y') }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
 
         <!-- Timeline -->

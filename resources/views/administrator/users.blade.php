@@ -11,7 +11,7 @@
 
     <!-- Filters and Search -->
     <div class="bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route($routePrefix . '.users') }}" class="space-y-4">
+        <form id="usersFilterForm" method="GET" action="{{ route($routePrefix . '.users') }}" class="space-y-4">
             <!-- Main Search Bar -->
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1 relative">
@@ -70,7 +70,7 @@
     </div>
 
     <!-- Users Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div id="usersTableContainer" class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full table-fixed divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -241,14 +241,14 @@
                 <div class="flex gap-2">
                     <form method="POST" action="{{ route($routePrefix . '.students.import') }}" enctype="multipart/form-data" class="inline-flex">
                         @csrf
-                        <input type="file" name="students_file" id="studentsImportFile" accept=".xls,.xlsx" class="hidden"
+                           <input type="file" name="students_file" id="studentsImportFile" accept=".xlsx" class="hidden"
                                onchange="if(this.files.length){ this.form.submit(); }">
                         <button type="button" onclick="document.getElementById('studentsImportFile').click()"
                                 class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2 transition-colors duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                             </svg>
-                            Import Students XLS
+                            Import Students XLSX
                         </button>
                     </form>
                     <button type="button" onclick="openBulkTransferModal()"
@@ -284,7 +284,7 @@
 
         <!-- Student Filters -->
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <form method="GET" action="{{ route($routePrefix . '.users') }}" class="flex flex-wrap gap-3 items-end">
+            <form id="studentFilterForm" method="GET" action="{{ route($routePrefix . '.users') }}" class="flex flex-wrap gap-3 items-end">
                 <!-- Preserve user filters -->
                 <input type="hidden" name="search" value="{{ request('search') }}">
                 <input type="hidden" name="role" value="{{ request('role') }}">
@@ -351,6 +351,7 @@
             </form>
         </div>
 
+        <div id="studentsTableContainer">
         <!-- Students Table -->
         <div class="overflow-x-auto">
             <table class="w-full table-fixed divide-y divide-gray-200">
@@ -541,6 +542,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </div>
@@ -1140,8 +1142,8 @@
 
 <!-- Edit User Modal -->
 <div id="editUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-full px-4 py-6">
-        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+    <div class="flex items-center justify-center min-h-full px-3 py-4 sm:px-4 sm:py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <!-- Modal Header -->
             <div class="flex items-center justify-between pb-4 border-b">
                 <h3 class="text-lg font-semibold text-gray-900">Edit User Details</h3>
@@ -1224,21 +1226,60 @@
                         <input type="password" id="editPassword" name="password"
                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                placeholder="Leave blank to keep current">
+                        <div class="mt-2">
+                            <button type="button" onclick="openDefaultPasswordModal()"
+                                    class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                                Use Default Password
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="flex items-center justify-end gap-3 pt-6 border-t mt-6">
+                <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-6 border-t mt-6">
                     <button type="button" onclick="closeEditModal()"
-                            class="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200">
+                            class="w-full sm:w-auto px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200">
                         Cancel
                     </button>
                     <button type="submit"
-                            class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">
+                            class="w-full sm:w-auto px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">
                         Save Changes
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Default Password Confirmation Modal -->
+<div id="defaultPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-full px-4 py-6">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div class="flex items-center justify-between pb-4 border-b">
+                <h3 class="text-lg font-semibold text-gray-900">Set Default Password</h3>
+                <button type="button" onclick="closeDefaultPasswordModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mt-4 text-sm text-gray-700 space-y-2">
+                <p>This will set the user password to the system default:</p>
+                <p class="font-semibold text-gray-900">password123</p>
+                <p class="text-xs text-gray-500">You can still change it manually before saving.</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-5 border-t mt-5">
+                <button type="button" onclick="closeDefaultPasswordModal()"
+                        class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button type="button" onclick="applyDefaultPassword()"
+                        class="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors duration-200">
+                    Set Default
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -1512,8 +1553,228 @@
     </div>
 </div>
 
+<!-- Users Page Toast Notification (matches flash message style) -->
+<div id="usersToast" class="fixed top-5 right-5 z-50 hidden max-w-sm w-full border rounded-lg shadow-lg px-4 py-3">
+    <div class="flex items-start gap-3">
+        <svg id="usersToastIcon" class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path id="usersToastIconPath" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="flex-1">
+            <p id="usersToastTitle" class="font-semibold">Info</p>
+            <p id="usersToastMessage" class="text-sm"></p>
+        </div>
+        <button type="button" onclick="hideUsersToast()" class="text-current/60 hover:text-current">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+</div>
+
 <script>
 const routePrefix = "{{ $routePrefix }}";
+const DEFAULT_EDIT_PASSWORD = 'password123';
+let usersToastTimeout = null;
+let usersFilterDebounce = null;
+let studentFilterDebounce = null;
+
+function applyUsersFilters(formValues, pushState = true) {
+    const url = new URL(window.location.href);
+
+    ['search', 'role', 'status'].forEach((key) => {
+        const value = (formValues[key] ?? '').toString().trim();
+        if (value) {
+            url.searchParams.set(key, value);
+        } else {
+            url.searchParams.delete(key);
+        }
+    });
+
+    url.searchParams.delete('page');
+
+    fetch(url.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.text();
+    })
+    .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const freshTable = doc.getElementById('usersTableContainer');
+        const currentTable = document.getElementById('usersTableContainer');
+
+        if (!freshTable || !currentTable) {
+            throw new Error('Unable to refresh users table.');
+        }
+
+        currentTable.innerHTML = freshTable.innerHTML;
+        selectedUsers = [];
+
+        const printBtn = document.getElementById('printSelectedBtn');
+        if (printBtn) {
+            printBtn.classList.add('hidden');
+        }
+
+        if (pushState) {
+            window.history.pushState({}, '', url.toString());
+        }
+    })
+    .catch((error) => {
+        console.error('Users filter error:', error);
+        showUsersToast('error', 'Unable to filter users right now.');
+    });
+}
+
+function getUsersFilterValues() {
+    const form = document.getElementById('usersFilterForm');
+    if (!form) {
+        return { search: '', role: '', status: '' };
+    }
+
+    return {
+        search: form.querySelector('input[name="search"]')?.value ?? '',
+        role: form.querySelector('select[name="role"]')?.value ?? '',
+        status: form.querySelector('select[name="status"]')?.value ?? '',
+    };
+}
+
+function applyStudentFilters(formValues, pushState = true) {
+    const url = new URL(window.location.href);
+
+    ['student_search', 'grade_level', 'academic_year', 'enrollment_status', 'students_per_page'].forEach((key) => {
+        const value = (formValues[key] ?? '').toString().trim();
+        if (value) {
+            url.searchParams.set(key, value);
+        } else {
+            url.searchParams.delete(key);
+        }
+    });
+
+    url.searchParams.delete('student_page');
+
+    fetch(url.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.text();
+    })
+    .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const freshTable = doc.getElementById('studentsTableContainer');
+        const currentTable = document.getElementById('studentsTableContainer');
+
+        if (!freshTable || !currentTable) {
+            throw new Error('Unable to refresh students table.');
+        }
+
+        currentTable.innerHTML = freshTable.innerHTML;
+        selectedStudents = [];
+
+        const bulkTransferBtn = document.getElementById('bulkTransferBtn');
+        const selectedCountSpan = document.getElementById('selectedStudentCount');
+        const selectAllStudents = document.getElementById('selectAllStudents');
+
+        if (bulkTransferBtn) {
+            bulkTransferBtn.style.display = 'none';
+        }
+        if (selectedCountSpan) {
+            selectedCountSpan.textContent = '0';
+        }
+        if (selectAllStudents) {
+            selectAllStudents.checked = false;
+            selectAllStudents.indeterminate = false;
+        }
+
+        if (pushState) {
+            window.history.pushState({}, '', url.toString());
+        }
+    })
+    .catch((error) => {
+        console.error('Students filter error:', error);
+        showUsersToast('error', 'Unable to filter students right now.');
+    });
+}
+
+function getStudentFilterValues() {
+    const form = document.getElementById('studentFilterForm');
+    const studentsPerPage = document.getElementById('adminStudentsPerPage')?.value ?? '';
+
+    if (!form) {
+        return {
+            student_search: '',
+            grade_level: '',
+            academic_year: '',
+            enrollment_status: '',
+            students_per_page: studentsPerPage,
+        };
+    }
+
+    return {
+        student_search: form.querySelector('input[name="student_search"]')?.value ?? '',
+        grade_level: form.querySelector('select[name="grade_level"]')?.value ?? '',
+        academic_year: form.querySelector('select[name="academic_year"]')?.value ?? '',
+        enrollment_status: form.querySelector('select[name="enrollment_status"]')?.value ?? '',
+        students_per_page: studentsPerPage,
+    };
+}
+
+function showUsersToast(type, message) {
+    const toast = document.getElementById('usersToast');
+    const title = document.getElementById('usersToastTitle');
+    const messageEl = document.getElementById('usersToastMessage');
+    const iconPath = document.getElementById('usersToastIconPath');
+
+    const toastStyles = {
+        success: {
+            title: 'Success',
+            classes: 'bg-green-50 border-green-200 text-green-800',
+            icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+        },
+        error: {
+            title: 'Error',
+            classes: 'bg-red-50 border-red-200 text-red-800',
+            icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        },
+        info: {
+            title: 'Info',
+            classes: 'bg-blue-50 border-blue-200 text-blue-800',
+            icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        },
+    };
+
+    const style = toastStyles[type] || toastStyles.info;
+
+    toast.className = `fixed top-5 right-5 z-50 max-w-sm w-full border rounded-lg shadow-lg px-4 py-3 ${style.classes}`;
+    title.textContent = style.title;
+    messageEl.textContent = message;
+    iconPath.setAttribute('d', style.icon);
+    toast.classList.remove('hidden');
+
+    if (usersToastTimeout) {
+        clearTimeout(usersToastTimeout);
+    }
+
+    usersToastTimeout = setTimeout(() => {
+        hideUsersToast();
+    }, 4000);
+}
+
+function hideUsersToast() {
+    const toast = document.getElementById('usersToast');
+    toast.classList.add('hidden');
+}
 
 // Selected users tracking
 let selectedUsers = [];
@@ -1557,6 +1818,19 @@ function openEditModal(user) {
 function closeEditModal() {
     document.getElementById('editUserModal').classList.add('hidden');
     currentEditingUserId = null;
+}
+
+function openDefaultPasswordModal() {
+    document.getElementById('defaultPasswordModal').classList.remove('hidden');
+}
+
+function closeDefaultPasswordModal() {
+    document.getElementById('defaultPasswordModal').classList.add('hidden');
+}
+
+function applyDefaultPassword() {
+    document.getElementById('editPassword').value = DEFAULT_EDIT_PASSWORD;
+    closeDefaultPasswordModal();
 }
 
 // Form submission function
@@ -1608,14 +1882,13 @@ function submitEditForm(event) {
     })
     .then(data => {
         if (data.success) {
-            // Show success message
-            alert('User updated successfully!');
+            showUsersToast('success', data.message || 'User updated successfully!');
             // Close modal
             closeEditModal();
             // Reload the page to show updated data
-            window.location.reload();
+            setTimeout(() => window.location.reload(), 1200);
         } else {
-            alert('Error updating user: ' + (data.message || 'Unknown error'));
+            showUsersToast('error', 'Error updating user: ' + (data.message || 'Unknown error'));
         }
     })
     .catch(error => {
@@ -1630,7 +1903,7 @@ function submitEditForm(event) {
             errorMessage = error.message;
         }
 
-        alert(errorMessage);
+        showUsersToast('error', errorMessage);
     })
     .finally(() => {
         // Reset button state
@@ -1851,6 +2124,186 @@ function deleteUserWithCallback(userId, onError) {
 // Add event listener for real-time validation
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('deleteConfirmationInput').addEventListener('input', validateDeleteConfirmation);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const studentFilterForm = document.getElementById('studentFilterForm');
+    if (!studentFilterForm) return;
+
+    studentFilterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        applyStudentFilters(getStudentFilterValues());
+    });
+
+    const studentSearchInput = studentFilterForm.querySelector('input[name="student_search"]');
+    if (studentSearchInput) {
+        studentSearchInput.addEventListener('input', function() {
+            if (studentFilterDebounce) {
+                clearTimeout(studentFilterDebounce);
+            }
+
+            studentFilterDebounce = setTimeout(() => {
+                applyStudentFilters(getStudentFilterValues());
+            }, 300);
+        });
+    }
+
+    ['grade_level', 'academic_year', 'enrollment_status'].forEach((name) => {
+        const select = studentFilterForm.querySelector(`select[name="${name}"]`);
+        if (select) {
+            select.addEventListener('change', function() {
+                applyStudentFilters(getStudentFilterValues());
+            });
+        }
+    });
+
+    studentFilterForm.querySelectorAll('a[href]').forEach((link) => {
+        if (link.textContent.trim().toLowerCase() === 'clear') {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                if (studentSearchInput) studentSearchInput.value = '';
+
+                const gradeSelect = studentFilterForm.querySelector('select[name="grade_level"]');
+                const yearSelect = studentFilterForm.querySelector('select[name="academic_year"]');
+                const statusSelect = studentFilterForm.querySelector('select[name="enrollment_status"]');
+
+                if (gradeSelect) gradeSelect.value = '';
+                if (yearSelect) yearSelect.value = '';
+                if (statusSelect) statusSelect.value = '';
+
+                applyStudentFilters(getStudentFilterValues());
+            });
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('usersFilterForm');
+    if (!filterForm) return;
+
+    filterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        applyUsersFilters(getUsersFilterValues());
+    });
+
+    const searchInput = filterForm.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            if (usersFilterDebounce) {
+                clearTimeout(usersFilterDebounce);
+            }
+
+            usersFilterDebounce = setTimeout(() => {
+                applyUsersFilters(getUsersFilterValues());
+            }, 300);
+        });
+    }
+
+    const roleSelect = filterForm.querySelector('select[name="role"]');
+    if (roleSelect) {
+        roleSelect.addEventListener('change', function() {
+            applyUsersFilters(getUsersFilterValues());
+        });
+    }
+
+    const statusSelect = filterForm.querySelector('select[name="status"]');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            applyUsersFilters(getUsersFilterValues());
+        });
+    }
+
+    filterForm.querySelectorAll('a[href]').forEach((link) => {
+        if (link.textContent.trim().toLowerCase() === 'clear') {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                if (searchInput) searchInput.value = '';
+                if (roleSelect) roleSelect.value = '';
+                if (statusSelect) statusSelect.value = '';
+                applyUsersFilters(getUsersFilterValues());
+            });
+        }
+    });
+});
+
+document.addEventListener('click', function(event) {
+    const pageLink = event.target.closest('#usersTableContainer a[href]');
+    if (!pageLink) return;
+
+    const url = new URL(pageLink.href, window.location.origin);
+    if (!url.searchParams.has('page')) return;
+
+    event.preventDefault();
+
+    fetch(url.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.text();
+    })
+    .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const freshTable = doc.getElementById('usersTableContainer');
+        const currentTable = document.getElementById('usersTableContainer');
+
+        if (!freshTable || !currentTable) {
+            throw new Error('Unable to change users page.');
+        }
+
+        currentTable.innerHTML = freshTable.innerHTML;
+        selectedUsers = [];
+        window.history.pushState({}, '', url.toString());
+    })
+    .catch((error) => {
+        console.error('Users pagination error:', error);
+        showUsersToast('error', 'Unable to change page right now.');
+    });
+});
+
+document.addEventListener('click', function(event) {
+    const pageLink = event.target.closest('#studentsTableContainer a[href]');
+    if (!pageLink) return;
+
+    const url = new URL(pageLink.href, window.location.origin);
+    if (!url.searchParams.has('student_page')) return;
+
+    event.preventDefault();
+
+    fetch(url.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.text();
+    })
+    .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const freshTable = doc.getElementById('studentsTableContainer');
+        const currentTable = document.getElementById('studentsTableContainer');
+
+        if (!freshTable || !currentTable) {
+            throw new Error('Unable to change students page.');
+        }
+
+        currentTable.innerHTML = freshTable.innerHTML;
+        selectedStudents = [];
+        window.history.pushState({}, '', url.toString());
+    })
+    .catch((error) => {
+        console.error('Students pagination error:', error);
+        showUsersToast('error', 'Unable to change student page right now.');
+    });
 });
 
 // Delete User Function (kept for backward compatibility)
@@ -2130,10 +2583,18 @@ function changeUsersPerPage(perPage) {
 }
 
 function changeStudentsPerPage(perPage) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('students_per_page', perPage);
-    url.searchParams.delete('student_page'); // Reset to first page when changing per page
-    window.location.href = url.toString();
+    const studentFilterForm = document.getElementById('studentFilterForm');
+    if (!studentFilterForm) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('students_per_page', perPage);
+        url.searchParams.delete('student_page');
+        window.location.href = url.toString();
+        return;
+    }
+
+    const values = getStudentFilterValues();
+    values.students_per_page = perPage;
+    applyStudentFilters(values);
 }
 
 // ==================== STUDENT MANAGEMENT FUNCTIONS ====================

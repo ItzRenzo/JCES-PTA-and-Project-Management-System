@@ -17,6 +17,8 @@ class ParentProfile extends Model
         'last_name',
         'email',
         'phone',
+        'emergency_contact_name',
+        'emergency_contact_phone',
         'street_address',
         'city',
         'barangay',
