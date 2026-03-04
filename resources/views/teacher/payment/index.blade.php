@@ -26,7 +26,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </div>
-                <div id="parentDropdown" class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                <div id="parentDropdown" class="hidden absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     <!-- Dropdown items will be populated by JavaScript -->
                 </div>
             </div>
@@ -214,6 +214,26 @@
                     <p class="text-sm text-gray-600">Enter payment details and upload proof of payment</p>
                 </div>
 
+                <!-- Parent Details -->
+                <div id="modalParentDetails" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h3 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Parent Details
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Full Name</p>
+                            <p id="modalParentFullName" class="text-sm font-semibold text-gray-900"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Email</p>
+                            <p id="modalParentEmail" class="text-sm text-gray-700 break-all"></p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Payment Receipt -->
                 <div class="bg-gray-50 rounded-lg p-4 mb-6">
                     <h3 class="text-sm font-semibold text-gray-700 mb-3">Payment Summary</h3>
@@ -344,6 +364,8 @@ const MAX_PROOF_FILE_SIZE = 5 * 1024 * 1024;
 let selectedBills = [];
 let selectedParentId = null;
 let selectedParentName = '';
+let selectedParentEmail = '';
+let selectedParentLastName = '';
 
 // Parent data from server
 const allParents = {!! json_encode($parents) !!};
@@ -405,6 +427,8 @@ function selectParent(parentId, firstName, lastName, email) {
     document.getElementById('parentDropdown').classList.add('hidden');
     selectedParentId = parentId;
     selectedParentName = `${firstName} ${lastName}`;
+    selectedParentEmail = email;
+    selectedParentLastName = lastName;
     loadParentBills(parentId);
 }
 
@@ -525,6 +549,10 @@ function processManualPayment() {
 
     // Set parent ID in form
     document.getElementById('formParentId').value = selectedParentId;
+
+    // Populate parent details in modal
+    document.getElementById('modalParentFullName').textContent = selectedParentLastName ? `${selectedParentLastName}, ${selectedParentName.split(' ')[0]}` : selectedParentName;
+    document.getElementById('modalParentEmail').textContent = selectedParentEmail;
 
     // Add project IDs and amounts to form
     const projectInputsContainer = document.getElementById('modalProjectInputs');

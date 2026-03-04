@@ -74,7 +74,7 @@
                 </div>
                 <div
                     x-show="open && showParentDropdown && filteredParents.length > 0"
-                    class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    class="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     <template x-for="parent in filteredParents" :key="parent.parentID">
                         <div
                             @click="selectParent(parent); open = false"
@@ -365,6 +365,26 @@
                         <p class="text-sm text-gray-600">Enter payment details and upload proof of payment</p>
                     </div>
 
+                    <!-- Parent Details -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6" x-show="selectedParentInfo">
+                        <h3 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Parent Details
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Full Name</p>
+                                <p class="text-sm font-semibold text-gray-900" x-text="selectedParentInfo ? selectedParentInfo.last_name + ', ' + selectedParentInfo.first_name : ''"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Email</p>
+                                <p class="text-sm text-gray-700 break-all" x-text="selectedParentInfo ? selectedParentInfo.email : ''"></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Payment Summary -->
                     <div class="bg-gray-50 rounded-lg p-4 mb-6">
                         <h3 class="text-sm font-semibold text-gray-700 mb-3">Payment Summary</h3>
@@ -497,6 +517,7 @@ function paymentsManager() {
 
         // Payment state
         selectedParent: null,
+        selectedParentInfo: null,
         bills: [],
         selectedBills: [],
         loading: false,
@@ -548,6 +569,7 @@ function paymentsManager() {
         selectParent(parent) {
             document.getElementById('parentSearch').value = `${parent.last_name}, ${parent.first_name} (${parent.email})`;
             document.getElementById('selectedParentName').textContent = `${parent.first_name} ${parent.last_name}`;
+            this.selectedParentInfo = parent;
             this.showParentDropdown = false;
             this.loadParentBills(parent.parentID);
         },
