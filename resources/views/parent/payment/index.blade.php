@@ -4,11 +4,14 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto">
+    @php
+        $selectableItems = collect($paymentItems)->filter(fn($item) => !$item['is_pending']);
+    @endphp
     <!-- Payment Selection Card -->
     <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
         <!-- Select All Button -->
         <div class="flex justify-end mb-6">
-            @if(count($paymentItems) > 0)
+            @if($selectableItems->count() > 0)
             <button type="button" id="selectAllBtn" onclick="toggleSelectAll()"
                     class="px-5 py-2 bg-white border-2 border-green-500 hover:bg-green-50 text-green-600 text-sm font-semibold rounded-lg transition-all">
                 Select All
@@ -39,14 +42,14 @@
                             <div class="flex flex-col">
                                 <span class="text-sm text-gray-900">{{ $item['project']->project_name }}</span>
                                 @if($item['is_pending'])
-                                    <span class="text-xs text-yellow-600">Payment pending verification</span>
+                                    <span class="text-xs text-amber-700">Pending - waiting for approval</span>
                                 @endif
                             </div>
                         </div>
                         <div class="text-right">
                             <span class="text-sm font-medium text-gray-900">₱{{ number_format($item['amount'], 2) }}</span>
                             @if($item['is_pending'])
-                                <span class="block text-xs text-yellow-600">Pending: ₱{{ number_format($item['pending_amount'], 2) }}</span>
+                                <span class="block text-xs text-amber-700">Pending amount: ₱{{ number_format($item['pending_amount'], 2) }}</span>
                             @endif
                         </div>
                     </label>
@@ -72,7 +75,7 @@
         </div>
 
         <!-- Action Buttons -->
-        @if(count($paymentItems) > 0)
+        @if($selectableItems->count() > 0)
         <div class="flex justify-end gap-4 mt-6">
             <button type="button" onclick="exportPayments()"
                     class="px-6 py-3 bg-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-lg transition-all flex items-center gap-2">
@@ -90,6 +93,10 @@
                 </svg>
                 Pay
             </button>
+        </div>
+        @elseif(count($paymentItems) > 0)
+        <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+            <p class="text-sm text-amber-800 font-medium">All listed payments are pending and waiting for approval.</p>
         </div>
         @endif
     </div>
@@ -246,7 +253,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                     </svg>
                                     <p class="text-sm font-medium text-gray-700 mb-1">Click to upload receipt image</p>
-                                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                                    <p class="text-xs text-gray-500">Accepted file types: JPG, JPEG, PNG, GIF (max 5MB)</p>
                                 </div>
                                 <div id="uploadPreview" class="hidden">
                                     <img id="previewImage" src="" alt="Receipt Preview" class="max-h-48 mx-auto rounded-lg mb-2">
@@ -254,7 +261,7 @@
                                 </div>
                             </div>
                         </label>
-                        <input type="file" id="receiptImageInput" name="receipt_image" accept="image/*" class="hidden" onchange="previewReceiptImage(this)">
+                        <input type="file" id="receiptImageInput" name="receipt_image" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" class="hidden" onchange="previewReceiptImage(this)">
                     </div>
 
                     <!-- Submit Button -->
@@ -273,6 +280,9 @@
 </div>
 
 <script>
+    const ALLOWED_PROOF_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+    const MAX_PROOF_FILE_SIZE = 5 * 1024 * 1024;
+
     function updateTotal() {
         const checkboxes = document.querySelectorAll('.payment-checkbox:checked:not(:disabled)');
         let total = 0;
@@ -479,6 +489,25 @@
     function previewReceiptImage(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
+
+            if (!ALLOWED_PROOF_MIME_TYPES.includes(file.type)) {
+                alert('Unsupported file type. Please upload JPG, JPEG, PNG, or GIF only.');
+                input.value = '';
+                document.getElementById('uploadPlaceholder').classList.remove('hidden');
+                document.getElementById('uploadPreview').classList.add('hidden');
+                document.getElementById('submitPaymentBtn').disabled = true;
+                return;
+            }
+
+            if (file.size > MAX_PROOF_FILE_SIZE) {
+                alert('File is too large. Maximum allowed size is 5MB.');
+                input.value = '';
+                document.getElementById('uploadPlaceholder').classList.remove('hidden');
+                document.getElementById('uploadPreview').classList.add('hidden');
+                document.getElementById('submitPaymentBtn').disabled = true;
+                return;
+            }
+
             const reader = new FileReader();
 
             reader.onload = function(e) {

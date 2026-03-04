@@ -7,12 +7,13 @@ use App\Models\Milestone;
 use App\Models\ProjectContribution;
 use App\Models\ProjectUpdate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
     private function resolveProjectsView(string $view): string
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($user && $user->user_type === 'administrator') {
             return "administrator.projects.$view";
@@ -27,7 +28,7 @@ class ProjectController extends Controller
 
     private function resolveProjectsRoute(string $route): string
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($user && $user->user_type === 'administrator') {
             return "administrator.projects.$route";
@@ -45,7 +46,7 @@ class ProjectController extends Controller
      */
     private function canCreateProject(): bool
     {
-        $user = auth()->user();
+        $user = Auth::user();
         return $user && $user->user_type === 'principal';
     }
 
@@ -54,7 +55,7 @@ class ProjectController extends Controller
      */
     private function canManageProject(): bool
     {
-        $user = auth()->user();
+        $user = Auth::user();
         return $user && in_array($user->user_type, ['administrator', 'teacher']);
     }
 
@@ -63,7 +64,7 @@ class ProjectController extends Controller
      */
     private function canApproveClosure(): bool
     {
-        $user = auth()->user();
+        $user = Auth::user();
         return $user && $user->user_type === 'principal';
     }
 
@@ -119,7 +120,7 @@ class ProjectController extends Controller
             'venue' => ['nullable', 'string', 'max:200'],
             'time' => ['nullable', 'string', 'max:100'],
             'objective' => ['nullable', 'string'],
-            'project_photo' => ['nullable', 'image', 'max:2048'],
+            'project_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'target_budget' => ['required', 'numeric', 'min:0'],
             'start_date' => ['required', 'date'],
             'target_completion_date' => ['required', 'date', 'after_or_equal:start_date'],
@@ -165,7 +166,7 @@ class ProjectController extends Controller
             'start_date' => $validated['start_date'],
             'target_completion_date' => $validated['target_completion_date'],
             'project_status' => $validated['project_status'] ?? 'created',
-            'created_by' => auth()->user()->userID,
+            'created_by' => Auth::user()->userID,
             'created_date' => now(),
             'updated_date' => now(),
         ]);
@@ -214,6 +215,12 @@ class ProjectController extends Controller
 
     public function edit(int $projectID)
     {
+        abort_unless(
+            in_array(Auth::user()?->user_type, ['principal', 'administrator', 'teacher'], true),
+            403,
+            'Unauthorized action.'
+        );
+
         $project = Project::where('projectID', $projectID)->firstOrFail();
         $statusOptions = ['created', 'active', 'in_progress', 'completed', 'archived', 'cancelled'];
 
@@ -222,6 +229,12 @@ class ProjectController extends Controller
 
     public function update(Request $request, int $projectID)
     {
+        abort_unless(
+            in_array(Auth::user()?->user_type, ['principal', 'administrator', 'teacher'], true),
+            403,
+            'Unauthorized action.'
+        );
+
         $validated = $request->validate([
             'project_name' => ['required', 'string', 'max:200'],
             'description' => ['required', 'string'],
@@ -234,6 +247,21 @@ class ProjectController extends Controller
         ]);
 
         $project = Project::where('projectID', $projectID)->firstOrFail();
+
+        $allowedTransitions = [
+            'created' => ['active', 'cancelled'],
+            'active' => ['in_progress', 'completed', 'cancelled'],
+            'in_progress' => ['completed', 'cancelled'],
+            'completed' => ['archived'],
+            'archived' => [],
+            'cancelled' => [],
+        ];
+
+        $currentStatus = $project->project_status;
+        $nextStatus = $validated['project_status'];
+        if ($currentStatus !== $nextStatus && !in_array($nextStatus, $allowedTransitions[$currentStatus] ?? [], true)) {
+            abort(422, "Invalid project status transition: {$currentStatus} -> {$nextStatus}");
+        }
 
         $project->fill([
             'project_name' => $validated['project_name'],
@@ -258,7 +286,7 @@ class ProjectController extends Controller
 
     public function requestClosure(int $projectID)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Administrator or Teacher can request closure
         if (!$user || !in_array($user->user_type, ['administrator', 'teacher'])) {
@@ -284,7 +312,7 @@ class ProjectController extends Controller
      */
     public function activate(int $projectID)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Only Administrator or Teacher can activate projects
         if (!$user || !in_array($user->user_type, ['administrator', 'teacher'])) {
@@ -307,7 +335,7 @@ class ProjectController extends Controller
 
     public function approveClosure(int $projectID)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if (!$user || $user->user_type !== 'principal') {
             abort(403, 'Unauthorized action.');
@@ -329,7 +357,7 @@ class ProjectController extends Controller
 
     public function destroy(int $projectID)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         // Administrator or Teacher can archive projects
         if (!$user || !in_array($user->user_type, ['administrator', 'teacher'])) {

@@ -46,6 +46,12 @@ class LoginRequest extends FormRequest
 
         // Check if user exists and is active
         if ($user) {
+            if ($user->is_archived) {
+                throw ValidationException::withMessages([
+                    'email' => 'This account is archived. Please contact the administrator.',
+                ]);
+            }
+
             // Check if account is locked
             if ($user->isLocked()) {
                 $minutes = $user->account_locked_until->diffInMinutes(now());

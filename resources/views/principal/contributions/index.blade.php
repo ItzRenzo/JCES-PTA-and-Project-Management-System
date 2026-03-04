@@ -138,7 +138,7 @@
                         <option value="">Status</option>
                         <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Paid</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Unpaid</option>
+                        <option value="refunded" {{ request('status') === 'refunded' ? 'selected' : '' }}>Refunded</option>
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +208,7 @@
                     @forelse ($contributions as $contribution)
                         @php
                             $status = $contribution->payment_status;
-                            $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Unpaid');
+                            $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Refunded');
                             $statusClass = $status === 'completed' ? 'bg-green-100 text-green-800' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
                             $requiredPayment = isset($projectPayments[$contribution->projectID]) ? $projectPayments[$contribution->projectID] : 0;
                             $parentName = $contribution->parent ? $contribution->parent->first_name . ' ' . $contribution->parent->last_name : 'Unknown Parent';
@@ -448,7 +448,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                 </svg>
                                                 <p class="text-sm font-medium text-gray-700 mb-1">Click to upload payment proof</p>
-                                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                                                <p class="text-xs text-gray-500">Accepted file types: JPG, JPEG, PNG, GIF (max 5MB)</p>
                                             </div>
                                         </template>
                                         <template x-if="proofImage">
@@ -461,7 +461,7 @@
                                             </div>
                                         </template>
                                     </div>
-                                    <input id="manualProofImage" name="proof_image" type="file" accept="image/*" @change="proofImage = $event.target.files[0]" class="hidden">
+                                    <input id="manualProofImage" name="proof_image" type="file" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" @change="handleProofImageChange($event)" class="hidden">
                                 </label>
                             </div>
                         </div>
@@ -485,6 +485,9 @@
 
 <script>
 function paymentsManager() {
+    const allowedProofMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const maxProofFileSize = 5 * 1024 * 1024;
+
     return {
         // Filter state
         searchQuery: '{{ request("search") }}',
@@ -505,11 +508,15 @@ function paymentsManager() {
 
         // Parent search state
         allParents: {!! json_encode($parents->map(function($parent) {
+            $accountEmail = $parent->user->email ?? null;
+            $profileEmail = $parent->email ?? null;
+
             return [
                 'parentID' => $parent->parentID,
-                'first_name' => $parent->first_name ?: ($parent->user->first_name ?? ''),
-                'last_name' => $parent->last_name ?: ($parent->user->last_name ?? ''),
-                'email' => $parent->email ?: ($parent->user->email ?? ''),
+                'first_name' => $parent->user->first_name ?: ($parent->first_name ?? ''),
+                'last_name' => $parent->user->last_name ?: ($parent->last_name ?? ''),
+                'email' => $accountEmail ?: ($profileEmail ?? ''),
+                'search_email' => trim(implode(' ', array_filter([$accountEmail, $profileEmail]))),
             ];
         })->filter(function($p) {
             return !empty($p['first_name']) || !empty($p['last_name']);
@@ -531,8 +538,9 @@ function paymentsManager() {
             const searchLower = search.toLowerCase();
             this.filteredParents = this.allParents.filter(parent => {
                 const fullName = `${parent.last_name}, ${parent.first_name}`.toLowerCase();
-                const email = parent.email.toLowerCase();
-                return fullName.includes(searchLower) || email.includes(searchLower);
+                const email = (parent.email || '').toLowerCase();
+                const searchEmail = (parent.search_email || '').toLowerCase();
+                return fullName.includes(searchLower) || email.includes(searchLower) || searchEmail.includes(searchLower);
             });
             this.showParentDropdown = true;
         },
@@ -542,6 +550,31 @@ function paymentsManager() {
             document.getElementById('selectedParentName').textContent = `${parent.first_name} ${parent.last_name}`;
             this.showParentDropdown = false;
             this.loadParentBills(parent.parentID);
+        },
+
+        handleProofImageChange(event) {
+            const file = event?.target?.files?.[0] || null;
+
+            if (!file) {
+                this.proofImage = null;
+                return;
+            }
+
+            if (!allowedProofMimeTypes.includes(file.type)) {
+                alert('Unsupported file type. Please upload JPG, JPEG, PNG, or GIF only.');
+                event.target.value = '';
+                this.proofImage = null;
+                return;
+            }
+
+            if (file.size > maxProofFileSize) {
+                alert('File is too large. Maximum allowed size is 5MB.');
+                event.target.value = '';
+                this.proofImage = null;
+                return;
+            }
+
+            this.proofImage = file;
         },
 
         filterTable() {
@@ -592,16 +625,23 @@ function paymentsManager() {
 
             bills.forEach(bill => {
                 const billDiv = document.createElement('label');
-                billDiv.className = 'flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-green-300 cursor-pointer transition-all';
+                billDiv.className = `flex items-center justify-between p-3 bg-white rounded-lg border transition-all ${bill.is_pending ? 'border-amber-300 bg-amber-50' : 'border-gray-200 hover:border-green-300 cursor-pointer'}`;
                 billDiv.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <input type="checkbox"
-                               value="${bill.projectID}"
-                               data-project-name="${bill.project_name}"
-                               data-amount="${bill.amount}"
-                               onchange="Alpine.store('paymentManager').toggleBill(this)"
-                               class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
-                        <span class="text-sm text-gray-900">${bill.project_name}</span>
+                        ${bill.is_pending ? `
+                            <span class="inline-flex px-2 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-amber-100 text-amber-700">Pending</span>
+                        ` : `
+                            <input type="checkbox"
+                                   value="${bill.projectID}"
+                                   data-project-name="${bill.project_name}"
+                                   data-amount="${bill.amount}"
+                                   onchange="Alpine.store('paymentManager').toggleBill(this)"
+                                   class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        `}
+                        <div>
+                            <span class="text-sm text-gray-900 block">${bill.project_name}</span>
+                            ${bill.is_pending ? `<span class="text-xs text-amber-700">${bill.status_note || 'Pending - waiting for approval'}</span>` : ''}
+                        </div>
                     </div>
                     <span class="text-sm font-semibold text-gray-900">₱${parseFloat(bill.amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                 `;
@@ -708,7 +748,7 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
 
     const isPaid = currentStatus === 'completed';
     const isPending = currentStatus === 'pending';
-    const isUnpaid = currentStatus === 'refunded';
+    const isRefunded = currentStatus === 'refunded';
 
     // Create modal
     const modal = document.createElement('div');
@@ -726,7 +766,7 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
                 <div class="flex items-center gap-2">
                     <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${isPaid ? 'bg-green-100 text-green-700' : (isPending ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}">
                         <span class="w-1.5 h-1.5 rounded-full ${isPaid ? 'bg-green-500' : (isPending ? 'bg-amber-500' : 'bg-red-500')}"></span>
-                        ${isPaid ? 'Paid' : (isPending ? 'Pending' : 'Unpaid')}
+                        ${isPaid ? 'Paid' : (isPending ? 'Pending' : 'Refunded')}
                     </span>
                     <button onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -799,18 +839,18 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
 
                         <!-- Reject Button -->
                         <button onclick="updatePaymentStatus(${contributionId}, 'refunded')"
-                                class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isUnpaid ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-500 hover:bg-red-50'}"
-                                ${isUnpaid ? 'disabled' : ''}>
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isUnpaid ? 'bg-red-500' : 'bg-gray-100'}">
-                                <svg class="w-5 h-5 ${isUnpaid ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isRefunded ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-500 hover:bg-red-50'}"
+                                ${isRefunded ? 'disabled' : ''}>
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isRefunded ? 'bg-red-500' : 'bg-gray-100'}">
+                                <svg class="w-5 h-5 ${isRefunded ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </div>
                             <div class="text-left">
-                                <span class="block text-sm font-semibold ${isUnpaid ? 'text-red-700' : 'text-gray-700'}">Reject Payment</span>
-                                <span class="block text-xs ${isUnpaid ? 'text-red-600' : 'text-gray-500'}">Mark as Unpaid</span>
+                                <span class="block text-sm font-semibold ${isRefunded ? 'text-red-700' : 'text-gray-700'}">Reject Payment</span>
+                                <span class="block text-xs ${isRefunded ? 'text-red-600' : 'text-gray-500'}">Mark as Refunded</span>
                             </div>
-                            ${isUnpaid ? '<svg class="w-5 h-5 text-red-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
+                            ${isRefunded ? '<svg class="w-5 h-5 text-red-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
                         </button>
                     </div>
 
