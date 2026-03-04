@@ -4,6 +4,66 @@
 
 @section('content')
 <div class="space-y-6" x-data="paymentsManager()">
+    <!-- Manual Payment Section -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Process Manual Payment</h2>
+
+        <!-- Parent Selection with Search -->
+        <div class="mb-6" x-data="{ open: false }" @click.away="open = false">
+            <label for="adminParentSearch" class="block text-sm font-medium text-gray-700 mb-2">Select Parent</label>
+            <div class="relative">
+                <input
+                    type="text"
+                    id="adminParentSearch"
+                    @input="filterParents($event.target.value)"
+                    @focus="showParentDropdown = true; open = true"
+                    @click="open = true"
+                    placeholder="Search parent by name or email..."
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 pr-10"
+                />
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <div
+                    x-show="open && showParentDropdown && filteredParents.length > 0"
+                    class="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    <template x-for="parent in filteredParents" :key="parent.parentID">
+                        <div
+                            @click="selectParent(parent); open = false"
+                            class="px-4 py-2 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                            <span class="font-medium text-gray-900" x-text="parent.last_name + ', ' + parent.first_name"></span>
+                            <span class="text-sm text-gray-500 ml-2" x-text="'(' + parent.email + ')'"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <input type="hidden" id="adminSelectedParentId" x-model="selectedParent" />
+        </div>
+
+        <!-- Bills Display -->
+        <div x-show="selectedParent && bills.length > 0" class="mb-6">
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h4 class="text-sm font-semibold text-gray-700 mb-3">Unpaid Bills for <span id="adminSelectedParentName" class="text-green-600"></span></h4>
+                <div class="space-y-2" id="adminBillsContainer"></div>
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Total Amount: <span class="text-xl font-bold text-green-600" x-text="'₱' + calculateTotal().toFixed(2)">₱0.00</span>
+                </div>
+                <button @click="openPaymentModal" :disabled="selectedBills.length === 0"
+                        class="px-6 py-2.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-lg">
+                    Process Payment
+                </button>
+            </div>
+        </div>
+
+        <div x-show="selectedParent && bills.length === 0 && !loading" class="mb-6">
+            <p class="text-sm text-gray-500">No active project bills found for this parent.</p>
+        </div>
+    </div>
+
     <div class="bg-white rounded-lg shadow">
         <form method="GET" id="filterForm" class="px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div class="relative w-full md:flex-1">
@@ -552,11 +612,298 @@
             </div>
         </div>
     </div>
+
+    <!-- Payment Modal -->
+    <div x-show="showPaymentModal"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @keydown.escape.window="showPaymentModal = false">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="showPaymentModal = false"></div>
+            <div class="bg-white rounded-2xl w-full max-w-2xl relative z-10" style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 0, 0, 0.15);">
+                <button @click="showPaymentModal = false" class="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full flex items-center justify-center transition-all z-10">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <div class="p-8">
+                    <div class="mb-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-2">Process Manual Payment</h2>
+                        <p class="text-sm text-gray-600">Enter payment details and upload proof of payment</p>
+                    </div>
+                    <!-- Parent Details -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6" x-show="selectedParentInfo">
+                        <h3 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Parent Details
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Full Name</p>
+                                <p class="text-sm font-semibold text-gray-900" x-text="selectedParentInfo ? selectedParentInfo.last_name + ', ' + selectedParentInfo.first_name : ''"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Email</p>
+                                <p class="text-sm text-gray-700 break-all" x-text="selectedParentInfo ? selectedParentInfo.email : ''"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Payment Summary -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-3">Payment Summary</h3>
+                        <div class="space-y-2 mb-3">
+                            <template x-for="bill in selectedBills" :key="bill.projectID">
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span class="text-sm text-gray-700" x-text="bill.project_name"></span>
+                                    <span class="text-sm font-semibold text-gray-900" x-text="'₱' + parseFloat(bill.amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="pt-3 border-t border-gray-200 flex justify-between items-center">
+                            <span class="text-sm font-semibold text-gray-700">Total</span>
+                            <span class="text-lg font-bold text-gray-900" x-text="'₱' + calculateTotal().toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                        </div>
+                    </div>
+                    <!-- Payment Form -->
+                    <form @submit.prevent="submitPayment" enctype="multipart/form-data">
+                        <div class="space-y-4 mb-6">
+                            <div>
+                                <p class="block text-sm font-medium text-gray-700 mb-2">Payment Method</p>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <label for="adminPayMethodCash" class="cursor-pointer">
+                                        <input id="adminPayMethodCash" name="payment_method" type="radio" x-model="paymentMethod" value="cash" class="sr-only peer">
+                                        <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-gray-500 peer-checked:bg-gray-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
+                                            <div class="w-7 h-7 bg-gray-600 rounded-lg flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/></svg>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-700">Cash</span>
+                                        </div>
+                                    </label>
+                                    <label for="adminPayMethodGcash" class="cursor-pointer">
+                                        <input id="adminPayMethodGcash" name="payment_method" type="radio" x-model="paymentMethod" value="gcash" class="sr-only peer">
+                                        <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
+                                            <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                                            </div>
+                                            <span class="text-sm font-semibold text-blue-700">GCash</span>
+                                        </div>
+                                    </label>
+                                    <label for="adminPayMethodMaya" class="cursor-pointer">
+                                        <input id="adminPayMethodMaya" name="payment_method" type="radio" x-model="paymentMethod" value="maya" class="sr-only peer">
+                                        <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
+                                            <div class="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                                            </div>
+                                            <span class="text-sm font-semibold text-green-700">Maya</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="adminPaymentNotes" class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                                <textarea id="adminPaymentNotes" name="notes" x-model="notes" rows="2" placeholder="Additional payment details..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+                            </div>
+                            <div>
+                                <label for="adminProofImage" class="block text-sm font-medium text-gray-700 mb-2">Proof of Payment</label>
+                                <label for="adminProofImage" class="block cursor-pointer">
+                                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 hover:bg-green-50 transition-all" :class="{'border-green-500 bg-green-50': proofImage}">
+                                        <template x-if="!proofImage">
+                                            <div>
+                                                <svg class="w-10 h-10 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <p class="text-sm font-medium text-gray-700 mb-1">Click to upload payment proof</p>
+                                                <p class="text-xs text-gray-500">Accepted: JPG, JPEG, PNG, GIF (max 5MB)</p>
+                                            </div>
+                                        </template>
+                                        <template x-if="proofImage">
+                                            <div>
+                                                <svg class="w-10 h-10 mx-auto text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <p class="text-sm font-medium text-green-700 mb-1" x-text="proofImage.name"></p>
+                                                <p class="text-xs text-gray-500">Click to change file</p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <input id="adminProofImage" name="proof_image" type="file" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" @change="handleProofImageChange($event)" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" :disabled="submitting || !paymentMethod || !proofImage"
+                                class="w-full px-6 py-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-base font-semibold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span x-show="!submitting">Submit Payment</span>
+                            <span x-show="submitting">Processing...</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+    const allowedAdminProofMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const maxAdminProofFileSize = 5 * 1024 * 1024;
+
     function paymentsManager() {
         return {
+            // Manual payment state
+            selectedParent: null,
+            selectedParentInfo: null,
+            bills: [],
+            selectedBills: [],
+            loading: false,
+            showPaymentModal: false,
+            paymentMethod: '',
+            proofImage: null,
+            notes: '',
+            submitting: false,
+            allParents: {!! json_encode($parents->map(function($parent) {
+                $accountEmail = $parent->user->email ?? null;
+                $profileEmail = $parent->email ?? null;
+                return [
+                    'parentID' => $parent->parentID,
+                    'first_name' => $parent->user->first_name ?: ($parent->first_name ?? ''),
+                    'last_name' => $parent->user->last_name ?: ($parent->last_name ?? ''),
+                    'email' => $accountEmail ?: ($profileEmail ?? ''),
+                ];
+            })->filter(function($p) {
+                return !empty($p['first_name']) || !empty($p['last_name']);
+            })->values()) !!},
+            filteredParents: [],
+            showParentDropdown: false,
+
+            init() {
+                this.filteredParents = this.allParents;
+            },
+
+            filterParents(search) {
+                if (!search || search.trim() === '') {
+                    this.filteredParents = this.allParents;
+                    this.showParentDropdown = true;
+                    return;
+                }
+                const searchLower = search.toLowerCase();
+                this.filteredParents = this.allParents.filter(parent => {
+                    const fullName = `${parent.last_name}, ${parent.first_name}`.toLowerCase();
+                    const email = (parent.email || '').toLowerCase();
+                    return fullName.includes(searchLower) || email.includes(searchLower);
+                });
+                this.showParentDropdown = true;
+            },
+
+            selectParent(parent) {
+                document.getElementById('adminParentSearch').value = `${parent.last_name}, ${parent.first_name} (${parent.email})`;
+                document.getElementById('adminSelectedParentName').textContent = `${parent.first_name} ${parent.last_name}`;
+                this.selectedParentInfo = parent;
+                this.showParentDropdown = false;
+                this.loadParentBills(parent.parentID);
+            },
+
+            handleProofImageChange(event) {
+                const file = event?.target?.files?.[0] || null;
+                if (!file) { this.proofImage = null; return; }
+                if (!allowedAdminProofMimeTypes.includes(file.type)) {
+                    alert('Unsupported file type. Please upload JPG, JPEG, PNG, or GIF only.');
+                    event.target.value = '';
+                    this.proofImage = null;
+                    return;
+                }
+                if (file.size > maxAdminProofFileSize) {
+                    alert('File is too large. Maximum allowed size is 5MB.');
+                    event.target.value = '';
+                    this.proofImage = null;
+                    return;
+                }
+                this.proofImage = file;
+            },
+
+            async loadParentBills(parentId) {
+                if (!parentId) { this.selectedParent = null; this.bills = []; this.selectedBills = []; return; }
+                this.selectedParent = parentId;
+                this.loading = true;
+                this.selectedBills = [];
+                try {
+                    const response = await fetch(`/administrator/payments/parent-bills/${parentId}`);
+                    const data = await response.json();
+                    if (data.success) { this.bills = data.bills; this.displayParentBills(data.bills); }
+                } catch (error) {
+                    console.error('Error loading parent bills:', error);
+                    alert('Failed to load parent bills');
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            displayParentBills(bills) {
+                const container = document.getElementById('adminBillsContainer');
+                container.innerHTML = '';
+                bills.forEach(bill => {
+                    const billDiv = document.createElement('label');
+                    billDiv.className = `flex items-center justify-between p-3 bg-white rounded-lg border transition-all ${bill.is_pending ? 'border-amber-300 bg-amber-50' : 'border-gray-200 hover:border-green-300 cursor-pointer'}`;
+                    billDiv.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            ${bill.is_pending ? `<span class="inline-flex px-2 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-amber-100 text-amber-700">Pending</span>` :
+                            `<input type="checkbox" value="${bill.projectID}" data-project-name="${bill.project_name}" data-amount="${bill.amount}" onchange="Alpine.store('adminPaymentMgr').toggleBill(this)" class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">`}
+                            <div>
+                                <span class="text-sm text-gray-900 block">${bill.project_name}</span>
+                                ${bill.is_pending ? `<span class="text-xs text-amber-700">${bill.status_note || 'Pending - waiting for approval'}</span>` : ''}
+                            </div>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900">₱${parseFloat(bill.amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    `;
+                    container.appendChild(billDiv);
+                });
+            },
+
+            toggleBill(checkbox) {
+                const bill = { projectID: checkbox.value, project_name: checkbox.dataset.projectName, amount: parseFloat(checkbox.dataset.amount) };
+                if (checkbox.checked) { this.selectedBills.push(bill); }
+                else { this.selectedBills = this.selectedBills.filter(b => b.projectID !== bill.projectID); }
+            },
+
+            calculateTotal() {
+                return this.selectedBills.reduce((sum, bill) => sum + parseFloat(bill.amount), 0);
+            },
+
+            openPaymentModal() {
+                this.showPaymentModal = true;
+            },
+
+            async submitPayment() {
+                if (!this.paymentMethod || !this.proofImage) { alert('Please fill in all required fields'); return; }
+                this.submitting = true;
+                const formData = new FormData();
+                formData.append('parent_id', this.selectedParent);
+                formData.append('payment_method', this.paymentMethod);
+                formData.append('notes', this.notes);
+                formData.append('proof_image', this.proofImage);
+                this.selectedBills.forEach((bill, index) => {
+                    formData.append(`project_ids[${index}]`, bill.projectID);
+                    formData.append(`amounts[${index}]`, bill.amount);
+                });
+                try {
+                    const response = await fetch('{{ route("administrator.payments.submit-manual") }}', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        alert('Payment processed successfully!\nReceipt #: ' + data.receipt_number);
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Payment submission error:', error);
+                    alert('An error occurred while processing the payment');
+                } finally {
+                    this.submitting = false;
+                }
+            },
+
+            // Existing state
             showEditModal: false,
             showArchiveModal: false,
             showArchiveConfirm: false,
@@ -703,6 +1050,23 @@
             }
         }
     }
+
+    // Alpine store for admin manual payment bill toggling
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('adminPaymentMgr', {
+            toggleBill(checkbox) {
+                const event = new CustomEvent('admin-toggle-bill', { detail: { checkbox } });
+                window.dispatchEvent(event);
+            }
+        });
+    });
+
+    window.addEventListener('admin-toggle-bill', (event) => {
+        const component = Alpine.$data(document.querySelector('[x-data="paymentsManager()"]'));
+        if (component) {
+            component.toggleBill(event.detail.checkbox);
+        }
+    });
 
     // Select all functionality
     const selectAllCheckbox = document.getElementById('selectAll');
@@ -903,4 +1267,8 @@
         }
     });
 </script>
+
+<style>
+[x-cloak] { display: none !important; }
+</style>
 @endsection

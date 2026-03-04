@@ -411,6 +411,14 @@ Route::post('/administrator/payments', [ContributionController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.payments.store');
 
+Route::get('/administrator/payments/parent-bills/{parentId}', [ContributionController::class, 'getParentBills'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.payments.parent-bills');
+
+Route::post('/administrator/payments/submit-manual', [ContributionController::class, 'submitManualPayment'])
+    ->middleware(['auth', 'verified'])
+    ->name('administrator.payments.submit-manual');
+
 Route::put('/administrator/payments/{contributionID}', [ContributionController::class, 'update'])
     ->middleware(['auth', 'verified'])
     ->name('administrator.payments.update');

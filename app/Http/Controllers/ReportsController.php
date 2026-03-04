@@ -496,7 +496,7 @@ class ReportsController extends Controller
         $dateTo = $request->get('date_to', now()->toDateString());
         $paymentMethod = $request->get('payment_method');
 
-        $transactions = PaymentTransaction::with(['project', 'parent'])
+        $transactions = PaymentTransaction::with(['project', 'parent', 'parent.students'])
             ->whereBetween('transaction_date', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->where('transaction_status', 'completed')
             ->when(!empty($paymentMethod), function ($query) use ($paymentMethod) {
@@ -519,6 +519,8 @@ class ReportsController extends Controller
             fputcsv($file, [
                 'Transaction Date',
                 'Parent',
+                'Student',
+                'Class',
                 'Project',
                 'Amount',
                 'Payment Method',
@@ -527,9 +529,17 @@ class ReportsController extends Controller
             ]);
 
             foreach ($transactions as $transaction) {
+                $students = $transaction->parent ? $transaction->parent->students : collect();
+                $studentNames = $students->pluck('student_name')->filter()->implode('; ');
+                $studentClasses = $students->map(function ($s) {
+                    return trim(($s->grade_level ?? '') . ' ' . ($s->section ?? ''));
+                })->filter()->implode('; ');
+
                 fputcsv($file, [
                     optional($transaction->transaction_date)->format('Y-m-d H:i:s'),
                     $transaction->parent ? $transaction->parent->first_name . ' ' . $transaction->parent->last_name : 'Unknown Parent',
+                    $studentNames ?: 'N/A',
+                    $studentClasses ?: 'N/A',
                     $transaction->project ? $transaction->project->project_name : 'Unknown Project',
                     $transaction->amount,
                     $transaction->payment_method,
