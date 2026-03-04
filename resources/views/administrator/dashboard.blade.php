@@ -4,6 +4,8 @@
 
 @section('content')
     <div class="space-y-6">
+        @include('components.dashboard-notice')
+
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white border border-gray-300 rounded-xl p-4">

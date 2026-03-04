@@ -26,7 +26,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </div>
-                <div id="parentDropdown" class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                <div id="parentDropdown" class="hidden absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     <!-- Dropdown items will be populated by JavaScript -->
                 </div>
             </div>
@@ -214,6 +214,26 @@
                     <p class="text-sm text-gray-600">Enter payment details and upload proof of payment</p>
                 </div>
 
+                <!-- Parent Details -->
+                <div id="modalParentDetails" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h3 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Parent Details
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Full Name</p>
+                            <p id="modalParentFullName" class="text-sm font-semibold text-gray-900"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Email</p>
+                            <p id="modalParentEmail" class="text-sm text-gray-700 break-all"></p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Payment Receipt -->
                 <div class="bg-gray-50 rounded-lg p-4 mb-6">
                     <h3 class="text-sm font-semibold text-gray-700 mb-3">Payment Summary</h3>
@@ -295,7 +315,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
                                         <p class="text-sm font-medium text-gray-700 mb-1">Click to upload payment proof</p>
-                                        <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                                        <p class="text-xs text-gray-500">Accepted file types: JPG, JPEG, PNG, GIF (max 5MB)</p>
                                     </div>
                                     <div id="proofPreview" class="hidden">
                                         <img id="proofPreviewImage" src="" alt="Proof Preview" class="max-h-32 mx-auto rounded-lg mb-2">
@@ -303,7 +323,7 @@
                                     </div>
                                 </div>
                             </label>
-                            <input type="file" id="proofImageInput" name="proof_image" accept="image/*" class="hidden" onchange="previewProofImage(this)">
+                            <input type="file" id="proofImageInput" name="proof_image" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" class="hidden" onchange="previewProofImage(this)">
                         </div>
                     </div>
 
@@ -338,9 +358,14 @@
 </div>
 
 <script>
+const ALLOWED_PROOF_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+const MAX_PROOF_FILE_SIZE = 5 * 1024 * 1024;
+
 let selectedBills = [];
 let selectedParentId = null;
 let selectedParentName = '';
+let selectedParentEmail = '';
+let selectedParentLastName = '';
 
 // Parent data from server
 const allParents = {!! json_encode($parents) !!};
@@ -366,7 +391,8 @@ function filterParents(search) {
         filtered = allParents.filter(parent => {
             const fullName = `${parent.last_name}, ${parent.first_name}`.toLowerCase();
             const email = (parent.email || '').toLowerCase();
-            return fullName.includes(searchLower) || email.includes(searchLower);
+            const searchEmail = (parent.search_email || '').toLowerCase();
+            return fullName.includes(searchLower) || email.includes(searchLower) || searchEmail.includes(searchLower);
         });
     }
 
@@ -374,7 +400,7 @@ function filterParents(search) {
         dropdown.innerHTML = '<div class="px-4 py-3 text-sm text-gray-500">No parents found</div>';
     } else {
         dropdown.innerHTML = filtered.map(parent => `
-            <div onclick="selectParent(${parent.parentID}, '${escapeJs(parent.first_name)}', '${escapeJs(parent.last_name)}', '${escapeJs(parent.email)}')"
+            <div onclick="selectParent(${parent.parentID}, '${escapeJs(parent.first_name)}', '${escapeJs(parent.last_name)}', '${escapeJs(parent.email || '')}')"
                  class="px-4 py-2 hover:bg-green-50 cursor-pointer border-b border-gray-100 last:border-b-0">
                 <span class="font-medium text-gray-900">${escapeHtml(parent.last_name)}, ${escapeHtml(parent.first_name)}</span>
                 <span class="text-sm text-gray-500 ml-2">(${escapeHtml(parent.email || '')})</span>
@@ -401,6 +427,8 @@ function selectParent(parentId, firstName, lastName, email) {
     document.getElementById('parentDropdown').classList.add('hidden');
     selectedParentId = parentId;
     selectedParentName = `${firstName} ${lastName}`;
+    selectedParentEmail = email;
+    selectedParentLastName = lastName;
     loadParentBills(parentId);
 }
 
@@ -453,22 +481,29 @@ function displayParentBills(bills) {
     const billsList = document.getElementById('parentBillsList');
 
     if (bills.length === 0) {
-        billsList.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No unpaid bills found for this parent.</p>';
+        billsList.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No available bills found for this parent.</p>';
         return;
     }
 
     billsList.innerHTML = bills.map(bill => `
-        <label class="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-green-300 cursor-pointer transition-all">
+        <label class="flex items-center justify-between p-3 bg-white rounded-lg border ${bill.is_pending ? 'border-amber-300 bg-amber-50' : 'border-gray-200 hover:border-green-300 cursor-pointer'} transition-all">
             <div class="flex items-center gap-3">
-                <input
-                    type="checkbox"
-                    class="bill-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                    data-project-id="${bill.projectID}"
-                    data-project-name="${bill.project_name}"
-                    data-amount="${bill.amount}"
-                    onchange="updateManualTotal()"
-                >
-                <span class="text-sm text-gray-900">${bill.project_name}</span>
+                ${bill.is_pending ? `
+                    <span class="inline-flex px-2 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-amber-100 text-amber-700">Pending</span>
+                ` : `
+                    <input
+                        type="checkbox"
+                        class="bill-checkbox w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                        data-project-id="${bill.projectID}"
+                        data-project-name="${bill.project_name}"
+                        data-amount="${bill.amount}"
+                        onchange="updateManualTotal()"
+                    >
+                `}
+                <div>
+                    <span class="text-sm text-gray-900 block">${bill.project_name}</span>
+                    ${bill.is_pending ? `<span class="text-xs text-amber-700">${bill.status_note || 'Pending - waiting for approval'}</span>` : ''}
+                </div>
             </div>
             <span class="text-sm font-semibold text-gray-900">₱${parseFloat(bill.amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
         </label>
@@ -515,6 +550,10 @@ function processManualPayment() {
     // Set parent ID in form
     document.getElementById('formParentId').value = selectedParentId;
 
+    // Populate parent details in modal
+    document.getElementById('modalParentFullName').textContent = selectedParentLastName ? `${selectedParentLastName}, ${selectedParentName.split(' ')[0]}` : selectedParentName;
+    document.getElementById('modalParentEmail').textContent = selectedParentEmail;
+
     // Add project IDs and amounts to form
     const projectInputsContainer = document.getElementById('modalProjectInputs');
     projectInputsContainer.innerHTML = selectedBills.map(bill => `
@@ -542,6 +581,25 @@ function closeManualPaymentModal() {
 function previewProofImage(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
+
+        if (!ALLOWED_PROOF_MIME_TYPES.includes(file.type)) {
+            alert('Unsupported file type. Please upload JPG, JPEG, PNG, or GIF only.');
+            input.value = '';
+            document.getElementById('proofPlaceholder').classList.remove('hidden');
+            document.getElementById('proofPreview').classList.add('hidden');
+            document.getElementById('submitManualBtn').disabled = true;
+            return;
+        }
+
+        if (file.size > MAX_PROOF_FILE_SIZE) {
+            alert('File is too large. Maximum allowed size is 5MB.');
+            input.value = '';
+            document.getElementById('proofPlaceholder').classList.remove('hidden');
+            document.getElementById('proofPreview').classList.add('hidden');
+            document.getElementById('submitManualBtn').disabled = true;
+            return;
+        }
+
         const reader = new FileReader();
 
         reader.onload = function(e) {

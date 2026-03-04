@@ -49,24 +49,7 @@
                 <div>
                     <x-input-label for="email" :value="__('Email Address')" />
                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full bg-gray-100" :value="old('email', $user->email ?? '')" autocomplete="username" readonly />
-
-                    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                        <div>
-                            <p class="text-sm mt-2 text-gray-800">
-                                {{ __('Your email address is unverified.') }}
-
-                                <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    {{ __('Click here to re-send the verification email.') }}
-                                </button>
-                            </p>
-
-                            @if (session('status') === 'verification-link-sent')
-                                <p class="mt-2 font-medium text-sm text-green-600">
-                                    {{ __('A new verification link has been sent to your email address.') }}
-                                </p>
-                            @endif
-                        </div>
-                    @endif
+                    <p class="text-xs text-gray-500 mt-1">Email cannot be changed. Please contact the administrator for updates.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -58,6 +58,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
+        unset($validated['email']);
 
         if (!empty($validated['name']) && (empty($validated['first_name']) || empty($validated['last_name']))) {
             $nameParts = preg_split('/\s+/', trim($validated['name']), 2);
@@ -101,6 +102,7 @@ class ProfileController extends Controller
         } else {
             $user->fill(Arr::except($validated, [
                 'name',
+                'email',
                 'emergency_contact_name',
                 'emergency_contact_phone',
             ]));

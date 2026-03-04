@@ -3,6 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
+    @include('components.dashboard-notice')
 
     <!-- Top Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

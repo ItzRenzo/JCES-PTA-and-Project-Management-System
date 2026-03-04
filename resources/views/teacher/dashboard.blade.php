@@ -1,6 +1,8 @@
 @extends('layouts.te-sidebar')
 
 @section('content')
+    @include('components.dashboard-notice')
+
     <!-- Teacher Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <!-- My Students Card -->
