@@ -11,11 +11,18 @@ use Illuminate\Support\Facades\DB;
 
 class ParentContributionController extends Controller
 {
+    private function ensureParentAccess(): void
+    {
+        abort_unless(Auth::user()?->user_type === 'parent', 403, 'Parent access only.');
+    }
+
     /**
      * Display the parent's contribution history.
      */
     public function index(Request $request)
     {
+        $this->ensureParentAccess();
+
         $parentProfile = Auth::user()->parentProfile;
 
         if (!$parentProfile) {
@@ -66,6 +73,8 @@ class ParentContributionController extends Controller
      */
     public function create()
     {
+        $this->ensureParentAccess();
+
         $parentProfile = Auth::user()->parentProfile;
 
         if (!$parentProfile) {
@@ -94,6 +103,8 @@ class ParentContributionController extends Controller
      */
     public function store(Request $request)
     {
+        $this->ensureParentAccess();
+
         $parentProfile = Auth::user()->parentProfile;
 
         if (!$parentProfile) {
@@ -161,6 +172,8 @@ class ParentContributionController extends Controller
      */
     public function receipt($contributionID)
     {
+        $this->ensureParentAccess();
+
         $parentProfile = Auth::user()->parentProfile;
 
         if (!$parentProfile) {
@@ -179,6 +192,8 @@ class ParentContributionController extends Controller
      */
     public function paymentIndex()
     {
+        $this->ensureParentAccess();
+
         $parentProfile = Auth::user()->parentProfile;
 
         if (!$parentProfile) {
@@ -252,6 +267,8 @@ class ParentContributionController extends Controller
      */
     public function submitPayment(Request $request)
     {
+        $this->ensureParentAccess();
+
         $parentProfile = Auth::user()->parentProfile;
 
         if (!$parentProfile) {
@@ -265,12 +282,31 @@ class ParentContributionController extends Controller
             'project_ids' => ['required', 'array'],
             'project_ids.*' => ['exists:projects,projectID'],
             'amounts' => ['required', 'array'],
+            'amounts.*' => ['required', 'numeric', 'min:0.01'],
             'payment_method' => ['required', 'in:gcash,maya'],
             'name' => ['required', 'string'],
             'contact' => ['required', 'string'],
             'address' => ['required', 'string'],
             'receipt_image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:5120'],
         ]);
+
+        if (count($validated['project_ids']) !== count($validated['amounts'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Project and amount counts do not match.'
+            ], 422);
+        }
+
+        $invalidProjectIds = Project::whereIn('projectID', $validated['project_ids'])
+            ->whereNotIn('project_status', ['active', 'in_progress'])
+            ->pluck('projectID');
+
+        if ($invalidProjectIds->isNotEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'One or more selected projects are not open for payments.'
+            ], 422);
+        }
 
         DB::beginTransaction();
 

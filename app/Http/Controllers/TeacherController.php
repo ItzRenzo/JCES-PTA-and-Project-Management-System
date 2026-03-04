@@ -408,6 +408,8 @@ class TeacherController extends Controller
      */
     public function submitManualPayment(Request $request)
     {
+        abort_unless(Auth::user()?->user_type === 'teacher', 403, 'Teacher access only.');
+
         $validated = $request->validate([
             'parent_id' => ['required', 'exists:parents,parentID'],
             'project_ids' => ['required', 'array'],
