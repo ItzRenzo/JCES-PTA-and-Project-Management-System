@@ -241,7 +241,10 @@ class ContributionController extends Controller
 
         if ($contribution->payment_status !== $validated['payment_status']
             && !in_array($validated['payment_status'], $allowedTransitions[$contribution->payment_status] ?? [], true)) {
-            abort(422, "Invalid status transition: {$contribution->payment_status} -> {$validated['payment_status']}");
+            $labels = ['pending' => 'Pending', 'completed' => 'Paid', 'refunded' => 'Refunded'];
+            $from = $labels[$contribution->payment_status] ?? ucfirst($contribution->payment_status);
+            $to   = $labels[$validated['payment_status']] ?? ucfirst($validated['payment_status']);
+            return redirect()->back()->with('error', "Cannot change payment status from \"{$from}\" to \"{$to}\". This transition is not allowed.");
         }
 
         $previousStatus = $contribution->payment_status;

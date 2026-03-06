@@ -3,6 +3,36 @@
 @section('title', 'Payments')
 
 @section('content')
+
+{{-- Flash error alert --}}
+@if(session('error'))
+<div
+    x-data="{ show: true }"
+    x-show="show"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 -translate-y-2"
+    x-transition:enter-end="opacity-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 translate-y-0"
+    x-transition:leave-end="opacity-0 -translate-y-2"
+    class="mb-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm"
+    role="alert"
+>
+    <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    </svg>
+    <div class="flex-1">
+        <p class="font-semibold">Invalid Status Change</p>
+        <p class="mt-0.5">{{ session('error') }}</p>
+    </div>
+    <button @click="show = false" class="ml-auto text-red-400 hover:text-red-600" aria-label="Dismiss">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+</div>
+@endif
+
 <div class="space-y-6" x-data="paymentsManager()">
     <!-- Manual Payment Section -->
     <div class="bg-white rounded-lg shadow p-6">

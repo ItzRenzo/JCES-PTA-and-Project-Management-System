@@ -13,32 +13,39 @@ class JcsesPtaSystemSeeder extends Seeder
     public function run(): void
     {
         // Insert default user roles
-        DB::table('user_roles')->insert([
+        $roles = [
             [
                 'role_name' => 'Administrator',
                 'role_description' => 'Full system access with user management capabilities',
                 'is_active' => true,
-                'created_date' => now()
+                'created_date' => now(),
             ],
             [
                 'role_name' => 'Principal',
                 'role_description' => 'School leadership with oversight and reporting access',
                 'is_active' => true,
-                'created_date' => now()
+                'created_date' => now(),
             ],
             [
                 'role_name' => 'Teacher',
                 'role_description' => 'Limited administrative access for classroom-related functions',
                 'is_active' => true,
-                'created_date' => now()
+                'created_date' => now(),
             ],
             [
                 'role_name' => 'Parent',
                 'role_description' => 'Access to view projects and make contributions',
                 'is_active' => true,
-                'created_date' => now()
-            ]
-        ]);
+                'created_date' => now(),
+            ],
+        ];
+
+        foreach ($roles as $role) {
+            DB::table('user_roles')->updateOrInsert(
+                ['role_name' => $role['role_name']],
+                $role
+            );
+        }
 
         // Insert default permissions
         $permissions = [
@@ -59,13 +66,16 @@ class JcsesPtaSystemSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            DB::table('user_permissions')->insert([
-                'permission_name' => $permission[0],
-                'permission_description' => $permission[1],
-                'module_name' => $permission[2],
-                'is_active' => true,
-                'created_date' => now()
-            ]);
+            DB::table('user_permissions')->updateOrInsert(
+                ['permission_name' => $permission[0]],
+                [
+                    'permission_name' => $permission[0],
+                    'permission_description' => $permission[1],
+                    'module_name' => $permission[2],
+                    'is_active' => true,
+                    'created_date' => now(),
+                ]
+            );
         }
 
         // Insert default dashboard metrics
@@ -79,17 +89,20 @@ class JcsesPtaSystemSeeder extends Seeder
         ];
 
         foreach ($metrics as $index => $metric) {
-            DB::table('dashboard_metrics')->insert([
-                'metric_name' => $metric[0],
-                'metric_category' => $metric[1],
-                'current_value' => $metric[2],
-                'target_value' => $metric[3],
-                'unit_of_measure' => $metric[4],
-                'calculation_method' => $metric[5],
-                'last_updated' => now(),
-                'is_active' => true,
-                'display_order' => $index
-            ]);
+            DB::table('dashboard_metrics')->updateOrInsert(
+                ['metric_name' => $metric[0]],
+                [
+                    'metric_name' => $metric[0],
+                    'metric_category' => $metric[1],
+                    'current_value' => $metric[2],
+                    'target_value' => $metric[3],
+                    'unit_of_measure' => $metric[4],
+                    'calculation_method' => $metric[5],
+                    'last_updated' => now(),
+                    'is_active' => true,
+                    'display_order' => $index,
+                ]
+            );
         }
     }
 }
