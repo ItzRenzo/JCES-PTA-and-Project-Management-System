@@ -453,6 +453,27 @@ class ScheduleSeeder extends Seeder
             ],
         ];
 
-        DB::table('schedules')->insert($schedules);
+        foreach ($schedules as $schedule) {
+            $schedule['visibility'] = $this->normalizeVisibility($schedule['visibility']);
+
+            DB::table('schedules')->updateOrInsert(
+                [
+                    'title' => $schedule['title'],
+                    'visibility' => $schedule['visibility'],
+                ],
+                $schedule
+            );
+        }
+    }
+
+    private function normalizeVisibility(string $visibility): string
+    {
+        return match ($visibility) {
+            'parents' => 'parent',
+            'teachers' => 'teacher',
+            'faculty' => 'teacher',
+            'supporting_staff' => 'administrator',
+            default => $visibility,
+        };
     }
 }
