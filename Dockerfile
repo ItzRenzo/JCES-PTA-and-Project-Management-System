@@ -1,3 +1,15 @@
+# Build frontend assets
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY vite.config.js postcss.config.js tailwind.config.js ./
+COPY resources ./resources
+
+RUN npm ci
+RUN npm run build
+
 # Use official PHP with Apache
 FROM php:8.2-apache
 
@@ -19,6 +31,9 @@ RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available
 
 # Copy App Code
 COPY . /var/www/html/
+
+# Copy built frontend assets into the runtime image
+COPY --from=frontend-build /app/public/build /var/www/html/public/build
 
 # Create uploads folder and set permissions
 RUN mkdir -p /var/www/html/public/uploads \
