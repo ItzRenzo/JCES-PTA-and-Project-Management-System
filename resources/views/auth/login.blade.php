@@ -65,10 +65,6 @@
             </div>
         @endif
 
-        <div class="auth-links">
-            Don't have an account? 
-            <a href="{{ route('register') }}" class="auth-link">Create one here</a>
-        </div>
     </form>
 
     <script>
