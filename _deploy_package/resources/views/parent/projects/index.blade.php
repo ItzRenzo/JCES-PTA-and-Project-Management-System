@@ -41,7 +41,7 @@
                 <a href="{{ route('parent.projects.show', $project->projectID) }}" class="block group">
                     <div class="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-5 flex flex-col md:flex-row gap-5">
                         <div class="w-28 h-28 bg-white rounded-lg overflow-hidden flex items-center justify-center">
-                            <img src="{{ $project->parsed_details['photo'] ?? 'http://127.0.0.1:8000/images/logos/jces-logo.png' }}" alt="Project image" class="w-full h-full object-cover">
+                            <img src="{{ $project->parsed_details['photo'] ?? asset('images/logos/jces-logo.png') }}" alt="Project image" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1">
                             <h4 class="text-base font-semibold text-gray-900 group-hover:text-green-700">{{ $project->project_name }}</h4>
@@ -70,7 +70,7 @@
                 <a href="{{ route('parent.projects.show', $project->projectID) }}" class="block group">
                     <div class="bg-purple-50 border-l-4 border-purple-500 rounded-xl p-5 flex flex-col md:flex-row gap-5">
                         <div class="w-28 h-28 bg-white rounded-lg overflow-hidden flex items-center justify-center">
-                            <img src="{{ $project->parsed_details['photo'] ?? 'http://127.0.0.1:8000/images/logos/jces-logo.png' }}" alt="Project image" class="w-full h-full object-cover">
+                            <img src="{{ $project->parsed_details['photo'] ?? asset('images/logos/jces-logo.png') }}" alt="Project image" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1">
                             <h4 class="text-base font-semibold text-gray-900 group-hover:text-green-700">{{ $project->project_name }}</h4>

@@ -35,7 +35,7 @@
     <div class="receipt">
         <div class="header">
             <div class="brand">
-                <img src="http://127.0.0.1:8000/images/logos/jces-logo.png" alt="JCES Logo">
+                <img src="{{ asset('images/logos/jces-logo.png') }}" alt="JCES Logo">
                 <div>
                     <div class="title">JCES-PTA Receipt</div>
                     <div style="font-size: 12px; color: #6b7280;">J. Cruz Sr. Elementary School</div>
