@@ -29,11 +29,22 @@ RUN a2enmod rewrite
 # Set Apache DocumentRoot to /var/www/html/public
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/apache2.conf
 
+# Suppress Apache ServerName warning
+RUN printf 'ServerName localhost\n' > /etc/apache2/conf-available/servername.conf && a2enconf servername
+
 # Copy App Code
 COPY . /var/www/html/
 
 # Copy built frontend assets into the runtime image
 COPY --from=frontend-build /app/public/build /var/www/html/public/build
+
+# Remove development artifacts and ensure Laravel runtime directories exist
+RUN rm -f /var/www/html/public/hot \
+	&& rm -f /var/www/html/bootstrap/cache/*.php \
+	&& mkdir -p /var/www/html/storage/framework/cache/data \
+	&& mkdir -p /var/www/html/storage/framework/sessions \
+	&& mkdir -p /var/www/html/storage/framework/views \
+	&& mkdir -p /var/www/html/storage/logs
 
 # Create uploads folder and set permissions
 RUN mkdir -p /var/www/html/public/uploads \
@@ -50,7 +61,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
 # Set Permissions for Laravel storage and cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+	&& chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose Render's required port
 EXPOSE 10000
