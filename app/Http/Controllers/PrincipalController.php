@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Shuchkin\SimpleXLS;
-use Shuchkin\SimpleXLSX;
 
 class PrincipalController extends Controller
 {
@@ -909,12 +907,12 @@ class PrincipalController extends Controller
     }
 
     /**
-     * Import students from XLS/XLSX master list.
+     * Import students from XLSX master list.
      */
     public function adminImportStudents(Request $request)
     {
         $request->validate([
-            'students_file' => ['required', 'file', 'mimes:xls,xlsx', 'max:10240'],
+            'students_file' => ['required', 'file', 'mimes:xlsx', 'max:10240'],
         ]);
 
         $file = $request->file('students_file');
@@ -1031,21 +1029,131 @@ class PrincipalController extends Controller
 
     private function parseStudentSpreadsheetRows(string $filePath, string $extension): array
     {
-        if ($extension === 'xlsx') {
-            $xlsx = SimpleXLSX::parseFile($filePath);
+        $simpleXlsxClass = 'Shuchkin\\SimpleXLSX';
+
+        if ($extension !== 'xlsx') {
+            throw new \RuntimeException('Only .xlsx files are supported for student import.');
+        }
+
+        if (class_exists($simpleXlsxClass)) {
+            $xlsx = $simpleXlsxClass::parseFile($filePath);
             if (!$xlsx) {
-                throw new \RuntimeException(SimpleXLSX::parseError() ?: 'Unable to parse XLSX file.');
+                throw new \RuntimeException($simpleXlsxClass::parseError() ?: 'Unable to parse XLSX file.');
             }
 
             return $xlsx->rows();
         }
 
-        $xls = SimpleXLS::parseFile($filePath);
-        if (!$xls) {
-            throw new \RuntimeException(SimpleXLS::parseError() ?: 'Unable to parse XLS file.');
+        return $this->parseXlsxRowsWithNativePhp($filePath);
+    }
+
+    private function parseXlsxRowsWithNativePhp(string $filePath): array
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($filePath) !== true) {
+            throw new \RuntimeException('Unable to open XLSX file.');
         }
 
-        return $xls->rows();
+        try {
+            $sharedStrings = [];
+            $sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml');
+            if ($sharedStringsXml !== false) {
+                $sharedStringsDoc = @simplexml_load_string($sharedStringsXml);
+                if ($sharedStringsDoc !== false) {
+                    foreach ($sharedStringsDoc->si as $si) {
+                        if (isset($si->t)) {
+                            $sharedStrings[] = (string) $si->t;
+                            continue;
+                        }
+
+                        $text = '';
+                        foreach ($si->r as $run) {
+                            $text .= (string) $run->t;
+                        }
+                        $sharedStrings[] = $text;
+                    }
+                }
+            }
+
+            $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+            if ($sheetXml === false) {
+                throw new \RuntimeException('The XLSX file does not contain sheet1.xml.');
+            }
+
+            $sheetDoc = @simplexml_load_string($sheetXml);
+            if ($sheetDoc === false) {
+                throw new \RuntimeException('Unable to parse worksheet data.');
+            }
+
+            $sheetDoc->registerXPathNamespace('x', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main');
+            $rowNodes = $sheetDoc->xpath('//x:sheetData/x:row') ?: [];
+
+            $rows = [];
+            foreach ($rowNodes as $rowNode) {
+                $cells = [];
+                $maxIndex = -1;
+
+                foreach ($rowNode->c as $cell) {
+                    $ref = (string) ($cell['r'] ?? '');
+                    preg_match('/^[A-Z]+/i', $ref, $matches);
+                    $colLetters = strtoupper($matches[0] ?? 'A');
+                    $colIndex = $this->xlsxColumnLettersToIndex($colLetters);
+
+                    $cells[$colIndex] = $this->xlsxResolveCellValue($cell, $sharedStrings);
+                    $maxIndex = max($maxIndex, $colIndex);
+                }
+
+                if ($maxIndex < 0) {
+                    $rows[] = [];
+                    continue;
+                }
+
+                $normalizedRow = [];
+                for ($i = 0; $i <= $maxIndex; $i++) {
+                    $normalizedRow[$i] = $cells[$i] ?? null;
+                }
+
+                $rows[] = $normalizedRow;
+            }
+
+            return $rows;
+        } finally {
+            $zip->close();
+        }
+    }
+
+    private function xlsxColumnLettersToIndex(string $letters): int
+    {
+        $letters = strtoupper($letters);
+        $index = 0;
+
+        for ($i = 0; $i < strlen($letters); $i++) {
+            $index = $index * 26 + (ord($letters[$i]) - 64);
+        }
+
+        return max(0, $index - 1);
+    }
+
+    private function xlsxResolveCellValue(\SimpleXMLElement $cell, array $sharedStrings)
+    {
+        $type = (string) ($cell['t'] ?? '');
+
+        if ($type === 'inlineStr') {
+            return (string) ($cell->is->t ?? '');
+        }
+
+        $value = isset($cell->v) ? (string) $cell->v : '';
+
+        if ($type === 's') {
+            $sharedIndex = (int) $value;
+            return $sharedStrings[$sharedIndex] ?? '';
+        }
+
+        if ($value === '') {
+            return null;
+        }
+
+        return $value;
     }
 
     private function normalizeHeaderValue($value): string

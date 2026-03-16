@@ -372,6 +372,25 @@ class AnnouncementSeeder extends Seeder
             ],
         ];
 
-        DB::table('announcements')->insert($announcements);
+        foreach ($announcements as $announcement) {
+            $announcement['audience'] = $this->normalizeAudience($announcement['audience']);
+
+            DB::table('announcements')->updateOrInsert(
+                [
+                    'title' => $announcement['title'],
+                    'audience' => $announcement['audience'],
+                ],
+                $announcement
+            );
+        }
+    }
+
+    private function normalizeAudience(string $audience): string
+    {
+        return match ($audience) {
+            'faculty' => 'teachers',
+            'supporting_staff' => 'administrator',
+            default => $audience,
+        };
     }
 }

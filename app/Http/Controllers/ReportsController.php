@@ -12,12 +12,22 @@ use App\Models\ParentProfile;
 use App\Models\Student;
 use App\Services\DashboardMetricService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ReportsController extends Controller
 {
+    private function ensureReportsAccess(): void
+    {
+        abort_unless(
+            in_array(Auth::user()?->user_type, ['principal', 'administrator'], true),
+            403,
+            'Reports access denied.'
+        );
+    }
+
     private function resolveReportsView(string $view): string
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($user && $user->user_type === 'administrator') {
             return "administrator.reports.$view";
@@ -31,6 +41,8 @@ class ReportsController extends Controller
      */
     public function index()
     {
+        $this->ensureReportsAccess();
+
         // Get recent activity stats
         $recentActivityCount = SecurityAuditLog::where('timestamp', '>=', now()->subDays(7))->count();
         $failedActionsCount = SecurityAuditLog::where('timestamp', '>=', now()->subDays(7))
@@ -55,7 +67,7 @@ class ReportsController extends Controller
 
         return view($this->resolveReportsView('index'), compact(
             'recentActivityCount',
-            'failedActionsCount', 
+            'failedActionsCount',
             'uniqueUsersCount',
             'topActions',
             'latestReconciliation'
@@ -67,6 +79,8 @@ class ReportsController extends Controller
      */
     public function paymentsReport(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $payments = ProjectContribution::with(['parent', 'project'])
             ->orderBy('contribution_date', 'desc')
             ->paginate(9)
@@ -88,9 +102,11 @@ class ReportsController extends Controller
      */
     public function activityLogs(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $filters = $request->only(['user_id', 'action', 'date_from', 'date_to', 'ip_address', 'success']);
         $logs = SecurityAuditLog::getActivityLogs($filters, 20);
-        
+
         // Get all users for filter dropdown
         $users = User::select('userID', 'first_name', 'last_name', 'email')
             ->orderBy('first_name')
@@ -104,11 +120,13 @@ class ReportsController extends Controller
      */
     public function securityLogs(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $filters = $request->only(['user_id', 'action', 'date_from', 'date_to', 'ip_address']);
-        
+
         // Security-specific filters - focus on authentication and authorization events
         $securityActions = ['login', 'logout', 'failed_login', 'password_change', 'account_locked', 'permission_denied'];
-        
+
         $query = SecurityAuditLog::with('user')
             ->whereIn('action', $securityActions)
             ->selectRaw('MAX(logID) as logID, userID, action, ip_address, session_id, timestamp, success, error_message')
@@ -137,7 +155,7 @@ class ReportsController extends Controller
         }
 
         $logs = $query->paginate(20);
-        
+
         // Get all users for filter dropdown
         $users = User::select('userID', 'first_name', 'last_name', 'email')
             ->orderBy('first_name')
@@ -151,12 +169,14 @@ class ReportsController extends Controller
      */
     public function userActivity(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $days = $request->get('days', 30);
-        
+
         // Get user activity statistics
         $userStats = SecurityAuditLog::getUserActivityStats($days);
         $actionStats = SecurityAuditLog::getActionStats($days);
-        
+
         // Get daily activity data for chart
         $dailyActivity = SecurityAuditLog::where('timestamp', '>=', now()->subDays($days))
             ->selectRaw('DATE(timestamp) as date, COUNT(*) as count')
@@ -174,7 +194,7 @@ class ReportsController extends Controller
 
         return view($this->resolveReportsView('user-activity'), compact(
             'userStats',
-            'actionStats', 
+            'actionStats',
             'dailyActivity',
             'loginPatterns',
             'days'
@@ -186,6 +206,8 @@ class ReportsController extends Controller
      */
     public function enrollmentStats(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $academicYear = $request->get('academic_year');
 
         $studentsQuery = Student::query();
@@ -228,6 +250,8 @@ class ReportsController extends Controller
      */
     public function participationReport(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $dateFrom = $request->get('date_from', now()->subDays(30)->toDateString());
         $dateTo = $request->get('date_to', now()->toDateString());
         $projectId = $request->get('project_id');
@@ -268,6 +292,8 @@ class ReportsController extends Controller
      */
     public function projectAnalytics(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $status = $request->get('status');
         $dateFrom = $request->get('date_from');
         $dateTo = $request->get('date_to');
@@ -318,6 +344,8 @@ class ReportsController extends Controller
      */
     public function financialSummary(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $dateFrom = $request->get('date_from', now()->subDays(30)->toDateString());
         $dateTo = $request->get('date_to', now()->toDateString());
         $paymentMethod = $request->get('payment_method');
@@ -373,6 +401,8 @@ class ReportsController extends Controller
      */
     public function dashboardMetrics(Request $request, DashboardMetricService $dashboardMetricService)
     {
+        $this->ensureReportsAccess();
+
         $days = (int) $request->get('days', 30);
         $metrics = $dashboardMetricService->getKpis($days);
 
@@ -384,8 +414,10 @@ class ReportsController extends Controller
      */
     public function exportLogs(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $filters = $request->only(['user_id', 'action', 'date_from', 'date_to', 'ip_address', 'success']);
-        
+
         $logs = SecurityAuditLog::with('user')
             ->when(!empty($filters['user_id']), function ($query) use ($filters) {
                 return $query->where('userID', $filters['user_id']);
@@ -410,7 +442,7 @@ class ReportsController extends Controller
             ->get();
 
         $filename = 'activity_logs_' . date('Y-m-d_H-i-s') . '.csv';
-        
+
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -418,12 +450,12 @@ class ReportsController extends Controller
 
         $callback = function() use ($logs) {
             $file = fopen('php://output', 'w');
-            
+
             // Add CSV headers
             fputcsv($file, [
                 'Timestamp',
                 'User',
-                'Action', 
+                'Action',
                 'Table Affected',
                 'Record ID',
                 'IP Address',
@@ -446,7 +478,7 @@ class ReportsController extends Controller
                     $log->error_message
                 ]);
             }
-            
+
             fclose($file);
         };
 
@@ -458,11 +490,13 @@ class ReportsController extends Controller
      */
     public function exportFinancialSummary(Request $request)
     {
+        $this->ensureReportsAccess();
+
         $dateFrom = $request->get('date_from', now()->subDays(30)->toDateString());
         $dateTo = $request->get('date_to', now()->toDateString());
         $paymentMethod = $request->get('payment_method');
 
-        $transactions = PaymentTransaction::with(['project', 'parent'])
+        $transactions = PaymentTransaction::with(['project', 'parent', 'parent.students'])
             ->whereBetween('transaction_date', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->where('transaction_status', 'completed')
             ->when(!empty($paymentMethod), function ($query) use ($paymentMethod) {
@@ -485,6 +519,8 @@ class ReportsController extends Controller
             fputcsv($file, [
                 'Transaction Date',
                 'Parent',
+                'Student',
+                'Class',
                 'Project',
                 'Amount',
                 'Payment Method',
@@ -493,9 +529,17 @@ class ReportsController extends Controller
             ]);
 
             foreach ($transactions as $transaction) {
+                $students = $transaction->parent ? $transaction->parent->students : collect();
+                $studentNames = $students->pluck('student_name')->filter()->implode('; ');
+                $studentClasses = $students->map(function ($s) {
+                    return trim(($s->grade_level ?? '') . ' ' . ($s->section ?? ''));
+                })->filter()->implode('; ');
+
                 fputcsv($file, [
                     optional($transaction->transaction_date)->format('Y-m-d H:i:s'),
                     $transaction->parent ? $transaction->parent->first_name . ' ' . $transaction->parent->last_name : 'Unknown Parent',
+                    $studentNames ?: 'N/A',
+                    $studentClasses ?: 'N/A',
                     $transaction->project ? $transaction->project->project_name : 'Unknown Project',
                     $transaction->amount,
                     $transaction->payment_method,

@@ -30,7 +30,7 @@
                     @forelse ($payments as $payment)
                         @php
                             $status = $payment->payment_status;
-                            $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Unpaid');
+                            $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Refunded');
                         @endphp
                         <tr>
                             <td class="px-6 py-3 text-sm text-gray-700">

@@ -14,8 +14,8 @@
             <!-- Logo and School Name -->
             <div class="p-6 bg-white border-r border-gray-200">
                 <div class="flex items-center gap-3">
-                    <img src="http://127.0.0.1:8000/images/logos/jces-logo.png" 
-                         alt="JCES Logo" 
+                    <img src="http://127.0.0.1:8000/images/logos/jces-logo.png"
+                         alt="JCES Logo"
                          class="w-12 h-12 object-contain">
                     <div>
                         <div class="text-sm font-semibold text-gray-900">J. Cruz Sr.</div>
@@ -26,7 +26,7 @@
 
             <!-- Navigation Menu -->
             <nav class="flex-1 px-3 py-6 space-y-2">
-                <a href="{{ route('dashboard') }}" 
+                <a href="{{ route('dashboard') }}"
                    class="flex items-center gap-3 px-4 py-3 text-white {{ request()->routeIs('dashboard') ? 'bg-green-700' : 'hover:bg-green-700' }} rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
@@ -34,7 +34,7 @@
                     <span>Home</span>
                 </a>
 
-                <a href="#" 
+                <a href="#"
                    class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
@@ -42,7 +42,7 @@
                     <span>Announcements</span>
                 </a>
 
-                <a href="#" 
+                <a href="#"
                    class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"/>
@@ -51,7 +51,7 @@
                     <span>Projects</span>
                 </a>
 
-                <a href="#" 
+                <a href="#"
                    class="flex items-center gap-3 px-4 py-3 text-white hover:bg-green-700 rounded-lg font-medium transition-colors">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
@@ -91,7 +91,7 @@
             <header class="bg-gradient-to-r from-green-50 to-green-100 border-b border-gray-200 px-8 py-4">
                 <div class="flex items-center justify-between">
                     {{ $header }}
-                    
+
                     <!-- User Dropdown -->
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 focus:outline-none">
@@ -102,7 +102,7 @@
                         </button>
 
                         <!-- Dropdown Menu -->
-                        <div x-show="open" 
+                        <div x-show="open"
                              @click.away="open = false"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
@@ -133,6 +133,7 @@
     </div>
 
     <!-- Alpine.js for dropdown functionality -->
+    @include('components.inactivity-timeout')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

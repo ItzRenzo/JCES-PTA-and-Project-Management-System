@@ -16,6 +16,16 @@ use Illuminate\Support\Str;
 
 class ContributionController extends Controller
 {
+    private function isStaffUser(?\App\Models\User $user): bool
+    {
+        return $user && in_array($user->user_type, ['administrator', 'principal', 'teacher'], true);
+    }
+
+    private function ensureStaffAccess(): void
+    {
+        abort_unless($this->isStaffUser(Auth::user()), 403, 'Unauthorized action.');
+    }
+
     private function resolveContributionsView(string $view): string
     {
         /** @var \App\Models\User|null $user */
@@ -34,6 +44,8 @@ class ContributionController extends Controller
 
     public function index(Request $request)
     {
+        $this->ensureStaffAccess();
+
         // Get all active parent profiles for manual payment selection
         $parents = ParentProfile::with('user')
             ->where('account_status', 'active')
@@ -164,14 +176,21 @@ class ContributionController extends Controller
 
     public function store(Request $request)
     {
+        $this->ensureStaffAccess();
+
         $validated = $request->validate([
-            'parent_id' => ['required', 'integer'],
-            'project_id' => ['required', 'integer'],
+            'parent_id' => ['required', 'integer', 'exists:parents,parentID'],
+            'project_id' => ['required', 'integer', 'exists:projects,projectID'],
             'contribution_amount' => ['required', 'numeric', 'min:0.01'],
             'payment_method' => ['required', 'in:cash,check,bank_transfer'],
             'contribution_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        $project = Project::findOrFail($validated['project_id']);
+        if (!in_array($project->project_status, ['active', 'in_progress'], true)) {
+            abort(422, 'Payments are only allowed for active or in-progress projects.');
+        }
 
         $receiptNumber = 'RCPT-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
         $contributionDate = $validated['contribution_date'] ?? now();
@@ -207,11 +226,27 @@ class ContributionController extends Controller
 
     public function update(Request $request, int $contributionID)
     {
+        $this->ensureStaffAccess();
+
         $validated = $request->validate([
             'payment_status' => ['required', 'in:pending,completed,refunded'],
         ]);
 
         $contribution = ProjectContribution::where('contributionID', $contributionID)->firstOrFail();
+        $allowedTransitions = [
+            'pending' => ['completed', 'refunded'],
+            'completed' => ['refunded'],
+            'refunded' => [],
+        ];
+
+        if ($contribution->payment_status !== $validated['payment_status']
+            && !in_array($validated['payment_status'], $allowedTransitions[$contribution->payment_status] ?? [], true)) {
+            $labels = ['pending' => 'Pending', 'completed' => 'Paid', 'refunded' => 'Refunded'];
+            $from = $labels[$contribution->payment_status] ?? ucfirst($contribution->payment_status);
+            $to   = $labels[$validated['payment_status']] ?? ucfirst($validated['payment_status']);
+            return redirect()->back()->with('error', "Cannot change payment status from \"{$from}\" to \"{$to}\". This transition is not allowed.");
+        }
+
         $previousStatus = $contribution->payment_status;
         $contribution->payment_status = $validated['payment_status'];
 
@@ -249,9 +284,14 @@ class ContributionController extends Controller
 
     public function receipt(int $contributionID)
     {
+        $user = Auth::user();
+
         $contribution = ProjectContribution::with(['project', 'parent', 'processedBy'])
             ->where('contributionID', $contributionID)
             ->firstOrFail();
+
+        $ownsRecord = $user?->parentProfile && (int) $contribution->parentID === (int) $user->parentProfile->parentID;
+        abort_unless($this->isStaffUser($user) || $ownsRecord, 403, 'Unauthorized receipt access.');
 
         return view('receipts.print', compact('contribution'));
     }
@@ -261,6 +301,12 @@ class ContributionController extends Controller
      */
     public function getParentBills($parentId)
     {
+        $user = Auth::user();
+        if (!$this->isStaffUser($user)) {
+            abort_unless($user?->user_type === 'parent' && $user->parentProfile, 403, 'Unauthorized action.');
+            abort_unless((int) $parentId === (int) $user->parentProfile->parentID, 403, 'Cannot access other parent bills.');
+        }
+
         $parentProfile = ParentProfile::findOrFail($parentId);
 
         // Get total number of active parents for calculating per-parent payment
@@ -272,32 +318,37 @@ class ContributionController extends Controller
             ->orderBy('project_name')
             ->get();
 
-        $unpaidBills = [];
+        $billItems = [];
         foreach ($projects as $project) {
-            // Check if parent has already paid for this project
+            // Check if parent already has an open or completed payment for this project
             $existingPayment = ProjectContribution::where('projectID', $project->projectID)
                 ->where('parentID', $parentId)
-                ->where('payment_status', 'completed')
+                ->whereIn('payment_status', ['pending', 'completed'])
+                ->orderByDesc('contribution_date')
                 ->first();
 
-            // Skip if already paid
-            if ($existingPayment) {
+            // Hide fully completed bills from manual payment list
+            if ($existingPayment && $existingPayment->payment_status === 'completed') {
                 continue;
             }
 
             // Calculate per-parent amount
             $perParentAmount = round($project->target_budget / $totalParents, 2);
 
-            $unpaidBills[] = [
+            $isPending = $existingPayment && $existingPayment->payment_status === 'pending';
+
+            $billItems[] = [
                 'projectID' => $project->projectID,
                 'project_name' => $project->project_name,
-                'amount' => $perParentAmount,
+                'amount' => $isPending ? (float) $existingPayment->contribution_amount : $perParentAmount,
+                'is_pending' => $isPending,
+                'status_note' => $isPending ? 'Pending - waiting for approval' : null,
             ];
         }
 
         return response()->json([
             'success' => true,
-            'bills' => $unpaidBills
+            'bills' => $billItems
         ]);
     }
 
@@ -306,15 +357,56 @@ class ContributionController extends Controller
      */
     public function submitManualPayment(Request $request)
     {
+        $this->ensureStaffAccess();
+
         $validated = $request->validate([
             'parent_id' => ['required', 'exists:parents,parentID'],
             'project_ids' => ['required', 'array'],
             'project_ids.*' => ['exists:projects,projectID'],
             'amounts' => ['required', 'array'],
+            'amounts.*' => ['required', 'numeric', 'min:0.01'],
             'payment_method' => ['required', 'in:cash,gcash,maya'],
             'notes' => ['nullable', 'string'],
             'proof_image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:5120'],
         ]);
+
+        if (count($validated['project_ids']) !== count($validated['amounts'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Project and amount counts do not match.'
+            ], 422);
+        }
+
+        $invalidProjectIds = Project::whereIn('projectID', $validated['project_ids'])
+            ->whereNotIn('project_status', ['active', 'in_progress'])
+            ->pluck('projectID');
+
+        if ($invalidProjectIds->isNotEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'One or more selected projects are not open for manual payment processing.'
+            ], 422);
+        }
+
+        $existingOpenPayments = ProjectContribution::with('project')
+            ->where('parentID', $validated['parent_id'])
+            ->whereIn('projectID', $validated['project_ids'])
+            ->whereIn('payment_status', ['pending', 'completed'])
+            ->get();
+
+        if ($existingOpenPayments->isNotEmpty()) {
+            $projectNames = $existingOpenPayments
+                ->pluck('project.project_name')
+                ->filter()
+                ->unique()
+                ->values()
+                ->implode(', ');
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Manual payment cannot be recorded for: ' . ($projectNames ?: 'selected project(s)') . '. A pending or completed payment already exists.'
+            ], 422);
+        }
 
         DB::beginTransaction();
 

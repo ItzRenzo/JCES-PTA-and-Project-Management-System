@@ -9,13 +9,27 @@
         </p>
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
-
     <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('patch')
+
+        @php
+            $parentProfile = $user->parentProfile;
+            $defaultEmergencyName = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+            $defaultEmergencyPhone = $parentProfile->phone ?? ($user->phone ?? '');
+
+            $emergencyContactName = old(
+                'emergency_contact_name',
+                $parentProfile->emergency_contact_name
+                    ?? ($user->emergency_contact_name ?? $defaultEmergencyName)
+            );
+
+            $emergencyContactPhone = old(
+                'emergency_contact_phone',
+                $parentProfile->emergency_contact_phone
+                    ?? ($user->emergency_contact_phone ?? $defaultEmergencyPhone)
+            );
+        @endphp
 
         <div class="pt-4 border-t border-gray-200">
             <h3 class="text-md font-medium text-gray-900 mb-4">Parent Information</h3>
@@ -35,24 +49,7 @@
                 <div>
                     <x-input-label for="email" :value="__('Email Address')" />
                     <x-text-input id="email" name="email" type="email" class="mt-1 block w-full bg-gray-100" :value="old('email', $user->email ?? '')" autocomplete="username" readonly />
-
-                    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                        <div>
-                            <p class="text-sm mt-2 text-gray-800">
-                                {{ __('Your email address is unverified.') }}
-
-                                <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    {{ __('Click here to re-send the verification email.') }}
-                                </button>
-                            </p>
-
-                            @if (session('status') === 'verification-link-sent')
-                                <p class="mt-2 font-medium text-sm text-green-600">
-                                    {{ __('A new verification link has been sent to your email address.') }}
-                                </p>
-                            @endif
-                        </div>
-                    @endif
+                    <p class="text-xs text-gray-500 mt-1">Email cannot be changed. Please contact the administrator for updates.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -76,12 +73,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <x-input-label for="emergency_contact_name" :value="__('Emergency Contact Name')" />
-                        <x-text-input id="emergency_contact_name" name="emergency_contact_name" type="text" class="mt-1 block w-full" :value="old('emergency_contact_name', $user->emergency_contact_name ?? '')" />
+                        <x-text-input id="emergency_contact_name" name="emergency_contact_name" type="text" class="mt-1 block w-full" :value="$emergencyContactName" />
                         <x-input-error class="mt-2" :messages="$errors->get('emergency_contact_name')" />
                     </div>
                     <div>
                         <x-input-label for="emergency_contact_phone" :value="__('Emergency Contact Phone')" />
-                        <x-text-input id="emergency_contact_phone" name="emergency_contact_phone" type="text" class="mt-1 block w-full" :value="old('emergency_contact_phone', $user->emergency_contact_phone ?? '')" />
+                        <x-text-input id="emergency_contact_phone" name="emergency_contact_phone" type="text" class="mt-1 block w-full" :value="$emergencyContactPhone" />
                         <x-input-error class="mt-2" :messages="$errors->get('emergency_contact_phone')" />
                     </div>
                 </div>

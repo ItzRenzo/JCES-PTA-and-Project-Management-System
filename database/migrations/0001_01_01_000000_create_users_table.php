@@ -27,7 +27,7 @@ return new class extends Migration
             $table->timestamp('password_changed_date')->nullable();
             $table->integer('failed_login_attempts')->default(0);
             $table->timestamp('account_locked_until')->nullable();
-            
+
             $table->index('username');
             $table->index('user_type');
             $table->index('is_active');

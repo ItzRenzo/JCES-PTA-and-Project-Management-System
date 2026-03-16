@@ -56,7 +56,7 @@
 
         <!-- Parent Selection with Search -->
         <div class="mb-6" x-data="{ open: false }" @click.away="open = false">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Select Parent</label>
+            <label for="parentSearch" class="block text-sm font-medium text-gray-700 mb-2">Select Parent</label>
             <div class="relative">
                 <input
                     type="text"
@@ -74,7 +74,7 @@
                 </div>
                 <div
                     x-show="open && showParentDropdown && filteredParents.length > 0"
-                    class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    class="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     <template x-for="parent in filteredParents" :key="parent.parentID">
                         <div
                             @click="selectParent(parent); open = false"
@@ -138,7 +138,7 @@
                         <option value="">Status</option>
                         <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Paid</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>Unpaid</option>
+                        <option value="refunded" {{ request('status') === 'refunded' ? 'selected' : '' }}>Refunded</option>
                     </select>
                     <span class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +208,7 @@
                     @forelse ($contributions as $contribution)
                         @php
                             $status = $contribution->payment_status;
-                            $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Unpaid');
+                            $statusLabel = $status === 'completed' ? 'Paid' : ($status === 'pending' ? 'Pending' : 'Refunded');
                             $statusClass = $status === 'completed' ? 'bg-green-100 text-green-800' : ($status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
                             $requiredPayment = isset($projectPayments[$contribution->projectID]) ? $projectPayments[$contribution->projectID] : 0;
                             $parentName = $contribution->parent ? $contribution->parent->first_name . ' ' . $contribution->parent->last_name : 'Unknown Parent';
@@ -365,6 +365,26 @@
                         <p class="text-sm text-gray-600">Enter payment details and upload proof of payment</p>
                     </div>
 
+                    <!-- Parent Details -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6" x-show="selectedParentInfo">
+                        <h3 class="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Parent Details
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Full Name</p>
+                                <p class="text-sm font-semibold text-gray-900" x-text="selectedParentInfo ? selectedParentInfo.last_name + ', ' + selectedParentInfo.first_name : ''"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-blue-600 font-medium uppercase tracking-wide mb-0.5">Email</p>
+                                <p class="text-sm text-gray-700 break-all" x-text="selectedParentInfo ? selectedParentInfo.email : ''"></p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Payment Summary -->
                     <div class="bg-gray-50 rounded-lg p-4 mb-6">
                         <h3 class="text-sm font-semibold text-gray-700 mb-3">Payment Summary</h3>
@@ -387,10 +407,10 @@
                         <div class="space-y-4 mb-6">
                             <!-- Payment Method -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                                <p class="block text-sm font-medium text-gray-700 mb-2">Payment Method</p>
                                 <div class="grid grid-cols-3 gap-3">
-                                    <label class="cursor-pointer">
-                                        <input type="radio" x-model="paymentMethod" value="cash" class="sr-only peer">
+                                    <label for="manualPaymentMethodCash" class="cursor-pointer">
+                                        <input id="manualPaymentMethodCash" name="payment_method" type="radio" x-model="paymentMethod" value="cash" class="sr-only peer">
                                         <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-gray-500 peer-checked:bg-gray-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
                                             <div class="w-7 h-7 bg-gray-600 rounded-lg flex items-center justify-center">
                                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -400,8 +420,8 @@
                                             <span class="text-sm font-semibold text-gray-700">Cash</span>
                                         </div>
                                     </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" x-model="paymentMethod" value="gcash" class="sr-only peer">
+                                    <label for="manualPaymentMethodGcash" class="cursor-pointer">
+                                        <input id="manualPaymentMethodGcash" name="payment_method" type="radio" x-model="paymentMethod" value="gcash" class="sr-only peer">
                                         <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
                                             <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
                                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -411,8 +431,8 @@
                                             <span class="text-sm font-semibold text-blue-700">GCash</span>
                                         </div>
                                     </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" x-model="paymentMethod" value="maya" class="sr-only peer">
+                                    <label for="manualPaymentMethodMaya" class="cursor-pointer">
+                                        <input id="manualPaymentMethodMaya" name="payment_method" type="radio" x-model="paymentMethod" value="maya" class="sr-only peer">
                                         <div class="px-4 py-3 border-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:scale-105 peer-checked:shadow-lg border-gray-200 bg-white">
                                             <div class="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center">
                                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -427,8 +447,10 @@
 
                             <!-- Notes -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
-                                <textarea x-model="notes"
+                                <label for="manualPaymentNotes" class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                                <textarea id="manualPaymentNotes"
+                                          name="notes"
+                                          x-model="notes"
                                           rows="2"
                                           placeholder="Additional payment details..."
                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
@@ -436,8 +458,8 @@
 
                             <!-- Proof of Payment Upload -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Proof of Payment</label>
-                                <label class="block cursor-pointer">
+                                <label for="manualProofImage" class="block text-sm font-medium text-gray-700 mb-2">Proof of Payment</label>
+                                <label for="manualProofImage" class="block cursor-pointer">
                                     <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 hover:bg-green-50 transition-all"
                                          :class="{'border-green-500 bg-green-50': proofImage}">
                                         <template x-if="!proofImage">
@@ -446,7 +468,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                 </svg>
                                                 <p class="text-sm font-medium text-gray-700 mb-1">Click to upload payment proof</p>
-                                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                                                <p class="text-xs text-gray-500">Accepted file types: JPG, JPEG, PNG, GIF (max 5MB)</p>
                                             </div>
                                         </template>
                                         <template x-if="proofImage">
@@ -459,7 +481,7 @@
                                             </div>
                                         </template>
                                     </div>
-                                    <input type="file" accept="image/*" @change="proofImage = $event.target.files[0]" class="hidden">
+                                    <input id="manualProofImage" name="proof_image" type="file" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" @change="handleProofImageChange($event)" class="hidden">
                                 </label>
                             </div>
                         </div>
@@ -483,6 +505,9 @@
 
 <script>
 function paymentsManager() {
+    const allowedProofMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const maxProofFileSize = 5 * 1024 * 1024;
+
     return {
         // Filter state
         searchQuery: '{{ request("search") }}',
@@ -492,6 +517,7 @@ function paymentsManager() {
 
         // Payment state
         selectedParent: null,
+        selectedParentInfo: null,
         bills: [],
         selectedBills: [],
         loading: false,
@@ -503,11 +529,15 @@ function paymentsManager() {
 
         // Parent search state
         allParents: {!! json_encode($parents->map(function($parent) {
+            $accountEmail = $parent->user->email ?? null;
+            $profileEmail = $parent->email ?? null;
+
             return [
                 'parentID' => $parent->parentID,
-                'first_name' => $parent->first_name ?: ($parent->user->first_name ?? ''),
-                'last_name' => $parent->last_name ?: ($parent->user->last_name ?? ''),
-                'email' => $parent->email ?: ($parent->user->email ?? ''),
+                'first_name' => $parent->user->first_name ?: ($parent->first_name ?? ''),
+                'last_name' => $parent->user->last_name ?: ($parent->last_name ?? ''),
+                'email' => $accountEmail ?: ($profileEmail ?? ''),
+                'search_email' => trim(implode(' ', array_filter([$accountEmail, $profileEmail]))),
             ];
         })->filter(function($p) {
             return !empty($p['first_name']) || !empty($p['last_name']);
@@ -529,8 +559,9 @@ function paymentsManager() {
             const searchLower = search.toLowerCase();
             this.filteredParents = this.allParents.filter(parent => {
                 const fullName = `${parent.last_name}, ${parent.first_name}`.toLowerCase();
-                const email = parent.email.toLowerCase();
-                return fullName.includes(searchLower) || email.includes(searchLower);
+                const email = (parent.email || '').toLowerCase();
+                const searchEmail = (parent.search_email || '').toLowerCase();
+                return fullName.includes(searchLower) || email.includes(searchLower) || searchEmail.includes(searchLower);
             });
             this.showParentDropdown = true;
         },
@@ -538,8 +569,34 @@ function paymentsManager() {
         selectParent(parent) {
             document.getElementById('parentSearch').value = `${parent.last_name}, ${parent.first_name} (${parent.email})`;
             document.getElementById('selectedParentName').textContent = `${parent.first_name} ${parent.last_name}`;
+            this.selectedParentInfo = parent;
             this.showParentDropdown = false;
             this.loadParentBills(parent.parentID);
+        },
+
+        handleProofImageChange(event) {
+            const file = event?.target?.files?.[0] || null;
+
+            if (!file) {
+                this.proofImage = null;
+                return;
+            }
+
+            if (!allowedProofMimeTypes.includes(file.type)) {
+                alert('Unsupported file type. Please upload JPG, JPEG, PNG, or GIF only.');
+                event.target.value = '';
+                this.proofImage = null;
+                return;
+            }
+
+            if (file.size > maxProofFileSize) {
+                alert('File is too large. Maximum allowed size is 5MB.');
+                event.target.value = '';
+                this.proofImage = null;
+                return;
+            }
+
+            this.proofImage = file;
         },
 
         filterTable() {
@@ -590,16 +647,23 @@ function paymentsManager() {
 
             bills.forEach(bill => {
                 const billDiv = document.createElement('label');
-                billDiv.className = 'flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-green-300 cursor-pointer transition-all';
+                billDiv.className = `flex items-center justify-between p-3 bg-white rounded-lg border transition-all ${bill.is_pending ? 'border-amber-300 bg-amber-50' : 'border-gray-200 hover:border-green-300 cursor-pointer'}`;
                 billDiv.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <input type="checkbox"
-                               value="${bill.projectID}"
-                               data-project-name="${bill.project_name}"
-                               data-amount="${bill.amount}"
-                               onchange="Alpine.store('paymentManager').toggleBill(this)"
-                               class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
-                        <span class="text-sm text-gray-900">${bill.project_name}</span>
+                        ${bill.is_pending ? `
+                            <span class="inline-flex px-2 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-amber-100 text-amber-700">Pending</span>
+                        ` : `
+                            <input type="checkbox"
+                                   value="${bill.projectID}"
+                                   data-project-name="${bill.project_name}"
+                                   data-amount="${bill.amount}"
+                                   onchange="Alpine.store('paymentManager').toggleBill(this)"
+                                   class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        `}
+                        <div>
+                            <span class="text-sm text-gray-900 block">${bill.project_name}</span>
+                            ${bill.is_pending ? `<span class="text-xs text-amber-700">${bill.status_note || 'Pending - waiting for approval'}</span>` : ''}
+                        </div>
                     </div>
                     <span class="text-sm font-semibold text-gray-900">₱${parseFloat(bill.amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                 `;
@@ -706,7 +770,7 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
 
     const isPaid = currentStatus === 'completed';
     const isPending = currentStatus === 'pending';
-    const isUnpaid = currentStatus === 'refunded';
+    const isRefunded = currentStatus === 'refunded';
 
     // Create modal
     const modal = document.createElement('div');
@@ -724,7 +788,7 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
                 <div class="flex items-center gap-2">
                     <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${isPaid ? 'bg-green-100 text-green-700' : (isPending ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}">
                         <span class="w-1.5 h-1.5 rounded-full ${isPaid ? 'bg-green-500' : (isPending ? 'bg-amber-500' : 'bg-red-500')}"></span>
-                        ${isPaid ? 'Paid' : (isPending ? 'Pending' : 'Unpaid')}
+                        ${isPaid ? 'Paid' : (isPending ? 'Pending' : 'Refunded')}
                     </span>
                     <button onclick="closeVerifyModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -738,7 +802,7 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
             <div class="flex">
                 <!-- Left: Receipt Image -->
                 <div class="w-1/2 p-4 bg-gray-50 border-r border-gray-200">
-                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Receipt Image</label>
+                    <p class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Receipt Image</p>
                     <div class="bg-white rounded-lg border border-gray-200 p-2 flex items-center justify-center" style="height: 280px; overflow: auto;">
                         <img id="receiptImagePreview" alt="Payment Receipt" class="max-w-full max-h-full object-contain rounded" style="display: block;">
                     </div>
@@ -760,7 +824,7 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
 
                 <!-- Right: Verification Actions -->
                 <div class="w-1/2 p-4 bg-white">
-                    <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Update Status</label>
+                    <p class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Update Status</p>
 
                     <div class="space-y-2">
                         <!-- Approve Button -->
@@ -797,18 +861,18 @@ function showVerifyModal(imagePath, contributionId, currentStatus) {
 
                         <!-- Reject Button -->
                         <button onclick="updatePaymentStatus(${contributionId}, 'refunded')"
-                                class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isUnpaid ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-500 hover:bg-red-50'}"
-                                ${isUnpaid ? 'disabled' : ''}>
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isUnpaid ? 'bg-red-500' : 'bg-gray-100'}">
-                                <svg class="w-5 h-5 ${isUnpaid ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${isRefunded ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-red-500 hover:bg-red-50'}"
+                                ${isRefunded ? 'disabled' : ''}>
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${isRefunded ? 'bg-red-500' : 'bg-gray-100'}">
+                                <svg class="w-5 h-5 ${isRefunded ? 'text-white' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </div>
                             <div class="text-left">
-                                <span class="block text-sm font-semibold ${isUnpaid ? 'text-red-700' : 'text-gray-700'}">Reject Payment</span>
-                                <span class="block text-xs ${isUnpaid ? 'text-red-600' : 'text-gray-500'}">Mark as Unpaid</span>
+                                <span class="block text-sm font-semibold ${isRefunded ? 'text-red-700' : 'text-gray-700'}">Reject Payment</span>
+                                <span class="block text-xs ${isRefunded ? 'text-red-600' : 'text-gray-500'}">Mark as Refunded</span>
                             </div>
-                            ${isUnpaid ? '<svg class="w-5 h-5 text-red-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
+                            ${isRefunded ? '<svg class="w-5 h-5 text-red-500 ml-auto" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>' : ''}
                         </button>
                     </div>
 

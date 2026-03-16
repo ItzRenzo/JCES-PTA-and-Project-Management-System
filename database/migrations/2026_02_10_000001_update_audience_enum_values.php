@@ -13,9 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         // Step 1: Expand enum to include both old and new values temporarily
-        DB::statement("ALTER TABLE schedules MODIFY COLUMN visibility ENUM('everyone', 'administrator', 'principal', 'teacher', 'teachers', 'parent', 'parents', 'staff', 'supporting_staff', 'faculty') DEFAULT 'everyone'");
+        if (Schema::getConnection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE schedules MODIFY COLUMN visibility ENUM('everyone', 'administrator', 'principal', 'teacher', 'teachers', 'parent', 'parents', 'staff', 'supporting_staff', 'faculty') DEFAULT 'everyone'");
 
-        DB::statement("ALTER TABLE announcements MODIFY COLUMN audience ENUM('everyone', 'parents', 'teachers', 'administrator', 'principal', 'staff', 'supporting_staff', 'faculty') DEFAULT 'everyone'");
+            DB::statement("ALTER TABLE announcements MODIFY COLUMN audience ENUM('everyone', 'parents', 'teachers', 'administrator', 'principal', 'staff', 'supporting_staff', 'faculty') DEFAULT 'everyone'");
+        }
 
         // Step 2: Update old values to new values
         DB::table('schedules')
@@ -35,9 +37,11 @@ return new class extends Migration
             ->update(['audience' => 'supporting_staff']);
 
         // Step 3: Set final enum values (remove old singular values)
-        DB::statement("ALTER TABLE announcements MODIFY COLUMN audience ENUM('everyone', 'parents', 'teachers', 'administrator', 'principal', 'supporting_staff', 'faculty') DEFAULT 'everyone'");
+        if (Schema::getConnection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE announcements MODIFY COLUMN audience ENUM('everyone', 'parents', 'teachers', 'administrator', 'principal', 'supporting_staff', 'faculty') DEFAULT 'everyone'");
 
-        DB::statement("ALTER TABLE schedules MODIFY COLUMN visibility ENUM('everyone', 'administrator', 'principal', 'teachers', 'parents', 'supporting_staff', 'faculty') DEFAULT 'everyone'");
+            DB::statement("ALTER TABLE schedules MODIFY COLUMN visibility ENUM('everyone', 'administrator', 'principal', 'teachers', 'parents', 'supporting_staff', 'faculty') DEFAULT 'everyone'");
+        }
     }
 
     /**
@@ -45,9 +49,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert back to original enum values
-        DB::statement("ALTER TABLE announcements MODIFY COLUMN audience ENUM('everyone', 'parents', 'teachers', 'administrator', 'principal') DEFAULT 'everyone'");
+        // Revert back to original enum values (only applicable on MySQL)
+        if (Schema::getConnection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE announcements MODIFY COLUMN audience ENUM('everyone', 'parents', 'teachers', 'administrator', 'principal') DEFAULT 'everyone'");
 
-        DB::statement("ALTER TABLE schedules MODIFY COLUMN visibility ENUM('everyone', 'administrator', 'principal', 'teacher', 'parent') DEFAULT 'everyone'");
+            DB::statement("ALTER TABLE schedules MODIFY COLUMN visibility ENUM('everyone', 'administrator', 'principal', 'teacher', 'parent') DEFAULT 'everyone'");
+        }
     }
 };

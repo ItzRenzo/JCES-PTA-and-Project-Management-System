@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\ParentProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -57,26 +58,54 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
+        unset($validated['email']);
+
+        if (!empty($validated['name']) && (empty($validated['first_name']) || empty($validated['last_name']))) {
+            $nameParts = preg_split('/\s+/', trim($validated['name']), 2);
+            $validated['first_name'] = $validated['first_name'] ?? ($nameParts[0] ?? null);
+            $validated['last_name'] = $validated['last_name'] ?? ($nameParts[1] ?? null);
+        }
 
         if ($user->user_type === 'parent') {
-            $hasEmergencyColumns = Schema::hasColumn('users', 'emergency_contact_name')
+            $emergencyData = Arr::only($validated, [
+                'emergency_contact_name',
+                'emergency_contact_phone',
+            ]);
+
+            $hasParentEmergencyColumns = Schema::hasColumn('parents', 'emergency_contact_name')
+                && Schema::hasColumn('parents', 'emergency_contact_phone');
+
+            $hasUserEmergencyColumns = Schema::hasColumn('users', 'emergency_contact_name')
                 && Schema::hasColumn('users', 'emergency_contact_phone');
 
-            if ($hasEmergencyColumns) {
-                $user->forceFill(Arr::only($validated, [
-                    'emergency_contact_name',
-                    'emergency_contact_phone',
-                ]));
+            $parentProfile = $user->parentProfile;
+
+            if (! $parentProfile) {
+                $parentProfile = ParentProfile::query()
+                    ->where('userID', $user->userID)
+                    ->orWhere('email', $user->email)
+                    ->first();
+
+                if ($parentProfile && $parentProfile->userID !== $user->userID) {
+                    $parentProfile->userID = $user->userID;
+                    $parentProfile->save();
+                }
+            }
+
+            if ($hasParentEmergencyColumns && $parentProfile) {
+                $parentProfile->forceFill($emergencyData)->save();
+            }
+
+            if ($hasUserEmergencyColumns) {
+                $user->forceFill($emergencyData);
             }
         } else {
             $user->fill(Arr::except($validated, [
+                'name',
+                'email',
                 'emergency_contact_name',
                 'emergency_contact_phone',
             ]));
-
-            if ($user->isDirty('email')) {
-                $user->email_verified_at = null;
-            }
         }
 
         $user->save();

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProjectContribution extends Model
 {
+    use HasFactory;
     protected $table = 'project_contributions';
     protected $primaryKey = 'contributionID';
     public $timestamps = false;

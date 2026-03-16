@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProjectUpdate extends Model
 {
+    use HasFactory;
     protected $table = 'project_updates';
     protected $primaryKey = 'updateID';
     public $timestamps = false;
