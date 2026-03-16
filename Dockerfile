@@ -2,7 +2,14 @@
 FROM php:8.2-apache
 
 # Install required php extensions for Laravel
-RUN apt-get update && apt-get install -y \ git unzip libpq-dev zip \ && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
+RUN apt-get update && apt-get install -y \
+	git \
+	unzip \
+	libpq-dev \
+	libzip-dev \
+	zip \
+	&& docker-php-ext-install pdo_mysql pdo_pgsql zip \
+	&& rm -rf /var/lib/apt/lists/*
 
 #Enable Apache mod_rewrite (needed for Laravel routing)
 RUN a2enmod rewrite
@@ -14,7 +21,9 @@ RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available
 COPY . /var/www/html/
 
 # Create uploads folder and set permissions
-RUN mkdir -p /var/www/html/public/uploads\ && chown -R www-data:www-data /var/www/html/public/uploads\ && chmod -R 755 /var/www/html/public/uploads
+RUN mkdir -p /var/www/html/public/uploads \
+	&& chown -R www-data:www-data /var/www/html/public/uploads \
+	&& chmod -R 755 /var/www/html/public/uploads
 
 # Set working directory
 WORKDIR /var/www/html
