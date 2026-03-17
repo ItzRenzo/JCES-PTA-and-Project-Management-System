@@ -48,7 +48,7 @@ class LoginRequest extends FormRequest
         if ($user) {
             // Check if account is locked
             if ($user->isLocked()) {
-                $minutes = $user->account_locked_until->diffInMinutes(now());
+                $minutes = max(1, (int) ceil(now()->diffInSeconds($user->account_locked_until, false) / 60));
                 throw ValidationException::withMessages([
                     'email' => "Your account is locked due to too many failed login attempts. Please try again in {$minutes} minutes.",
                 ]);
