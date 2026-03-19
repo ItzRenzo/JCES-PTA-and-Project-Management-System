@@ -60,8 +60,14 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Ensure public storage assets are reachable in the container
+RUN rm -rf /var/www/html/public/storage \
+	&& ln -s /var/www/html/storage/app/public /var/www/html/public/storage \
+	&& mkdir -p /var/www/html/storage/app/public/projects \
+	&& mkdir -p /var/www/html/storage/app/public/receipt_img
+
 # Set Permissions for Laravel storage and cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/storage \
 	&& chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose Render's required port

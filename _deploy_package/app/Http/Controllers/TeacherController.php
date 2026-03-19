@@ -471,8 +471,7 @@ class TeacherController extends Controller
                 $firstContribution = $contributions[0];
                 $filename = $firstContribution->contributionID . '.' . $extension;
 
-                // Move the image to public/images/receipt_img
-                $image->move(public_path('images/receipt_img'), $filename);
+                $image->storeAs('receipt_img', $filename, 'public');
             }
 
             DB::commit();

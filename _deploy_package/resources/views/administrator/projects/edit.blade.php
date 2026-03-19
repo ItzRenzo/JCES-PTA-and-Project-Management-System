@@ -36,7 +36,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Description</label>
                     <textarea name="description" rows="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>{{ old('description', $project->description) }}</textarea>
-                    <p class="mt-2 text-xs text-gray-500">Suggested format: Title: ... \nVenue: ... \nTime: ... \nPhoto: /images/projects/... \nObjective: ...</p>
+                    <p class="mt-2 text-xs text-gray-500">Suggested format: Title: ... \nVenue: ... \nTime: ... \nPhoto: /storage/projects/... \nObjective: ...</p>
                 </div>
 
                 <div>
