@@ -202,6 +202,8 @@ CREATE TABLE IF NOT EXISTS `parents` (
   `last_name` varchar(100) NOT NULL,
   `email` varchar(150) NOT NULL,
   `phone` varchar(20) NOT NULL,
+  `emergency_contact_name` varchar(255) DEFAULT NULL,
+  `emergency_contact_phone` varchar(20) DEFAULT NULL,
   `street_address` varchar(255) DEFAULT NULL,
   `city` varchar(100) DEFAULT NULL,
   `barangay` varchar(100) DEFAULT NULL,
