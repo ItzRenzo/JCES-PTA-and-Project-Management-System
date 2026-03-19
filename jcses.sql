@@ -222,8 +222,6 @@ CREATE TABLE IF NOT EXISTS `parents` (
   CONSTRAINT `parents_userID_foreign` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table jcses_pta_system.parents: ~50 rows (approximately)
-
 -- Dumping structure for table jcses_pta_system.password_reset_tokens
 CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
   `email` varchar(255) NOT NULL,
